@@ -1,286 +1,502 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gulf Coast Media Services</title>
-    <style>
-        /* Reset and base styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Arial', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background-color: #f4f4f4;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        /* Header */
-        header {
-            background-color: #007bff;
-            color: white;
-            padding: 1rem 0;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-        }
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        nav ul {
-            display: flex;
-            list-style: none;
-        }
-        nav ul li {
-            margin-left: 20px;
-        }
-        nav ul li a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            transition: color 0.3s;
-        }
-        nav ul li a:hover {
-            color: #ffd700;
-        }
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-
-        /* Hero Section */
-        #hero {
-            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://via.placeholder.com/1920x1080?text=Beautiful+Gulf+Coast') no-repeat center/cover;
-            color: white;
-            text-align: center;
-            padding: 150px 0 100px;
-        }
-        #hero h1 {
-            font-size: 3rem;
-            margin-bottom: 20px;
-        }
-        #hero p {
-            font-size: 1.5rem;
-            margin-bottom: 30px;
-        }
-        .btn {
-            display: inline-block;
-            background-color: #ffd700;
-            color: #007bff;
-            padding: 10px 20px;
-            text-decoration: none;
-            font-weight: bold;
-            border-radius: 5px;
-            transition: background 0.3s;
-        }
-        .btn:hover {
-            background-color: #ffc107;
-        }
-
-        /* Features Section */
-        #features {
-            padding: 60px 0;
-            background-color: white;
-        }
-        #features h2 {
-            text-align: center;
-            margin-bottom: 40px;
-            font-size: 2.5rem;
-        }
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-        }
-        .feature {
-            text-align: center;
-            padding: 20px;
-            background: #f9f9f9;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .feature img {
-            width: 80px;
-            margin-bottom: 20px;
-        }
-        .feature h3 {
-            margin-bottom: 10px;
-        }
-
-        /* About Section */
-        #about {
-            padding: 60px 0;
-            background-color: #e9ecef;
-            text-align: center;
-        }
-        #about h2 {
-            margin-bottom: 20px;
-            font-size: 2.5rem;
-        }
-        #about p {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        /* Contact Section */
-        #contact {
-            padding: 60px 0;
-            background-color: white;
-        }
-        #contact h2 {
-            text-align: center;
-            margin-bottom: 40px;
-            font-size: 2.5rem;
-        }
-        form {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        form input, form textarea {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        form button {
-            width: 100%;
-            padding: 10px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        form button:hover {
-            background-color: #0056b3;
-        }
-
-        /* Footer */
-        footer {
-            background-color: #007bff;
-            color: white;
-            text-align: center;
-            padding: 20px 0;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            #hero h1 {
-                font-size: 2rem;
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gulf Coast Creators — Premium Digital, Media & Event Services</title>
+  <meta name="description" content="Premium Web & App, Video/Audio Production, Event Planning, and UGC Campaigns for Mississippi Gulf Coast creators and brands. Transparent pricing. Fast turnarounds. Results-driven."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui'] },
+          colors: {
+            base: {
+              50: '#eef6ff',
+              100: '#d9ecff',
+              200: '#b7dbff',
+              300: '#8dc6ff',
+              400: '#5aa7ff',
+              500: '#347fff',
+              600: '#205ef2',
+              700: '#1b49c4',
+              800: '#1a3b94',
+              900: '#172f73'
             }
-            #hero p {
-                font-size: 1.2rem;
-            }
-            nav ul {
-                flex-direction: column;
-            }
-            nav ul li {
-                margin: 10px 0;
-            }
+          }
         }
-    </style>
+      }
+    }
+  </script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    html { scroll-behavior: smooth; }
+    .glass { backdrop-filter: saturate(160%) blur(10px); background: rgba(255,255,255,.7); }
+  </style>
 </head>
-<body>
-    <header>
-        <div class="container">
-            <nav>
-                <div class="logo">Gulf Coast Media</div>
-                <ul>
-                    <li><a href="#hero">Home</a></li>
-                    <li><a href="#features">Features</a></li>
-                    <li><a href="#about">About</a></li>
-                    <li><a href="#contact">Contact</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+<body class="bg-slate-950 text-slate-100 font-sans">
+  <!-- Decorative gradient -->
+  <div aria-hidden class="pointer-events-none fixed inset-0 -z-10">
+    <div class="absolute -top-32 -left-24 h-96 w-[40rem] rounded-full bg-base-600/40 blur-3xl"></div>
+    <div class="absolute top-32 -right-24 h-96 w-[40rem] rounded-full bg-fuchsia-600/30 blur-3xl"></div>
+  </div>
 
-    <section id="hero">
-        <div class="container">
-            <h1>Premium Media Services for the Gulf Coast</h1>
-            <p>Amplify your presence with our cutting-edge solutions.</p>
-            <a href="#contact" class="btn">Get Started</a>
-        </div>
-    </section>
+  <!-- NAV -->
+  <header x-data="{open:false}" class="sticky top-0 z-50">
+    <div class="glass border-b border-white/10">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <a href="#top" class="inline-flex items-center gap-2">
+          <span class="inline-grid place-items-center h-9 w-9 rounded-xl bg-white/10 ring-1 ring-white/20">
+            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 2l3 6 6 .9-4.5 4.4 1 6.3L12 17l-5.5 2.6 1-6.3L3 8.9 9 8z"/>
+            </svg>
+          </span>
+          <span class="font-extrabold tracking-tight">Gulf Coast Creators</span>
+        </a>
+        <nav class="hidden md:flex items-center gap-8 text-sm">
+          <a href="#services" class="hover:text-white/90 text-white/70">Services</a>
+          <a href="#pricing" class="hover:text-white/90 text-white/70">Pricing</a>
+          <a href="#notes" class="hover:text-white/90 text-white/70">How it works</a>
+          <a href="#contact" class="hover:text-white/90 text-white/70">Contact</a>
+          <a href="#contact" class="inline-flex items-center gap-2 rounded-xl bg-white text-slate-900 px-3 py-2 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition">
+            Get a Free Consult
+          </a>
+        </nav>
+        <button @click="open=!open" class="md:hidden inline-flex items-center justify-center h-10 w-10 rounded-lg bg-white/10">
+          <svg x-show="!open" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-6 w-6"><path stroke-width="1.5" d="M4 7h16M4 12h16M4 17h16"/></svg>
+          <svg x-show="open" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-6 w-6"><path stroke-width="1.5" d="M6 6l12 12M6 18L18 6"/></svg>
+        </button>
+      </div>
+    </div>
+    <div x-show="open" x-transition class="md:hidden glass border-b border-white/10">
+      <div class="mx-auto max-w-7xl px-4 pb-4 flex flex-col gap-3 text-sm">
+        <a @click="open=false" href="#services" class="py-2">Services</a>
+        <a @click="open=false" href="#pricing" class="py-2">Pricing</a>
+        <a @click="open=false" href="#notes" class="py-2">How it works</a>
+        <a @click="open=false" href="#contact" class="py-2">Contact</a>
+      </div>
+    </div>
+  </header>
 
-    <section id="features">
-        <div class="container">
-            <h2>Our Features</h2>
-            <div class="features-grid">
-                <div class="feature">
-                    <img src="https://via.placeholder.com/80?text=Feature1" alt="Feature 1">
-                    <h3>High-Quality Content</h3>
-                    <p>Create stunning media that captivates your audience.</p>
-                </div>
-                <div class="feature">
-                    <img src="https://via.placeholder.com/80?text=Feature2" alt="Feature 2">
-                    <h3>Advanced Analytics</h3>
-                    <p>Track performance and optimize your strategies.</p>
-                </div>
-                <div class="feature">
-                    <img src="https://via.placeholder.com/80?text=Feature3" alt="Feature 3">
-                    <h3>Seamless Integration</h3>
-                    <p>Easily connect with your existing tools and platforms.</p>
-                </div>
+  <!-- HERO -->
+  <section id="top" class="relative">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20">
+      <div class="grid lg:grid-cols-2 gap-10 items-center">
+        <div>
+          <h1 class="text-4xl sm:text-5xl font-black leading-tight">
+            Premium Digital, Media, and Event Services for <span class="bg-gradient-to-r from-white via-base-200 to-base-500 bg-clip-text text-transparent">Gulf Coast</span> Creators & Brands
+          </h1>
+          <p class="mt-6 text-white/80 max-w-prose">
+            Sleek digital hubs that convert, captivating videos that tell your story, flawless events that create lasting connections, and authentic UGC campaigns that spark organic buzz. Transparent pricing. Fast turnarounds. Results-driven.
+          </p>
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a href="#pricing" class="inline-flex items-center gap-2 rounded-xl bg-white text-slate-900 px-4 py-3 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition">View Pricing</a>
+            <a href="#services" class="inline-flex items-center gap-2 rounded-xl ring-1 ring-white/20 px-4 py-3 font-semibold hover:bg-white/10 transition">Explore Services</a>
+          </div>
+          <div class="mt-6 text-xs text-white/60">Mix & match across packages to build your perfect strategy.</div>
+        </div>
+        <div class="relative">
+          <div class="aspect-video rounded-2xl bg-gradient-to-br from-white/10 to-white/5 ring-1 ring-white/10 p-2">
+            <div class="w-full h-full rounded-xl bg-slate-900/40 grid place-items-center text-center p-8">
+              <p class="text-sm text-white/70">Drop this file on GitHub Pages as <code class="bg-white/10 px-2 py-1 rounded">index.html</code> — no build tools required.</p>
+              <p class="mt-2 text-xs text-white/50">Tailwind + AlpineJS; lightweight, fast, responsive.</p>
             </div>
+          </div>
+          <div class="absolute -bottom-6 -right-6 hidden md:block">
+            <div class="rounded-2xl bg-white/10 ring-1 ring-white/20 px-4 py-3 text-xs">Transparent pricing • Modular add‑ons • One‑time or monthly</div>
+          </div>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 
-    <section id="about">
-        <div class="container">
-            <h2>About Us</h2>
-            <p>We are dedicated to providing top-tier media services tailored for the Gulf Coast region. Our team of experts combines creativity and technology to deliver exceptional results that amplify your brand's voice.</p>
+  <!-- BADGES / TRUST -->
+  <section aria-label="Highlights" class="py-6">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="rounded-xl ring-1 ring-white/10 bg-white/5 p-3 text-center text-xs">Fast turnarounds</div>
+        <div class="rounded-xl ring-1 ring-white/10 bg-white/5 p-3 text-center text-xs">Results‑driven</div>
+        <div class="rounded-xl ring-1 ring-white/10 bg-white/5 p-3 text-center text-xs">Transparent pricing</div>
+        <div class="rounded-xl ring-1 ring-white/10 bg-white/5 p-3 text-center text-xs">Local Gulf Coast focus</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES OVERVIEW -->
+  <section id="services" class="py-20">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-extrabold tracking-tight">What we do</h2>
+      <p class="mt-3 text-white/70 max-w-3xl">Start with affordable bases for quick wins, then customize with modular add‑ons to fit your goals. One‑time options deliver immediate impact; monthly retainers ensure sustained growth.</p>
+
+      <div class="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <!-- Web & App -->
+        <article class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6">
+          <h3 class="font-bold">1) Web & App Development</h3>
+          <p class="mt-2 text-sm text-white/70">Responsive, intuitive sites and tools that engage and convert.</p>
+          <ul class="mt-4 space-y-2 text-sm text-white/80 list-disc list-inside">
+            <li>One‑time base: $300</li>
+            <li>Monthly base: $500/mo</li>
+            <li>Add‑ons: SEO, automations, APIs, e‑commerce</li>
+          </ul>
+        </article>
+        <!-- Video -->
+        <article class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6">
+          <h3 class="font-bold">2) Video & Audio Production</h3>
+          <p class="mt-2 text-sm text-white/70">Music videos, commercials, and social reels with coastal flair.</p>
+          <ul class="mt-4 space-y-2 text-sm text-white/80 list-disc list-inside">
+            <li>One‑time base: $600</li>
+            <li>Monthly base: $1,200/mo</li>
+            <li>Add‑ons: audio mix, advanced edits, drone, series</li>
+          </ul>
+        </article>
+        <!-- Events -->
+        <article class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6">
+          <h3 class="font-bold">3) Event Planning & Coordination</h3>
+          <p class="mt-2 text-sm text-white/70">Seamless logistics and local vendors for unforgettable events.</p>
+          <ul class="mt-4 space-y-2 text-sm text-white/80 list-disc list-inside">
+            <li>One‑time base: $1,000</li>
+            <li>Monthly base: $1,200/mo</li>
+            <li>Add‑ons: full coordination, media, hybrid/virtual</li>
+          </ul>
+        </article>
+        <!-- UGC -->
+        <article class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6">
+          <h3 class="font-bold">4) UGC & Local Clipping Campaigns</h3>
+          <p class="mt-2 text-sm text-white/70">Authentic content by local creators that builds trust and reach.</p>
+          <ul class="mt-4 space-y-2 text-sm text-white/80 list-disc list-inside">
+            <li>One‑time base: $450</li>
+            <li>Monthly base: $600/mo</li>
+            <li>Add‑ons: repurpose, lead gen, captions, branding</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING / CONFIGURATOR -->
+  <section id="pricing" class="py-20">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
+        <div>
+          <h2 class="text-3xl font-extrabold tracking-tight">Build your package</h2>
+          <p class="mt-2 text-white/70 max-w-prose">Select a service, choose one‑time or monthly, then pick add‑ons. Your live total updates instantly. (We’ll confirm details and send a tailored quote.)</p>
         </div>
-    </section>
+        <a href="#contact" class="inline-flex items-center gap-2 rounded-xl bg-white text-slate-900 px-4 py-3 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition self-start">Lock in my quote</a>
+      </div>
 
-    <section id="contact">
-        <div class="container">
-            <h2>Contact Us</h2>
-            <form id="contact-form">
-                <input type="text" placeholder="Your Name" required>
-                <input type="email" placeholder="Your Email" required>
-                <textarea placeholder="Your Message" rows="5" required></textarea>
-                <button type="submit">Send Message</button>
-            </form>
+      <div x-data="pricing()" x-init="init()" class="mt-10 grid lg:grid-cols-3 gap-8">
+        <!-- Controls -->
+        <div class="lg:col-span-1 space-y-6">
+          <div class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6">
+            <label class="text-sm text-white/70">Service</label>
+            <select x-model="serviceKey" @change="onServiceChange" class="mt-2 w-full rounded-xl bg-slate-900/50 ring-1 ring-white/15 px-3 py-2">
+              <template x-for="(svc, key) in services" :key="key">
+                <option :value="key" x-text="svc.name"></option>
+              </template>
+            </select>
+            <div class="mt-4 inline-flex rounded-lg bg-white/10 p-1">
+              <button @click="plan='oneTime'" :class="plan==='oneTime' ? 'bg-white text-slate-900' : 'text-white/80'" class="px-3 py-1 rounded-md text-sm font-semibold">One‑time</button>
+              <button @click="plan='monthly'" :class="plan==='monthly' ? 'bg-white text-slate-900' : 'text-white/80'" class="px-3 py-1 rounded-md text-sm font-semibold">Monthly</button>
+            </div>
+            <div class="mt-4 text-sm text-white/80" x-text="currentDescription"></div>
+          </div>
+
+          <div class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6">
+            <h3 class="font-semibold">Add‑ons</h3>
+            <p class="mt-1 text-xs text-white/60">Select any number; pricing matches your chosen plan.</p>
+            <div class="mt-4 space-y-3 max-h-72 overflow-auto pr-1">
+              <template x-for="ad in currentAddons" :key="ad.id">
+                <label class="flex items-start gap-3">
+                  <input type="checkbox" class="mt-1" :value="ad.id" @change="toggleAddon(ad.id)" :checked="selectedAddons.includes(ad.id)">
+                  <span class="text-sm">
+                    <span class="font-medium" x-text="ad.label"></span>
+                    <span class="block text-white/60" x-text="ad.desc"></span>
+                  </span>
+                  <span class="ml-auto text-sm font-semibold" x-text="formatPrice(ad.price)"></span>
+                </label>
+              </template>
+            </div>
+          </div>
         </div>
-    </section>
 
-    <footer>
-        <div class="container">
-            &copy; 2025 Gulf Coast Media. All rights reserved.
+        <!-- Summary -->
+        <div class="lg:col-span-2 grid gap-6 content-start">
+          <div class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h3 class="text-xl font-extrabold" x-text="services[serviceKey].name"></h3>
+                <p class="mt-1 text-sm text-white/70" x-show="plan==='oneTime'">Base: <span class="font-semibold" x-text="formatPrice(basePrice)"></span> • Duration: <span class="font-medium" x-text="services[serviceKey].oneTime.duration"></span></p>
+                <p class="mt-1 text-sm text-white/70" x-show="plan==='monthly'">Base: <span class="font-semibold" x-text="formatPrice(basePrice)"></span> • 3‑month minimum</p>
+              </div>
+              <div class="text-right">
+                <div class="text-xs text-white/60">Estimated total</div>
+                <div class="text-3xl font-black" x-text="formatPrice(total)"></div>
+                <div class="text-xs text-white/60" x-show="plan==='monthly'">per month</div>
+              </div>
+            </div>
+            <hr class="my-4 border-white/10">
+            <div>
+              <h4 class="text-sm font-semibold">Included in base</h4>
+              <ul class="mt-2 grid sm:grid-cols-2 gap-y-2 text-sm text-white/80 list-disc list-inside">
+                <template x-for="item in baseIncludes" :key="item">
+                  <li x-text="item"></li>
+                </template>
+              </ul>
+            </div>
+            <div class="mt-4" x-show="selectedAddons.length">
+              <h4 class="text-sm font-semibold">Selected add‑ons</h4>
+              <ul class="mt-2 space-y-1 text-sm text-white/80">
+                <template x-for="ad in selectedAddonsDetailed" :key="ad.id">
+                  <li class="flex items-center justify-between">
+                    <span><span class="font-medium" x-text="ad.label"></span> — <span class="text-white/60" x-text="ad.desc"></span></span>
+                    <span class="font-semibold" x-text="formatPrice(ad.price)"></span>
+                  </li>
+                </template>
+              </ul>
+            </div>
+            <div class="mt-6 flex flex-wrap gap-3">
+              <a href="#contact" class="inline-flex items-center gap-2 rounded-xl bg-white text-slate-900 px-4 py-3 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition">Request Formal Quote</a>
+              <button @click="reset()" class="inline-flex items-center gap-2 rounded-xl ring-1 ring-white/20 px-4 py-3 font-semibold hover:bg-white/10 transition">Reset</button>
+            </div>
+          </div>
+
+          <div class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6">
+            <h4 class="font-semibold">Notes</h4>
+            <ul class="mt-2 text-sm text-white/80 list-disc list-inside">
+              <li>Blend options across packages for a unified strategy; we suggest 1 premium add‑on + 2 essentials per package for maximum impact.</li>
+              <li>Begin one‑time for tests or launches; upgrade to monthlies (3–12 months) for ongoing momentum. Custom quotes available for larger scopes.</li>
+              <li>Industries served: art, music, real estate, e‑commerce, tourism, finance, and beyond—elevating local talent to global levels.</li>
+            </ul>
+          </div>
         </div>
-    </footer>
+      </div>
+    </div>
+  </section>
 
-    <script>
-        // Simple form submission handler (for demo; in real use, connect to backend)
-        document.getElementById('contact-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Message sent! (This is a demo)');
-            this.reset();
-        });
+  <!-- HOW IT WORKS -->
+  <section id="notes" class="py-20">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-extrabold tracking-tight">How it works</h2>
+      <div class="mt-6 grid gap-6 md:grid-cols-3">
+        <div class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6">
+          <div class="text-sm text-white/60">Step 1</div>
+          <h3 class="font-semibold">Pick a base</h3>
+          <p class="mt-2 text-sm text-white/80">Every package starts with a strong base for immediate value.</p>
+        </div>
+        <div class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6">
+          <div class="text-sm text-white/60">Step 2</div>
+          <h3 class="font-semibold">Customize</h3>
+          <p class="mt-2 text-sm text-white/80">Check add‑ons to fit your goals; total price updates instantly.</p>
+        </div>
+        <div class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6">
+          <div class="text-sm text-white/60">Step 3</div>
+          <h3 class="font-semibold">Lock it in</h3>
+          <p class="mt-2 text-sm text-white/80">We’ll confirm scope, timeline, and deliverables and send a tailored quote.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-        // Smooth scrolling for nav links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
-        });
-    </script>
+  <!-- CONTACT -->
+  <section id="contact" class="py-20">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-2 gap-10 items-start">
+        <div>
+          <h2 class="text-3xl font-extrabold tracking-tight">Ready to transform your brand?</h2>
+          <p class="mt-3 text-white/80 max-w-prose">Contact <span class="font-semibold">[your email]</span> for a free consultation, personalized quotes, or to start your project today! Prefer text? Swap the mailto link below with your number.</p>
+          <div class="mt-6 space-y-3 text-sm">
+            <a href="mailto:youremail@example.com?subject=Gulf%20Coast%20Creators%20Inquiry" class="inline-flex items-center gap-2 rounded-xl bg-white text-slate-900 px-4 py-3 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition">Email Us</a>
+            <div class="text-white/60">Replace <code class="bg-white/10 px-2 py-1 rounded">youremail@example.com</code> with your address.</div>
+          </div>
+        </div>
+        <form class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6 grid gap-4" onsubmit="event.preventDefault(); alert('Thanks! We\'ll be in touch.');">
+          <div class="grid sm:grid-cols-2 gap-4">
+            <label class="text-sm">Name<input required class="mt-1 w-full rounded-xl bg-slate-900/50 ring-1 ring-white/15 px-3 py-2" placeholder="Your name"/></label>
+            <label class="text-sm">Email<input type="email" required class="mt-1 w-full rounded-xl bg-slate-900/50 ring-1 ring-white/15 px-3 py-2" placeholder="you@brand.com"/></label>
+          </div>
+          <label class="text-sm">What can we help with?
+            <select class="mt-1 w-full rounded-xl bg-slate-900/50 ring-1 ring-white/15 px-3 py-2">
+              <option>Web & App Development</option>
+              <option>Video & Audio Production</option>
+              <option>Event Planning & Coordination</option>
+              <option>UGC & Local Clipping Campaigns</option>
+            </select>
+          </label>
+          <label class="text-sm">Message<textarea rows="4" class="mt-1 w-full rounded-xl bg-slate-900/50 ring-1 ring-white/15 px-3 py-2" placeholder="Share goals, budget, or timeline..."></textarea></label>
+          <button class="mt-2 inline-flex items-center gap-2 rounded-xl bg-white text-slate-900 px-4 py-3 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition">Send</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <footer class="py-10 border-t border-white/10 text-center text-xs text-white/60">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      © <span id="year"></span> Gulf Coast Creators • Mississippi Gulf Coast • All rights reserved.
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    function pricing(){
+      return {
+        plan: 'oneTime',
+        serviceKey: 'web',
+        selectedAddons: [],
+        services: {
+          web: {
+            name: 'Web & App Development',
+            oneTime: { base: 300, duration: '3–7 days', includes: [
+              'Initial consultation & project setup',
+              'Basic responsive landing page',
+              'Wireframed UI/UX',
+              'Light copy edits'
+            ],
+            addons: [
+              {id:'web-mvp', label:'Basic App Prototype (MVP)', price:500, desc:'iOS/Android prototype (chatbots or simple tools)'},
+              {id:'web-seo', label:'SEO Setup', price:150, desc:'Keyword research & on‑page optimization'},
+              {id:'web-auto', label:'Automations', price:100, desc:'Email, leads, or social workflows'},
+              {id:'web-api', label:'API Integrations', price:250, desc:'Payments, maps, analytics'},
+              {id:'web-shop', label:'Custom E‑commerce Features', price:300, desc:'Basic shop setup'}
+            ]
+          },
+          video: {
+            name: 'Video & Audio Production',
+            oneTime: { base: 600, duration: '7–14 days', includes: [
+              'Consultation & project setup',
+              '1–2 minute basic video (music, commercial, or reels)',
+              'Simple shoot & edit with cuts/effects/voiceover',
+              'Coastal/local vibe where applicable'
+            ],
+            addons: [
+              {id:'vid-audio', label:'Audio Production', price:200, desc:'Noise reduction, subtitles, advanced mixing'},
+              {id:'vid-adv', label:'Advanced Video Upgrade', price:800, desc:'Extended length, complex edits, multi‑scene'},
+              {id:'vid-drone-p', label:'Drone Shoots — Personal', price:300, desc:'Dynamic footage with basic drone'},
+              {id:'vid-drone-pro', label:'Drone Shoots — Professional', price:1500, desc:'High‑end footage with certified operator'},
+              {id:'vid-edit', label:'Extended Editing', price:300, desc:'Series setup or additional polishes'}
+            ]
+          },
+          events: {
+            name: 'Event Planning & Coordination',
+            oneTime: { base: 1000, duration: 'Plan 2–6 weeks; event‑day support', includes: [
+              'Initial consultation',
+              'Basic coordination for small events',
+              'Venue scouting & simple timelines',
+              'Day‑of support'
+            ],
+            addons: [
+              {id:'ev-ven', label:'Venue & Vendor Coordination', price:500, desc:'Full timelines, logistics handled expertly'},
+              {id:'ev-digital', label:'Digital Event Pages', price:200, desc:'RSVPs, invites, lightweight attendee app'},
+              {id:'ev-media', label:'Media Coverage', price:300, desc:'Videographers/photographers for clips'},
+              {id:'ev-auto', label:'Automations', price:150, desc:'Reminders & predictions for smooth flow'},
+              {id:'ev-hybrid', label:'Hybrid/Virtual Setup', price:400, desc:'Streaming for wider reach'}
+            ]
+          },
+          ugc: {
+            name: 'UGC & Local Clipping Campaigns',
+            oneTime: { base: 450, duration: '7–21 days', includes: [
+              'Consultation & setup',
+              '30,000‑view campaign with local creators (1–2 platforms)',
+              'Post‑campaign report with view verification',
+              'Creator fit & guideline compliance summary'
+            ],
+            addons: [
+              {id:'ugc-repurpose', label:'Repurposed Asset Pack', price:200, desc:'Adapt clips into ads, posts, or email graphics'},
+              {id:'ugc-leads', label:'Lead Gen Integration', price:250, desc:'Simple funnel/landing page to capture contacts'},
+              {id:'ugc-enhance', label:'Content Enhancement', price:150, desc:'Overlays, CTAs, or music to boost engagement'},
+              {id:'ugc-captions', label:'Caption & Description Pack', price:100, desc:'Optimized captions/descriptions per clip'},
+              {id:'ugc-brand', label:'Branded Customization Kit', price:150, desc:'Logos, watermarks, end‑slates across clips'}
+            ]
+          }
+        },
+        monthlyOverrides: {
+          web: { base: 500, includes: [
+            'Monthly consultation',
+            'Basic site/app maintenance (updates & bug fixes)'
+          ], addons: [
+            {match:'web-seo', label:'Monthly SEO Boosts', price:150, desc:'Ongoing audits & content optimization'},
+            {match:'web-auto', label:'Automation Expansions', price:100, desc:'New workflows & integrations as needed'},
+            {match:'web-adv', label:'Advanced Features', price:200, desc:'Personalization, sentiment, predictive'},
+            {match:'web-dash', label:'Custom Dashboards', price:250, desc:'Real‑time metrics for traffic & engagement'},
+            {match:'web-mvp', label:'App Upgrades', price:500, desc:'Ongoing prototype enhancements'}
+          ]},
+          video: { base: 1200, includes: [
+            'Monthly consultation',
+            '3 basic videos (music, commercial, or reels) with enhancements'
+          ], addons: [
+            {match:'vid-audio', label:'Audio Refresh', price:250, desc:'Ongoing mixing/subtitles for series'},
+            {match:'vid-adv', label:'Advanced Video Series', price:1000, desc:'Extended or complex ongoing productions'},
+            {match:'vid-drone-p', label:'Drone Shoots — Personal', price:300, desc:'Added to monthly videos'},
+            {match:'vid-drone-pro', label:'Drone Shoots — Professional', price:1500, desc:'High‑end additions'},
+            {match:'vid-edit', label:'Custom Production', price:500, desc:'Multi‑clip or specialized effects'}
+          ]},
+          events: { base: 1200, includes: [
+            'Monthly consultation',
+            'Coordination for recurring small events (basic logistics)'
+          ], addons: [
+            {match:'ev-ven', label:'Ongoing Coordination', price:600, desc:'Multiple events/month, full logistics'},
+            {match:'ev-digital', label:'Digital Upkeep', price:200, desc:'Event sites/apps & automated invites'},
+            {match:'ev-media', label:'Media Integration', price:300, desc:'Consistent video/photo coverage'},
+            {match:'ev-auto', label:'Enhancements', price:150, desc:'Attendee analytics & personalization'},
+            {match:'ev-hybrid', label:'Scalable Support', price:400, desc:'Hybrid add‑ons for larger scope'}
+          ]},
+          ugc: { base: 600, includes: [
+            'Monthly consultation',
+            'Recurring 30,000‑view campaigns (1–2 platforms) with monthly reports'
+          ], addons: [
+            {match:'ugc-repurpose', label:'Repurposed Asset Pack', price:200, desc:'Monthly adaptations into ads/posts/emails'},
+            {match:'ugc-leads', label:'Lead Gen Integration', price:250, desc:'Monthly funnel optimizations'},
+            {match:'ugc-enhance', label:'Content Enhancement', price:150, desc:'Ongoing overlays/CTAs/music'},
+            {match:'ugc-captions', label:'Caption & Description Pack', price:100, desc:'Monthly optimizations for discoverability'},
+            {match:'ugc-brand', label:'Branded Customization Kit', price:150, desc:'Logos/watermarks/end‑slates each month'}
+          ]}
+        },
+        get base(){
+          return this.services[this.serviceKey][this.plan];
+        },
+        get basePrice(){
+          if(this.plan==='oneTime') return this.base.base;
+          return this.monthlyOverrides[this.serviceKey].base;
+        },
+        get baseIncludes(){
+          const base = this.plan==='oneTime' ? this.base.includes : this.monthlyOverrides[this.serviceKey].includes;
+          return base;
+        },
+        get currentAddons(){
+          if(this.plan==='oneTime') return this.base.addons;
+          // Map monthly overrides to matching structure
+          return this.monthlyOverrides[this.serviceKey].addons.map(ov => ({
+            id: ov.match,
+            label: ov.label,
+            price: ov.price,
+            desc: ov.desc
+          }));
+        },
+        get currentDescription(){
+          return this.plan==='oneTime' ? 'One‑time project for immediate impact.' : 'Monthly retainer for sustained growth (3‑month minimum).';
+        },
+        get selectedAddonsDetailed(){
+          const index = Object.fromEntries(this.currentAddons.map(a=>[a.id,a]));
+          return this.selectedAddons.map(id => index[id]).filter(Boolean);
+        },
+        get total(){
+          const addonsTotal = this.selectedAddonsDetailed.reduce((s,a)=>s + (a?.price||0), 0);
+          return this.basePrice + addonsTotal;
+        },
+        toggleAddon(id){
+          const i = this.selectedAddons.indexOf(id);
+          if(i>-1) this.selectedAddons.splice(i,1); else this.selectedAddons.push(id);
+        },
+        reset(){ this.selectedAddons = []; },
+        onServiceChange(){ this.reset(); },
+        init(){ this.reset(); },
+        formatPrice(v){ return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v); }
+      }
+    }
+  </script>
 </body>
 </html>
