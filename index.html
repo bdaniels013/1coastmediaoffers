@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Gulf Coast Creators — Premium Digital, Media & Event Services</title>
+  <title>1 Coast Media — Premium Digital, Media & Event Services</title>
   <meta name="description" content="Premium Web & App, Video/Audio Production, Event Planning, and UGC Campaigns for Mississippi Gulf Coast creators and brands. Transparent pricing. Fast turnarounds. Results-driven."/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,16 +16,7 @@
           fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui'] },
           colors: {
             base: {
-              50: '#eef6ff',
-              100: '#d9ecff',
-              200: '#b7dbff',
-              300: '#8dc6ff',
-              400: '#5aa7ff',
-              500: '#347fff',
-              600: '#205ef2',
-              700: '#1b49c4',
-              800: '#1a3b94',
-              900: '#172f73'
+              50: '#eef6ff', 100: '#d9ecff', 200: '#b7dbff', 300: '#8dc6ff', 400: '#5aa7ff', 500: '#347fff', 600: '#205ef2', 700: '#1b49c4', 800: '#1a3b94', 900: '#172f73'
             }
           }
         }
@@ -35,14 +26,17 @@
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <style>
     html { scroll-behavior: smooth; }
-    .glass { backdrop-filter: saturate(160%) blur(10px); background: rgba(255,255,255,.7); }
+    .glass { backdrop-filter: saturate(160%) blur(12px); background: rgba(255,255,255,.08); }
+    @keyframes float { 0%{transform:translateY(0)} 50%{transform:translateY(-10px)} 100%{transform:translateY(0)} }
+    html::-webkit-scrollbar{height:10px;width:10px}
+    html::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#5aa7ff,#8b5cf6);border-radius:9999px}
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans">
-  <!-- Decorative gradient -->
+  <!-- Decorative gradient + animated orbs -->
   <div aria-hidden class="pointer-events-none fixed inset-0 -z-10">
-    <div class="absolute -top-32 -left-24 h-96 w-[40rem] rounded-full bg-base-600/40 blur-3xl"></div>
-    <div class="absolute top-32 -right-24 h-96 w-[40rem] rounded-full bg-fuchsia-600/30 blur-3xl"></div>
+    <div class="absolute -top-40 -left-24 h-[28rem] w-[48rem] rounded-full bg-base-600/40 blur-3xl animate-pulse"></div>
+    <div class="absolute top-20 -right-24 h-[28rem] w-[48rem] rounded-full bg-fuchsia-600/30 blur-3xl animate-[float_10s_ease-in-out_infinite]"></div>
   </div>
 
   <!-- NAV -->
@@ -51,20 +45,16 @@
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <a href="#top" class="inline-flex items-center gap-2">
           <span class="inline-grid place-items-center h-9 w-9 rounded-xl bg-white/10 ring-1 ring-white/20">
-            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M12 2l3 6 6 .9-4.5 4.4 1 6.3L12 17l-5.5 2.6 1-6.3L3 8.9 9 8z"/>
-            </svg>
+            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3 6 6 .9-4.5 4.4 1 6.3L12 17l-5.5 2.6 1-6.3L3 8.9 9 8z"/></svg>
           </span>
-          <span class="font-extrabold tracking-tight">Gulf Coast Creators</span>
+          <span class="font-extrabold tracking-tight">1 Coast Media</span>
         </a>
         <nav class="hidden md:flex items-center gap-8 text-sm">
           <a href="#services" class="hover:text-white/90 text-white/70">Services</a>
           <a href="#pricing" class="hover:text-white/90 text-white/70">Pricing</a>
           <a href="#notes" class="hover:text-white/90 text-white/70">How it works</a>
           <a href="#contact" class="hover:text-white/90 text-white/70">Contact</a>
-          <a href="#contact" class="inline-flex items-center gap-2 rounded-xl bg-white text-slate-900 px-3 py-2 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition">
-            Get a Free Consult
-          </a>
+          <a href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-xl bg-white text-slate-900 px-3 py-2 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition">Book on Calendly</a>
         </nav>
         <button @click="open=!open" class="md:hidden inline-flex items-center justify-center h-10 w-10 rounded-lg bg-white/10">
           <svg x-show="!open" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-6 w-6"><path stroke-width="1.5" d="M4 7h16M4 12h16M4 17h16"/></svg>
@@ -78,6 +68,7 @@
         <a @click="open=false" href="#pricing" class="py-2">Pricing</a>
         <a @click="open=false" href="#notes" class="py-2">How it works</a>
         <a @click="open=false" href="#contact" class="py-2">Contact</a>
+        <a @click="open=false" href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noopener" class="py-2">Book on Calendly</a>
       </div>
     </div>
   </header>
@@ -87,23 +78,19 @@
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20">
       <div class="grid lg:grid-cols-2 gap-10 items-center">
         <div>
-          <h1 class="text-4xl sm:text-5xl font-black leading-tight">
-            Premium Digital, Media, and Event Services for <span class="bg-gradient-to-r from-white via-base-200 to-base-500 bg-clip-text text-transparent">Gulf Coast</span> Creators & Brands
-          </h1>
-          <p class="mt-6 text-white/80 max-w-prose">
-            Sleek digital hubs that convert, captivating videos that tell your story, flawless events that create lasting connections, and authentic UGC campaigns that spark organic buzz. Transparent pricing. Fast turnarounds. Results-driven.
-          </p>
+          <h1 class="text-4xl sm:text-5xl font-black leading-tight">Premium Digital, Media, and Event Services for <span class="bg-gradient-to-r from-white via-base-200 to-base-500 bg-clip-text text-transparent">Gulf Coast</span> Creators & Brands</h1>
+          <p class="mt-6 text-white/80 max-w-prose">Sleek digital hubs that convert, captivating videos that tell your story, flawless events that create lasting connections, and authentic UGC campaigns that spark organic buzz. Transparent pricing. Fast turnarounds. Results‑driven. Serving the Mississippi Gulf Coast.</p>
           <div class="mt-8 flex flex-wrap gap-3">
             <a href="#pricing" class="inline-flex items-center gap-2 rounded-xl bg-white text-slate-900 px-4 py-3 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition">View Pricing</a>
-            <a href="#services" class="inline-flex items-center gap-2 rounded-xl ring-1 ring-white/20 px-4 py-3 font-semibold hover:bg-white/10 transition">Explore Services</a>
+            <a href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-xl ring-1 ring-white/20 px-4 py-3 font-semibold hover:bg-white/10 transition">Book a Free Consult</a>
           </div>
           <div class="mt-6 text-xs text-white/60">Mix & match across packages to build your perfect strategy.</div>
         </div>
         <div class="relative">
           <div class="aspect-video rounded-2xl bg-gradient-to-br from-white/10 to-white/5 ring-1 ring-white/10 p-2">
             <div class="w-full h-full rounded-xl bg-slate-900/40 grid place-items-center text-center p-8">
-              <p class="text-sm text-white/70">Drop this file on GitHub Pages as <code class="bg-white/10 px-2 py-1 rounded">index.html</code> — no build tools required.</p>
-              <p class="mt-2 text-xs text-white/50">Tailwind + AlpineJS; lightweight, fast, responsive.</p>
+              <p class="text-sm text-white/70">Enhanced UI: animated gradients, refined cards, tappable CTAs.</p>
+              <p class="mt-2 text-xs text-white/50">Stripe Checkout enabled below for one‑time & subscriptions.</p>
             </div>
           </div>
           <div class="absolute -bottom-6 -right-6 hidden md:block">
@@ -133,51 +120,15 @@
       <p class="mt-3 text-white/70 max-w-3xl">Start with affordable bases for quick wins, then customize with modular add‑ons to fit your goals. One‑time options deliver immediate impact; monthly retainers ensure sustained growth.</p>
 
       <div class="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <!-- Web & App -->
-        <article class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6">
-          <h3 class="font-bold">1) Web & App Development</h3>
-          <p class="mt-2 text-sm text-white/70">Responsive, intuitive sites and tools that engage and convert.</p>
-          <ul class="mt-4 space-y-2 text-sm text-white/80 list-disc list-inside">
-            <li>One‑time base: $300</li>
-            <li>Monthly base: $500/mo</li>
-            <li>Add‑ons: SEO, automations, APIs, e‑commerce</li>
-          </ul>
-        </article>
-        <!-- Video -->
-        <article class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6">
-          <h3 class="font-bold">2) Video & Audio Production</h3>
-          <p class="mt-2 text-sm text-white/70">Music videos, commercials, and social reels with coastal flair.</p>
-          <ul class="mt-4 space-y-2 text-sm text-white/80 list-disc list-inside">
-            <li>One‑time base: $600</li>
-            <li>Monthly base: $1,200/mo</li>
-            <li>Add‑ons: audio mix, advanced edits, drone, series</li>
-          </ul>
-        </article>
-        <!-- Events -->
-        <article class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6">
-          <h3 class="font-bold">3) Event Planning & Coordination</h3>
-          <p class="mt-2 text-sm text-white/70">Seamless logistics and local vendors for unforgettable events.</p>
-          <ul class="mt-4 space-y-2 text-sm text-white/80 list-disc list-inside">
-            <li>One‑time base: $1,000</li>
-            <li>Monthly base: $1,200/mo</li>
-            <li>Add‑ons: full coordination, media, hybrid/virtual</li>
-          </ul>
-        </article>
-        <!-- UGC -->
-        <article class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6">
-          <h3 class="font-bold">4) UGC & Local Clipping Campaigns</h3>
-          <p class="mt-2 text-sm text-white/70">Authentic content by local creators that builds trust and reach.</p>
-          <ul class="mt-4 space-y-2 text-sm text-white/80 list-disc list-inside">
-            <li>One‑time base: $450</li>
-            <li>Monthly base: $600/mo</li>
-            <li>Add‑ons: repurpose, lead gen, captions, branding</li>
-          </ul>
-        </article>
+        <article class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6 hover:ring-white/20 transition"><h3 class="font-bold">1) Web & App Development</h3><p class="mt-2 text-sm text-white/70">Responsive, intuitive sites and tools that engage and convert.</p><ul class="mt-4 space-y-2 text-sm text-white/80 list-disc list-inside"><li>One‑time base: $300</li><li>Monthly base: $500/mo</li><li>Add‑ons: SEO, automations, APIs, e‑commerce</li></ul></article>
+        <article class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6 hover:ring-white/20 transition"><h3 class="font-bold">2) Video & Audio Production</h3><p class="mt-2 text-sm text-white/70">Music videos, commercials, and social reels with coastal flair.</p><ul class="mt-4 space-y-2 text-sm text-white/80 list-disc list-inside"><li>One‑time base: $600</li><li>Monthly base: $1,200/mo</li><li>Add‑ons: audio mix, advanced edits, drone, series</li></ul></article>
+        <article class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6 hover:ring-white/20 transition"><h3 class="font-bold">3) Event Planning & Coordination</h3><p class="mt-2 text-sm text-white/70">Seamless logistics and local vendors for unforgettable events.</p><ul class="mt-4 space-y-2 text-sm text-white/80 list-disc list-inside"><li>One‑time base: $1,000</li><li>Monthly base: $1,200/mo</li><li>Add‑ons: full coordination, media, hybrid/virtual</li></ul></article>
+        <article class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6 hover:ring-white/20 transition"><h3 class="font-bold">4) UGC & Local Clipping Campaigns</h3><p class="mt-2 text-sm text-white/70">Authentic content by local creators that builds trust and reach.</p><ul class="mt-4 space-y-2 text-sm text-white/80 list-disc list-inside"><li>One‑time base: $450</li><li>Monthly base: $600/mo</li><li>Add‑ons: repurpose, lead gen, captions, branding</li></ul></article>
       </div>
     </div>
   </section>
 
-  <!-- PRICING / CONFIGURATOR -->
+  <!-- PRICING / CONFIGURATOR + CHECKOUT -->
   <section id="pricing" class="py-20">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
@@ -185,7 +136,10 @@
           <h2 class="text-3xl font-extrabold tracking-tight">Build your package</h2>
           <p class="mt-2 text-white/70 max-w-prose">Select a service, choose one‑time or monthly, then pick add‑ons. Your live total updates instantly. (We’ll confirm details and send a tailored quote.)</p>
         </div>
-        <a href="#contact" class="inline-flex items-center gap-2 rounded-xl bg-white text-slate-900 px-4 py-3 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition self-start">Lock in my quote</a>
+        <div class="flex gap-3">
+          <a href="#contact" class="inline-flex items-center gap-2 rounded-xl bg-white text-slate-900 px-4 py-3 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition self-start">Lock in my quote</a>
+          <a href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-xl ring-1 ring-white/20 px-4 py-3 font-semibold hover:bg-white/10 transition self-start">Schedule a Call</a>
+        </div>
       </div>
 
       <div x-data="pricing()" x-init="init()" class="mt-10 grid lg:grid-cols-3 gap-8">
@@ -199,8 +153,8 @@
               </template>
             </select>
             <div class="mt-4 inline-flex rounded-lg bg-white/10 p-1">
-              <button @click="plan='oneTime'" :class="plan==='oneTime' ? 'bg-white text-slate-900' : 'text-white/80'" class="px-3 py-1 rounded-md text-sm font-semibold">One‑time</button>
-              <button @click="plan='monthly'" :class="plan==='monthly' ? 'bg-white text-slate-900' : 'text-white/80'" class="px-3 py-1 rounded-md text-sm font-semibold">Monthly</button>
+              <button @click="plan='oneTime'; reset();" :class="plan==='oneTime' ? 'bg-white text-slate-900' : 'text-white/80'" class="px-3 py-1 rounded-md text-sm font-semibold">One‑time</button>
+              <button @click="plan='monthly'; reset();" :class="plan==='monthly' ? 'bg-white text-slate-900' : 'text-white/80'" class="px-3 py-1 rounded-md text-sm font-semibold">Monthly</button>
             </div>
             <div class="mt-4 text-sm text-white/80" x-text="currentDescription"></div>
           </div>
@@ -242,26 +196,23 @@
             <div>
               <h4 class="text-sm font-semibold">Included in base</h4>
               <ul class="mt-2 grid sm:grid-cols-2 gap-y-2 text-sm text-white/80 list-disc list-inside">
-                <template x-for="item in baseIncludes" :key="item">
-                  <li x-text="item"></li>
-                </template>
+                <template x-for="item in baseIncludes" :key="item"><li x-text="item"></li></template>
               </ul>
             </div>
             <div class="mt-4" x-show="selectedAddons.length">
               <h4 class="text-sm font-semibold">Selected add‑ons</h4>
               <ul class="mt-2 space-y-1 text-sm text-white/80">
                 <template x-for="ad in selectedAddonsDetailed" :key="ad.id">
-                  <li class="flex items-center justify-between">
-                    <span><span class="font-medium" x-text="ad.label"></span> — <span class="text-white/60" x-text="ad.desc"></span></span>
-                    <span class="font-semibold" x-text="formatPrice(ad.price)"></span>
-                  </li>
+                  <li class="flex items-center justify-between"><span><span class="font-medium" x-text="ad.label"></span> — <span class="text-white/60" x-text="ad.desc"></span></span><span class="font-semibold" x-text="formatPrice(ad.price)"></span></li>
                 </template>
               </ul>
             </div>
             <div class="mt-6 flex flex-wrap gap-3">
               <a href="#contact" class="inline-flex items-center gap-2 rounded-xl bg-white text-slate-900 px-4 py-3 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition">Request Formal Quote</a>
+              <button @click="checkout()" class="inline-flex items-center gap-2 rounded-xl bg-base-500 text-white px-4 py-3 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition">Checkout with Stripe</button>
               <button @click="reset()" class="inline-flex items-center gap-2 rounded-xl ring-1 ring-white/20 px-4 py-3 font-semibold hover:bg-white/10 transition">Reset</button>
             </div>
+            <p class="mt-2 text-xs text-white/60">You’ll be redirected to a secure Stripe Checkout page. For subscriptions, billing renews monthly.</p>
           </div>
 
           <div class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6">
@@ -282,63 +233,36 @@
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <h2 class="text-3xl font-extrabold tracking-tight">How it works</h2>
       <div class="mt-6 grid gap-6 md:grid-cols-3">
-        <div class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6">
-          <div class="text-sm text-white/60">Step 1</div>
-          <h3 class="font-semibold">Pick a base</h3>
-          <p class="mt-2 text-sm text-white/80">Every package starts with a strong base for immediate value.</p>
-        </div>
-        <div class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6">
-          <div class="text-sm text-white/60">Step 2</div>
-          <h3 class="font-semibold">Customize</h3>
-          <p class="mt-2 text-sm text-white/80">Check add‑ons to fit your goals; total price updates instantly.</p>
-        </div>
-        <div class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6">
-          <div class="text-sm text-white/60">Step 3</div>
-          <h3 class="font-semibold">Lock it in</h3>
-          <p class="mt-2 text-sm text-white/80">We’ll confirm scope, timeline, and deliverables and send a tailored quote.</p>
-        </div>
+        <div class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6"><div class="text-sm text-white/60">Step 1</div><h3 class="font-semibold">Pick a base</h3><p class="mt-2 text-sm text-white/80">Every package starts with a strong base for immediate value.</p></div>
+        <div class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6"><div class="text-sm text-white/60">Step 2</div><h3 class="font-semibold">Customize</h3><p class="mt-2 text-sm text-white/80">Check add‑ons to fit your goals; total price updates instantly.</p></div>
+        <div class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6"><div class="text-sm text-white/60">Step 3</div><h3 class="font-semibold">Lock it in</h3><p class="mt-2 text-sm text-white/80">We’ll confirm scope, timeline, and deliverables and send a tailored quote.</p></div>
       </div>
     </div>
   </section>
 
-  <!-- CONTACT -->
+  <!-- CONTACT + CALENDLY EMBED -->
   <section id="contact" class="py-20">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="grid lg:grid-cols-2 gap-10 items-start">
         <div>
           <h2 class="text-3xl font-extrabold tracking-tight">Ready to transform your brand?</h2>
-          <p class="mt-3 text-white/80 max-w-prose">Contact <span class="font-semibold">[your email]</span> for a free consultation, personalized quotes, or to start your project today! Prefer text? Swap the mailto link below with your number.</p>
+          <p class="mt-3 text-white/80 max-w-prose">Contact <span class="font-semibold">1coastmedia@gmail.com</span> for a free consultation, personalized quotes, or to start your project today. Prefer to chat? Book a call below.</p>
           <div class="mt-6 space-y-3 text-sm">
-            <a href="mailto:youremail@example.com?subject=Gulf%20Coast%20Creators%20Inquiry" class="inline-flex items-center gap-2 rounded-xl bg-white text-slate-900 px-4 py-3 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition">Email Us</a>
-            <div class="text-white/60">Replace <code class="bg-white/10 px-2 py-1 rounded">youremail@example.com</code> with your address.</div>
+            <a href="mailto:1coastmedia@gmail.com?subject=1%20Coast%20Media%20Inquiry" class="inline-flex items-center gap-2 rounded-xl bg-white text-slate-900 px-4 py-3 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition">Email Us</a>
+            <a href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-xl ring-1 ring-white/20 px-4 py-3 font-semibold hover:bg-white/10 transition">Open Calendly</a>
           </div>
         </div>
-        <form class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6 grid gap-4" onsubmit="event.preventDefault(); alert('Thanks! We\'ll be in touch.');">
-          <div class="grid sm:grid-cols-2 gap-4">
-            <label class="text-sm">Name<input required class="mt-1 w-full rounded-xl bg-slate-900/50 ring-1 ring-white/15 px-3 py-2" placeholder="Your name"/></label>
-            <label class="text-sm">Email<input type="email" required class="mt-1 w-full rounded-xl bg-slate-900/50 ring-1 ring-white/15 px-3 py-2" placeholder="you@brand.com"/></label>
-          </div>
-          <label class="text-sm">What can we help with?
-            <select class="mt-1 w-full rounded-xl bg-slate-900/50 ring-1 ring-white/15 px-3 py-2">
-              <option>Web & App Development</option>
-              <option>Video & Audio Production</option>
-              <option>Event Planning & Coordination</option>
-              <option>UGC & Local Clipping Campaigns</option>
-            </select>
-          </label>
-          <label class="text-sm">Message<textarea rows="4" class="mt-1 w-full rounded-xl bg-slate-900/50 ring-1 ring-white/15 px-3 py-2" placeholder="Share goals, budget, or timeline..."></textarea></label>
-          <button class="mt-2 inline-flex items-center gap-2 rounded-xl bg-white text-slate-900 px-4 py-3 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition">Send</button>
-        </form>
+        <div class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-2">
+          <div class="calendly-inline-widget" data-url="https://calendly.com/bdaniels013/30min" style="min-width:320px;height:660px;"></div>
+        </div>
       </div>
     </div>
   </section>
 
-  <footer class="py-10 border-t border-white/10 text-center text-xs text-white/60">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      © <span id="year"></span> Gulf Coast Creators • Mississippi Gulf Coast • All rights reserved.
-    </div>
-  </footer>
+  <footer class="py-10 border-t border-white/10 text-center text-xs text-white/60"><div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">© <span id="year"></span> 1 Coast Media • Mississippi Gulf Coast • All rights reserved.</div></footer>
 
+  <script src="https://js.stripe.com/v3/"></script>
+  <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
 
@@ -348,106 +272,58 @@
         serviceKey: 'web',
         selectedAddons: [],
         services: {
-          web: {
-            name: 'Web & App Development',
-            oneTime: { base: 300, duration: '3–7 days', includes: [
-              'Initial consultation & project setup',
-              'Basic responsive landing page',
-              'Wireframed UI/UX',
-              'Light copy edits'
-            ],
-            addons: [
-              {id:'web-mvp', label:'Basic App Prototype (MVP)', price:500, desc:'iOS/Android prototype (chatbots or simple tools)'},
-              {id:'web-seo', label:'SEO Setup', price:150, desc:'Keyword research & on‑page optimization'},
-              {id:'web-auto', label:'Automations', price:100, desc:'Email, leads, or social workflows'},
-              {id:'web-api', label:'API Integrations', price:250, desc:'Payments, maps, analytics'},
-              {id:'web-shop', label:'Custom E‑commerce Features', price:300, desc:'Basic shop setup'}
-            ]
-          },
-          video: {
-            name: 'Video & Audio Production',
-            oneTime: { base: 600, duration: '7–14 days', includes: [
-              'Consultation & project setup',
-              '1–2 minute basic video (music, commercial, or reels)',
-              'Simple shoot & edit with cuts/effects/voiceover',
-              'Coastal/local vibe where applicable'
-            ],
-            addons: [
-              {id:'vid-audio', label:'Audio Production', price:200, desc:'Noise reduction, subtitles, advanced mixing'},
-              {id:'vid-adv', label:'Advanced Video Upgrade', price:800, desc:'Extended length, complex edits, multi‑scene'},
-              {id:'vid-drone-p', label:'Drone Shoots — Personal', price:300, desc:'Dynamic footage with basic drone'},
-              {id:'vid-drone-pro', label:'Drone Shoots — Professional', price:1500, desc:'High‑end footage with certified operator'},
-              {id:'vid-edit', label:'Extended Editing', price:300, desc:'Series setup or additional polishes'}
-            ]
-          },
-          events: {
-            name: 'Event Planning & Coordination',
-            oneTime: { base: 1000, duration: 'Plan 2–6 weeks; event‑day support', includes: [
-              'Initial consultation',
-              'Basic coordination for small events',
-              'Venue scouting & simple timelines',
-              'Day‑of support'
-            ],
-            addons: [
-              {id:'ev-ven', label:'Venue & Vendor Coordination', price:500, desc:'Full timelines, logistics handled expertly'},
-              {id:'ev-digital', label:'Digital Event Pages', price:200, desc:'RSVPs, invites, lightweight attendee app'},
-              {id:'ev-media', label:'Media Coverage', price:300, desc:'Videographers/photographers for clips'},
-              {id:'ev-auto', label:'Automations', price:150, desc:'Reminders & predictions for smooth flow'},
-              {id:'ev-hybrid', label:'Hybrid/Virtual Setup', price:400, desc:'Streaming for wider reach'}
-            ]
-          },
-          ugc: {
-            name: 'UGC & Local Clipping Campaigns',
-            oneTime: { base: 450, duration: '7–21 days', includes: [
-              'Consultation & setup',
-              '30,000‑view campaign with local creators (1–2 platforms)',
-              'Post‑campaign report with view verification',
-              'Creator fit & guideline compliance summary'
-            ],
-            addons: [
-              {id:'ugc-repurpose', label:'Repurposed Asset Pack', price:200, desc:'Adapt clips into ads, posts, or email graphics'},
-              {id:'ugc-leads', label:'Lead Gen Integration', price:250, desc:'Simple funnel/landing page to capture contacts'},
-              {id:'ugc-enhance', label:'Content Enhancement', price:150, desc:'Overlays, CTAs, or music to boost engagement'},
-              {id:'ugc-captions', label:'Caption & Description Pack', price:100, desc:'Optimized captions/descriptions per clip'},
-              {id:'ugc-brand', label:'Branded Customization Kit', price:150, desc:'Logos, watermarks, end‑slates across clips'}
-            ]
-          }
+          web: { name: 'Web & App Development', oneTime: { base: 300, duration: '3–7 days', includes: ['Initial consultation & project setup','Basic responsive landing page','Wireframed UI/UX','Light copy edits'] }, addons: [
+            {id:'web-mvp', label:'Basic App Prototype (MVP)', price:500, desc:'iOS/Android prototype (chatbots or simple tools)'},
+            {id:'web-seo', label:'SEO Setup', price:150, desc:'Keyword research & on‑page optimization'},
+            {id:'web-auto', label:'Automations', price:100, desc:'Email, leads, or social workflows'},
+            {id:'web-api', label:'API Integrations', price:250, desc:'Payments, maps, analytics'},
+            {id:'web-shop', label:'Custom E‑commerce Features', price:300, desc:'Basic shop setup'}
+          ]},
+          video: { name: 'Video & Audio Production', oneTime: { base: 600, duration: '7–14 days', includes: ['Consultation & project setup','1–2 minute basic video (music, commercial, or reels)','Simple shoot & edit with cuts/effects/voiceover','Coastal/local vibe where applicable'] }, addons: [
+            {id:'vid-audio', label:'Audio Production', price:200, desc:'Noise reduction, subtitles, advanced mixing'},
+            {id:'vid-adv', label:'Advanced Video Upgrade', price:800, desc:'Extended length, complex edits, multi‑scene'},
+            {id:'vid-drone-p', label:'Drone Shoots — Personal', price:300, desc:'Dynamic footage with basic drone'},
+            {id:'vid-drone-pro', label:'Drone Shoots — Professional', price:1500, desc:'High‑end footage with certified operator'},
+            {id:'vid-edit', label:'Extended Editing', price:300, desc:'Series setup or additional polishes'}
+          ]},
+          events: { name: 'Event Planning & Coordination', oneTime: { base: 1000, duration: 'Plan 2–6 weeks; event‑day support', includes: ['Initial consultation','Basic coordination for small events','Venue scouting & simple timelines','Day‑of support'] }, addons: [
+            {id:'ev-ven', label:'Venue & Vendor Coordination', price:500, desc:'Full timelines, logistics handled expertly'},
+            {id:'ev-digital', label:'Digital Event Pages', price:200, desc:'RSVPs, invites, lightweight attendee app'},
+            {id:'ev-media', label:'Media Coverage', price:300, desc:'Videographers/photographers for clips'},
+            {id:'ev-auto', label:'Automations', price:150, desc:'Reminders & predictions for smooth flow'},
+            {id:'ev-hybrid', label:'Hybrid/Virtual Setup', price:400, desc:'Streaming for wider reach'}
+          ]},
+          ugc: { name: 'UGC & Local Clipping Campaigns', oneTime: { base: 450, duration: '7–21 days', includes: ['Consultation & setup','30,000‑view campaign (1–2 platforms)','Post‑campaign view verification','Creator fit & compliance summary'] }, addons: [
+            {id:'ugc-repurpose', label:'Repurposed Asset Pack', price:200, desc:'Adapt clips into ads, posts, or email graphics'},
+            {id:'ugc-leads', label:'Lead Gen Integration', price:250, desc:'Simple funnel/landing page to capture contacts'},
+            {id:'ugc-enhance', label:'Content Enhancement', price:150, desc:'Overlays, CTAs, or music to boost engagement'},
+            {id:'ugc-captions', label:'Caption & Description Pack', price:100, desc:'Optimized captions/descriptions per clip'},
+            {id:'ugc-brand', label:'Branded Customization Kit', price:150, desc:'Logos, watermarks, end‑slates across clips'}
+          ]}
         },
         monthlyOverrides: {
-          web: { base: 500, includes: [
-            'Monthly consultation',
-            'Basic site/app maintenance (updates & bug fixes)'
-          ], addons: [
+          web: { base: 500, includes: ['Monthly consultation','Basic site/app maintenance (updates & bug fixes)'], addons: [
             {match:'web-seo', label:'Monthly SEO Boosts', price:150, desc:'Ongoing audits & content optimization'},
             {match:'web-auto', label:'Automation Expansions', price:100, desc:'New workflows & integrations as needed'},
             {match:'web-adv', label:'Advanced Features', price:200, desc:'Personalization, sentiment, predictive'},
             {match:'web-dash', label:'Custom Dashboards', price:250, desc:'Real‑time metrics for traffic & engagement'},
             {match:'web-mvp', label:'App Upgrades', price:500, desc:'Ongoing prototype enhancements'}
           ]},
-          video: { base: 1200, includes: [
-            'Monthly consultation',
-            '3 basic videos (music, commercial, or reels) with enhancements'
-          ], addons: [
+          video: { base: 1200, includes: ['Monthly consultation','3 basic videos with enhancements'], addons: [
             {match:'vid-audio', label:'Audio Refresh', price:250, desc:'Ongoing mixing/subtitles for series'},
             {match:'vid-adv', label:'Advanced Video Series', price:1000, desc:'Extended or complex ongoing productions'},
             {match:'vid-drone-p', label:'Drone Shoots — Personal', price:300, desc:'Added to monthly videos'},
             {match:'vid-drone-pro', label:'Drone Shoots — Professional', price:1500, desc:'High‑end additions'},
             {match:'vid-edit', label:'Custom Production', price:500, desc:'Multi‑clip or specialized effects'}
           ]},
-          events: { base: 1200, includes: [
-            'Monthly consultation',
-            'Coordination for recurring small events (basic logistics)'
-          ], addons: [
+          events: { base: 1200, includes: ['Monthly consultation','Coordination for recurring small events (basic logistics)'], addons: [
             {match:'ev-ven', label:'Ongoing Coordination', price:600, desc:'Multiple events/month, full logistics'},
             {match:'ev-digital', label:'Digital Upkeep', price:200, desc:'Event sites/apps & automated invites'},
             {match:'ev-media', label:'Media Integration', price:300, desc:'Consistent video/photo coverage'},
             {match:'ev-auto', label:'Enhancements', price:150, desc:'Attendee analytics & personalization'},
             {match:'ev-hybrid', label:'Scalable Support', price:400, desc:'Hybrid add‑ons for larger scope'}
           ]},
-          ugc: { base: 600, includes: [
-            'Monthly consultation',
-            'Recurring 30,000‑view campaigns (1–2 platforms) with monthly reports'
-          ], addons: [
+          ugc: { base: 600, includes: ['Monthly consultation','Recurring 30,000‑view campaigns (1–2 platforms) + monthly report'], addons: [
             {match:'ugc-repurpose', label:'Repurposed Asset Pack', price:200, desc:'Monthly adaptations into ads/posts/emails'},
             {match:'ugc-leads', label:'Lead Gen Integration', price:250, desc:'Monthly funnel optimizations'},
             {match:'ugc-enhance', label:'Content Enhancement', price:150, desc:'Ongoing overlays/CTAs/music'},
@@ -455,48 +331,94 @@
             {match:'ugc-brand', label:'Branded Customization Kit', price:150, desc:'Logos/watermarks/end‑slates each month'}
           ]}
         },
-        get base(){
-          return this.services[this.serviceKey][this.plan];
-        },
-        get basePrice(){
-          if(this.plan==='oneTime') return this.base.base;
-          return this.monthlyOverrides[this.serviceKey].base;
-        },
-        get baseIncludes(){
-          const base = this.plan==='oneTime' ? this.base.includes : this.monthlyOverrides[this.serviceKey].includes;
-          return base;
-        },
-        get currentAddons(){
-          if(this.plan==='oneTime') return this.base.addons;
-          // Map monthly overrides to matching structure
-          return this.monthlyOverrides[this.serviceKey].addons.map(ov => ({
-            id: ov.match,
-            label: ov.label,
-            price: ov.price,
-            desc: ov.desc
-          }));
-        },
-        get currentDescription(){
-          return this.plan==='oneTime' ? 'One‑time project for immediate impact.' : 'Monthly retainer for sustained growth (3‑month minimum).';
-        },
-        get selectedAddonsDetailed(){
-          const index = Object.fromEntries(this.currentAddons.map(a=>[a.id,a]));
-          return this.selectedAddons.map(id => index[id]).filter(Boolean);
-        },
-        get total(){
-          const addonsTotal = this.selectedAddonsDetailed.reduce((s,a)=>s + (a?.price||0), 0);
-          return this.basePrice + addonsTotal;
-        },
-        toggleAddon(id){
-          const i = this.selectedAddons.indexOf(id);
-          if(i>-1) this.selectedAddons.splice(i,1); else this.selectedAddons.push(id);
-        },
-        reset(){ this.selectedAddons = []; },
+        get base(){ return this.services[this.serviceKey][this.plan]; },
+        get basePrice(){ return this.plan==='oneTime' ? this.base.base : this.monthlyOverrides[this.serviceKey].base; },
+        get baseIncludes(){ return this.plan==='oneTime' ? this.base.includes : this.monthlyOverrides[this.serviceKey].includes; },
+        get currentAddons(){ return this.plan==='oneTime' ? this.base.addons : this.monthlyOverrides[this.serviceKey].addons.map(ov=>({id:ov.match,label:ov.label,price:ov.price,desc:ov.desc})); },
+        get currentDescription(){ return this.plan==='oneTime' ? 'One‑time project for immediate impact.' : 'Monthly retainer for sustained growth (3‑month minimum).'; },
+        get selectedAddonsDetailed(){ const idx=Object.fromEntries(this.currentAddons.map(a=>[a.id,a])); return this.selectedAddons.map(id=>idx[id]).filter(Boolean); },
+        get total(){ return this.basePrice + this.selectedAddonsDetailed.reduce((s,a)=>s+(a?.price||0),0); },
+        toggleAddon(id){ const i=this.selectedAddons.indexOf(id); if(i>-1) this.selectedAddons.splice(i,1); else this.selectedAddons.push(id); },
+        reset(){ this.selectedAddons=[]; },
         onServiceChange(){ this.reset(); },
         init(){ this.reset(); },
-        formatPrice(v){ return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v); }
+        formatPrice(v){ return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v); },
+
+        // === Stripe Checkout (via serverless API) ===
+        async checkout(){
+          try{
+            const payload = { serviceKey: this.serviceKey, plan: this.plan, addons: this.selectedAddons };
+            const res = await fetch('/api/checkout', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+            if(!res.ok){ const t = await res.text(); throw new Error(t || 'Failed to create checkout session'); }
+            const { id } = await res.json();
+            const stripe = Stripe('pk_live_51O4Qh0KoF1Q8iKteAbGsSkEj65fg0tSGOG6dcJCcLyvz0PHC5y8jEAkMDfDFfCTdEeRyPcOtZ7O13MBNZkDhBMR900NqzTN4LN');
+            const { error } = await stripe.redirectToCheckout({ sessionId: id });
+            if(error){ alert(error.message); }
+          } catch(e){ console.error(e); alert('Checkout could not start. Email 1coastmedia@gmail.com for help.'); }
+        }
       }
     }
   </script>
+
+  <!--
+  =====================
+  SERVERLESS API (create /api/checkout)
+  =====================
+  IMPORTANT: Never expose your secret key in client-side code. Use an environment
+  variable named STRIPE_SECRET_KEY with the value you provided (sk_live_...).
+
+  --- Vercel: create file at /api/checkout.js ---
+  const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
+  const PRICE_TABLE = {
+    web: { oneTimeBase: 30000, monthlyBase: 50000, addons: { 'web-mvp':{ot:50000,mo:50000}, 'web-seo':{ot:15000,mo:15000}, 'web-auto':{ot:10000,mo:10000}, 'web-api':{ot:25000,mo:25000}, 'web-shop':{ot:30000,mo:30000}, 'web-adv':{ot:null,mo:20000}, 'web-dash':{ot:null,mo:25000} } },
+    video:{ oneTimeBase: 60000, monthlyBase:120000, addons: { 'vid-audio':{ot:20000,mo:25000}, 'vid-adv':{ot:80000,mo:100000}, 'vid-drone-p':{ot:30000,mo:30000}, 'vid-drone-pro':{ot:150000,mo:150000}, 'vid-edit':{ot:30000,mo:50000} } },
+    events:{ oneTimeBase:100000, monthlyBase:120000, addons: { 'ev-ven':{ot:50000,mo:60000}, 'ev-digital':{ot:20000,mo:20000}, 'ev-media':{ot:30000,mo:30000}, 'ev-auto':{ot:15000,mo:15000}, 'ev-hybrid':{ot:40000,mo:40000} } },
+    ugc:  { oneTimeBase: 45000, monthlyBase: 60000, addons: { 'ugc-repurpose':{ot:20000,mo:20000}, 'ugc-leads':{ot:25000,mo:25000}, 'ugc-enhance':{ot:15000,mo:15000}, 'ugc-captions':{ot:10000,mo:10000}, 'ugc-brand':{ot:15000,mo:15000} } }
+  };
+
+  module.exports = async (req, res) => {
+    try{
+      if(req.method !== 'POST') return res.status(405).send('Method Not Allowed');
+      const { serviceKey, plan, addons } = req.body || {};
+      if(!['web','video','events','ugc'].includes(serviceKey)) return res.status(400).send('Invalid service');
+      if(!['oneTime','monthly'].includes(plan)) return res.status(400).send('Invalid plan');
+      const t = PRICE_TABLE[serviceKey];
+      const isMonthly = plan==='monthly';
+
+      const line_items = [];
+      // Base
+      const baseAmount = isMonthly ? t.monthlyBase : t.oneTimeBase;
+      line_items.push({ price_data: { currency: 'usd', product_data: { name: `${serviceKey.toUpperCase()} — ${isMonthly?'Monthly':'One‑time'} Base` }, unit_amount: baseAmount, ...(isMonthly? {recurring:{interval:'month'}} : {}) }, quantity: 1 });
+
+      // Addons (server‑authoritative)
+      for(const id of Array.isArray(addons)?addons:[]){
+        const a = t.addons[id]; if(!a) continue;
+        const amt = isMonthly ? a.mo : a.ot; if(!amt) continue;
+        line_items.push({ price_data: { currency: 'usd', product_data: { name: `Add‑on: ${id}` }, unit_amount: amt, ...(isMonthly? {recurring:{interval:'month'}} : {}) }, quantity: 1 });
+      }
+
+      const session = await stripe.checkout.sessions.create({
+        mode: isMonthly ? 'subscription' : 'payment',
+        line_items,
+        success_url: `${req.headers.origin || 'https://yourdomain.com'}/#contact`,
+        cancel_url: `${req.headers.origin || 'https://yourdomain.com'}/#pricing`,
+        allow_promotion_codes: true,
+        metadata: { serviceKey, plan }
+      });
+
+      res.status(200).json({ id: session.id });
+    }catch(err){
+      console.error(err);
+      res.status(500).send(err.message || 'Server error');
+    }
+  }
+
+  --- Netlify: create /netlify/functions/checkout.js and export handler ---
+  const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+  exports.handler = async (event) => { /* use same PRICE_TABLE and logic, return {statusCode:200, body: JSON.stringify({id: session.id})} */ };
+
+  Set env var STRIPE_SECRET_KEY = sk_live_... in your hosting dashboard. Do NOT hardcode it.
+  -->
 </body>
 </html>
