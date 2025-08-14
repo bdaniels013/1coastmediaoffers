@@ -1,9 +1,9 @@
-// /api/admin.js
-import { sql } from '@vercel/postgres';
-import jwt from 'jsonwebtoken';
-import { parse } from 'cookie';
+// /api/admin.js  (CommonJS version)
+const { sql } = require('@vercel/postgres');
+const jwt = require('jsonwebtoken');
+const { parse } = require('cookie');
 
-// Let @vercel/postgres see a pooled SSL URL even if only NO_SSL exists
+// Ensure @vercel/postgres uses SSL even if only NO_SSL is set
 if (!process.env.POSTGRES_URL && process.env.POSTGRES_URL_NO_SSL) {
   process.env.POSTGRES_URL =
     process.env.POSTGRES_URL_NO_SSL +
@@ -14,7 +14,6 @@ if (!process.env.POSTGRES_URL && process.env.POSTGRES_URL_NO_SSL) {
 const COOKIE = 'admin_auth';
 const ONE_DAY = 60 * 60 * 24;
 
-// --- cookie helpers ---
 function setCookie(res, name, value, maxAge = ONE_DAY * 7) {
   const cookie = `${name}=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}; ${
     process.env.VERCEL_ENV === 'production' ? 'Secure;' : ''
@@ -33,23 +32,29 @@ function getToken(req) {
   const cookies = parse(req.headers.cookie || '');
   return cookies[COOKIE];
 }
+function unauthorized(res) {
+  res.status(401).json({ error: 'Unauthorized' });
+  return null;
+}
 function requireAdmin(req, res) {
   try {
     const token = getToken(req);
     const payload = jwt.verify(token, process.env.ADMIN_JWT_SECRET);
     return payload?.username || 'admin';
   } catch {
-    res.status(401).json({ error: 'Unauthorized' });
-    return null;
+    return unauthorized(res);
   }
 }
 
-// --- public catalog (used by homepage) ---
+async function safeQuery(q) {
+  try { return await q; } catch { return { rows: [], rowCount: 0 }; }
+}
+
 async function getCatalog(res) {
-  const { rows: services } =
-    await sql`SELECT * FROM services ORDER BY name ASC`;
-  const { rows: addons } =
-    await sql`SELECT * FROM addons ORDER BY label ASC`;
+  const servicesRes = await safeQuery(sql`SELECT * FROM services ORDER BY name ASC`);
+  const addonsRes   = await safeQuery(sql`SELECT * FROM addons ORDER BY label ASC`);
+  const services = servicesRes.rows || [];
+  const addons   = addonsRes.rows || [];
 
   const grouped = services.map((s) => ({
     key: s.id,
@@ -79,28 +84,30 @@ async function getCatalog(res) {
   res.status(200).json({ services: grouped });
 }
 
-// --- metrics helper ---
 async function getMetrics() {
-  const rev =
-    await sql`SELECT COALESCE(SUM(total_cents),0) AS c FROM orders WHERE status='paid'`;
-  const orders =
-    await sql`SELECT COUNT(*)::int AS n FROM orders WHERE status='paid'`;
-  const customers =
-    await sql`SELECT COUNT(*)::int AS n FROM customers`;
-  const pageviews =
-    await sql`SELECT COUNT(*)::int AS n FROM events WHERE type='pageview'`;
+  const rev = await safeQuery(sql`SELECT COALESCE(SUM(total_cents),0) AS c FROM orders WHERE status='paid'`);
+  const orders = await safeQuery(sql`SELECT COUNT(*)::int AS n FROM orders WHERE status='paid'`);
+  const customers = await safeQuery(sql`SELECT COUNT(*)::int AS n FROM customers`);
+  const pageviews = await safeQuery(sql`SELECT COUNT(*)::int AS n FROM events WHERE type='pageview'`);
   return {
-    revenue_cents: Number(rev.rows[0].c || 0),
-    orders: Number(orders.rows[0].n || 0),
-    customers: Number(customers.rows[0].n || 0),
-    pageviews: Number(pageviews.rows[0].n || 0),
+    revenue_cents: Number(rev.rows?.[0]?.c || 0),
+    orders: Number(orders.rows?.[0]?.n || 0),
+    customers: Number(customers.rows?.[0]?.n || 0),
+    pageviews: Number(pageviews.rows?.[0]?.n || 0),
   };
 }
 
-// --- main handler ---
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   try {
-    const { r: resource } = req.query;
+    // Loud error if credentials are missing
+    if (!process.env.ADMIN_USER || !process.env.ADMIN_PASS || !process.env.ADMIN_JWT_SECRET) {
+      return res.status(500).json({
+        error:
+          'Admin credentials are not configured. Please set ADMIN_USER, ADMIN_PASS, ADMIN_JWT_SECRET in Vercel and redeploy.',
+      });
+    }
+
+    const resource = req.query.r;
 
     // -------- PUBLIC ROUTES --------
     if (resource === 'catalog' && req.method === 'GET') {
@@ -109,10 +116,7 @@ export default async function handler(req, res) {
 
     if (resource === 'login' && req.method === 'POST') {
       const { username, password } = req.body || {};
-      if (
-        username === process.env.ADMIN_USER &&
-        password === process.env.ADMIN_PASS
-      ) {
+      if (username === process.env.ADMIN_USER && password === process.env.ADMIN_PASS) {
         const token = jwt.sign(
           { username, ts: Date.now() },
           process.env.ADMIN_JWT_SECRET,
@@ -143,43 +147,35 @@ export default async function handler(req, res) {
     const user = requireAdmin(req, res);
     if (!user) return;
 
-    // Metrics
     if (resource === 'metrics' && req.method === 'GET') {
       const kpis = await getMetrics();
       return res.status(200).json(kpis);
     }
 
-    // Orders (read-only)
     if (resource === 'orders' && req.method === 'GET') {
-      const { rows } =
-        await sql`SELECT * FROM orders ORDER BY created_at DESC LIMIT 200`;
+      const { rows } = await safeQuery(sql`SELECT * FROM orders ORDER BY created_at DESC LIMIT 200`);
       return res.status(200).json(rows);
     }
 
-    // Customers (read-only)
     if (resource === 'customers' && req.method === 'GET') {
-      const { rows } =
-        await sql`SELECT * FROM customers ORDER BY created_at DESC LIMIT 500`;
+      const { rows } = await safeQuery(sql`SELECT * FROM customers ORDER BY created_at DESC LIMIT 500`);
       return res.status(200).json(rows);
     }
 
-    // Leads (read-only)
     if (resource === 'leads' && req.method === 'GET') {
-      const { rows } =
-        await sql`SELECT * FROM leads ORDER BY created_at DESC LIMIT 500`;
+      const { rows } = await safeQuery(sql`SELECT * FROM leads ORDER BY created_at DESC LIMIT 500`);
       return res.status(200).json(rows);
     }
 
     // Services CRUD
     if (resource === 'services') {
       if (req.method === 'GET') {
-        const { rows } = await sql`SELECT * FROM services ORDER BY name ASC`;
+        const { rows } = await safeQuery(sql`SELECT * FROM services ORDER BY name ASC`);
         return res.status(200).json(rows);
       }
       if (req.method === 'POST' || req.method === 'PUT') {
         const b = req.body || {};
-        if (!b.id || !b.name)
-          return res.status(400).json({ error: 'id and name required' });
+        if (!b.id || !b.name) return res.status(400).json({ error: 'id and name required' });
         await sql`
           INSERT INTO services (id, name, blurb, base_one_time_cents, base_monthly_cents, includes)
           VALUES (${b.id}, ${b.name}, ${b.blurb || null},
@@ -210,7 +206,7 @@ export default async function handler(req, res) {
         const q = svc
           ? sql`SELECT * FROM addons WHERE service_id=${svc} ORDER BY label ASC`
           : sql`SELECT * FROM addons ORDER BY label ASC`;
-        const { rows } = await q;
+        const { rows } = await safeQuery(q);
         return res.status(200).json(rows);
       }
       if (req.method === 'POST' || req.method === 'PUT') {
@@ -218,9 +214,7 @@ export default async function handler(req, res) {
         if (!b.id || !b.service_id || !b.label)
           return res.status(400).json({ error: 'id, service_id, label required' });
 
-        // ensure service exists
-        const s =
-          await sql`SELECT 1 FROM services WHERE id=${b.service_id} LIMIT 1`;
+        const s = await safeQuery(sql`SELECT 1 FROM services WHERE id=${b.service_id} LIMIT 1`);
         if (!s.rowCount) return res.status(400).json({ error: 'service_id not found' });
 
         await sql`
@@ -249,9 +243,9 @@ export default async function handler(req, res) {
       }
     }
 
-    return res.status(405).json({ error: 'Method not allowed' });
+    res.status(405).json({ error: 'Method not allowed' });
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: e.message || 'Server error' });
   }
-}
+};
