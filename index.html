@@ -5,16 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>1 Coast Media — Premium Digital, Media & Event Services</title>
   <meta name="description" content="Premium Web & App, Video/Audio Production, Event Planning, and UGC Campaigns for Mississippi Gulf Coast creators and brands. Transparent pricing. Fast turnarounds. Results-driven."/>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <!-- Tailwind CDN -->
+
+  <!-- Tailwind + Alpine -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Alpine.js -->
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
   <style>
     :root{
-      --ink:#0b1220; --indigo:#4f46e5; --cyan:#06b6d4; --emerald:#10b981; --ring: rgba(15, 23, 42, 0.12);
+      --ink:#0b1220; --indigo:#4f46e5; --cyan:#06b6d4; --emerald:#10b981;
     }
     html{scroll-behavior:smooth}
     body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
@@ -26,6 +28,8 @@
     .glass{backdrop-filter:saturate(170%) blur(14px);background:rgba(255,255,255,.84)}
     .halo{position:relative;border-radius:1.25rem}
     .halo:before{content:"";position:absolute;inset:-1px;border-radius:inherit;background:linear-gradient(120deg, rgba(2,6,23,.08), rgba(79,70,229,.32), rgba(6,182,212,.32), rgba(2,6,23,.08));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;padding:1px;pointer-events:none}
+    .card{border-radius:1.25rem;background:#fff;border:1px solid rgba(15,23,42,.08);box-shadow:0 10px 30px rgba(2,6,23,.04);transition:box-shadow .2s ease, transform .2s ease}
+    .card:hover{box-shadow:0 16px 44px rgba(2,6,23,.08);transform:translateY(-1px)}
     .btn{transition:transform .2s ease, box-shadow .2s ease}
     .btn:hover{transform:translateY(-1px)}
     .tap:active{transform:scale(.98)}
@@ -35,6 +39,8 @@
     .toast-enter-active{transform:translateY(0);opacity:1;transition:.18s ease-out}
     .spinner{border:3px solid #e2e8f0;border-top-color:#0f172a;border-radius:999px;width:18px;height:18px;animation:spin .8s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
+    h1,h2,h3{letter-spacing:-0.02em}
+    section{scroll-margin-top:80px}
   </style>
 </head>
 <body class="mesh text-slate-800" x-data="landingApp()" x-init="init()">
@@ -83,16 +89,26 @@
         </div>
       </div>
     </div>
+
+    <!-- trust strip -->
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-6">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 opacity-80">
+        <div class="card p-3 text-center text-xs">Tourism & Events</div>
+        <div class="card p-3 text-center text-xs">Real Estate</div>
+        <div class="card p-3 text-center text-xs">Local Brands</div>
+        <div class="card p-3 text-center text-xs">Creators</div>
+      </div>
+    </div>
   </section>
 
   <!-- PLAN TOGGLE -->
-  <section class="pt-2">
+  <section class="pt-8">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between gap-3">
         <div class="text-sm text-slate-600">Plan</div>
-        <div class="inline-flex rounded-lg bg-slate-100 p-1">
-          <button @click="setPlan('oneTime')" :class="plan==='oneTime' ? 'bg-white text-slate-900' : 'text-slate-700'" class="px-3 py-1 rounded-md text-sm font-semibold f-ring">One-time</button>
-          <button @click="setPlan('monthly')" :class="plan==='monthly' ? 'bg-white text-slate-900' : 'text-slate-700'" class="px-3 py-1 rounded-md text-sm font-semibold f-ring">Monthly</button>
+        <div class="inline-flex rounded-xl bg-slate-100 p-1 ring-1 ring-slate-200">
+          <button @click="setPlan('oneTime')" :class="plan==='oneTime' ? 'bg-white shadow text-slate-900' : 'text-slate-700'" class="px-3 py-1.5 rounded-lg text-sm font-semibold f-ring">One-time</button>
+          <button @click="setPlan('monthly')" :class="plan==='monthly' ? 'bg-white shadow text-slate-900' : 'text-slate-700'" class="px-3 py-1.5 rounded-lg text-sm font-semibold f-ring">Monthly</button>
         </div>
       </div>
     </div>
@@ -112,13 +128,11 @@
       <div class="mt-6 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         <template x-for="svc in services" :key="'svc-'+svc.key">
           <div class="halo p-0.5">
-            <div class="relative rounded-3xl bg-white ring-1 ring-slate-200 p-6 shadow-sm hover:shadow-xl transition">
-              <div class="absolute -top-1 left-6 inline-flex gap-2">
-                <span class="text-[11px] uppercase tracking-wide rounded bg-slate-100 ring-1 ring-slate-200 px-2 py-0.5" x-text="plan==='oneTime' ? 'One-time' : 'Monthly'"></span>
-              </div>
-              <div class="flex items-start justify-between gap-3 mt-3">
+            <div class="card p-6">
+              <div class="flex items-start justify-between gap-3">
                 <div>
-                  <h3 class="text-xl font-bold" x-text="svc.name"></h3>
+                  <div class="text-[11px] uppercase tracking-wide rounded bg-slate-100 ring-1 ring-slate-200 px-2 py-0.5 inline-block" x-text="plan==='oneTime' ? 'One-time' : 'Monthly'"></div>
+                  <h3 class="text-xl font-bold mt-2" x-text="svc.name"></h3>
                   <p class="text-sm text-slate-600 mt-1" x-text="svc.blurb"></p>
                 </div>
                 <div class="text-right">
@@ -147,8 +161,8 @@
         <div class="text-sm text-slate-600">Selected: <strong x-text="cartServices.length"></strong> base • <strong x-text="cartAddons.length"></strong> add-ons</div>
         <div class="text-sm text-slate-600">Est. total: <strong x-text="fmtUSD(total)"></strong><span class="text-slate-500" x-show="plan==='monthly'">/mo</span></div>
         <div class="flex gap-2">
-          <button @click="openAddons(activeService)" class="tap rounded-lg ring-1 ring-slate-200 bg-white px-3 py-2 text-sm font-semibold f-ring">Explore Add-Ons</button>
-          <button @click="openBuilder()" class="tap rounded-lg bg-slate-900 text-white px-3 py-2 text-sm font-semibold f-ring">Review & Checkout</button>
+          <button @click="openAddons(activeService)" class="tap rounded-xl ring-1 ring-slate-200 bg-white px-4 py-2 text-sm font-semibold f-ring">Add-Ons</button>
+          <button @click="openBuilder()" class="tap rounded-xl bg-indigo-600 text-white px-4 py-2 text-sm font-semibold f-ring hover:bg-indigo-700">Review & Checkout</button>
         </div>
       </div>
     </div>
@@ -166,19 +180,19 @@
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <h3 class="text-2xl font-extrabold">FAQ</h3>
       <div class="mt-4 grid md:grid-cols-2 gap-3">
-        <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4" x-data="{open:false}">
+        <div class="card p-4" x-data="{open:false}">
           <button @click="open=!open" class="w-full flex items-center justify-between text-left f-ring"><span class="font-semibold">How quickly can we start?</span><svg :class="{'rotate-180':open}" class="h-5 w-5 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
           <div x-show="open" x-transition class="overflow-hidden"><p class="mt-3 text-slate-600">Kick off in ~48 hours. One-time sites in 3–7 days; monthly starts this week.</p></div>
         </div>
-        <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4" x-data="{open:false}">
+        <div class="card p-4" x-data="{open:false}">
           <button @click="open=!open" class="w-full flex items-center justify-between text-left f-ring"><span class="font-semibold">Can I pick add-ons without a base?</span><svg :class="{'rotate-180':open}" class="h-5 w-5 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
-          <div x-show="open" x-transition class="overflow-hidden"><p class="mt-3 text-slate-600">Yes for browsing; for checkout, add at least one base so Stripe can itemize correctly.</p></div>
+          <div x-show="open" x-transition class="overflow-hidden"><p class="mt-3 text-slate-600">Yes for browsing; at checkout we’ll add the correct base automatically if needed.</p></div>
         </div>
-        <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4" x-data="{open:false}">
+        <div class="card p-4" x-data="{open:false}">
           <button @click="open=!open" class="w-full flex items-center justify-between text-left f-ring"><span class="font-semibold">Do you travel for shoots?</span><svg :class="{'rotate-180':open}" class="h-5 w-5 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
           <div x-show="open" x-transition class="overflow-hidden"><p class="mt-3 text-slate-600">Yes. We’re Gulf Coast based with travel options for video and events.</p></div>
         </div>
-        <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4" x-data="{open:false}">
+        <div class="card p-4" x-data="{open:false}">
           <button @click="open=!open" class="w-full flex items-center justify-between text-left f-ring"><span class="font-semibold">Is there a contract?</span><svg :class="{'rotate-180':open}" class="h-5 w-5 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
           <div x-show="open" x-transition class="overflow-hidden"><p class="mt-3 text-slate-600">One-time = clear scope. Monthly = simple 3-month minimum to build momentum.</p></div>
         </div>
@@ -218,7 +232,7 @@
     </div>
   </div>
 
-  <!-- Explore Add-Ons (global) -->
+  <!-- Explore Add-Ons -->
   <div x-show="addonsOpen" x-transition.opacity class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
     <div @click="addonsOpen=false" class="absolute inset-0 bg-slate-900/50"></div>
     <div class="relative w-full sm:max-w-6xl rounded-2xl bg-white text-slate-900 shadow-2xl ring-1 ring-slate-200 max-h-[92vh] overflow-hidden">
@@ -296,14 +310,14 @@
   <!-- Builder (Review) -->
   <div x-show="builderOpen" x-transition.opacity class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
     <div @click="builderOpen=false" class="absolute inset-0 bg-slate-900/50"></div>
-    <div class="relative w-full sm:max-w-6xl rounded-2xl bg-white text-slate-900 shadow-2xl ring-1 ring-slate-200 max-h:[92vh] overflow-hidden">
+    <div class="relative w-full sm:max-w-6xl rounded-2xl bg-white text-slate-900 shadow-2xl ring-1 ring-slate-200 max-h-[92vh] overflow-hidden">
       <div class="p-5 border-b border-slate-200 flex items-center justify-between">
         <h3 class="text-lg font-bold">Review & Checkout</h3>
         <button @click="builderOpen=false" class="h-9 w-9 grid place-items-center rounded-md hover:bg-slate-50 f-ring" aria-label="Close"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6l12 12M6 18L18 6"/></svg></button>
       </div>
       <div class="p-5 grid lg:grid-cols-3 gap-6 overflow-auto max-h-[calc(92vh-72px)]">
         <!-- Left: choose bases -->
-        <div class="lg:col-span-1 rounded-2xl bg-white ring-1 ring-slate-200 p-4">
+        <div class="lg:col-span-1 card p-4">
           <h4 class="font-semibold">1) Base services</h4>
           <p class="text-xs text-slate-500 mt-1">Pick at least one base to continue.</p>
           <div class="mt-2 grid grid-cols-2 gap-2">
@@ -317,7 +331,7 @@
         </div>
 
         <!-- Middle: add-ons -->
-        <div class="lg:col-span-2 rounded-2xl bg-white ring-1 ring-slate-200 p-4">
+        <div class="lg:col-span-2 card p-4">
           <div class="flex items-center justify-between gap-3 flex-wrap">
             <h4 class="font-semibold">2) Add-ons (optional)</h4>
             <div class="flex items-center gap-2">
@@ -348,7 +362,7 @@
         </div>
 
         <!-- Summary + Contact -->
-        <div class="lg:col-span-3 rounded-2xl bg-white ring-1 ring-slate-200 p-4">
+        <div class="lg:col-span-3 card p-4">
           <h4 class="font-semibold">Summary</h4>
           <div class="mt-3 grid md:grid-cols-2 gap-4">
             <div>
@@ -376,24 +390,24 @@
           <!-- Contact block -->
           <div class="mt-5 grid md:grid-cols-5 gap-3">
             <div class="md:col-span-2">
-              <label class="text-xs text-slate-500">Name</label>
-              <input x-model.trim="contact.name" placeholder="Jane Smith" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-3 py-2 text-sm f-ring"/>
+              <label class="text-xs text-slate-500" for="c-name">Name</label>
+              <input id="c-name" x-model.trim="contact.name" placeholder="Jane Smith" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-3 py-2 text-sm f-ring"/>
             </div>
             <div class="md:col-span-2">
-              <label class="text-xs text-slate-500">Email <span class="text-rose-500">*</span></label>
-              <input x-model.trim="contact.email" type="email" placeholder="you@example.com" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-3 py-2 text-sm f-ring"/>
+              <label class="text-xs text-slate-500" for="c-email">Email <span class="text-rose-500">*</span></label>
+              <input id="c-email" x-model.trim="contact.email" type="email" placeholder="you@example.com" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-3 py-2 text-sm f-ring"/>
             </div>
-            <div class="">
-              <label class="text-xs text-slate-500">Phone</label>
-              <input x-model.trim="contact.phone" placeholder="(555) 555-5555" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-3 py-2 text-sm f-ring"/>
+            <div>
+              <label class="text-xs text-slate-500" for="c-phone">Phone</label>
+              <input id="c-phone" x-model.trim="contact.phone" placeholder="(555) 555-5555" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-3 py-2 text-sm f-ring"/>
             </div>
             <div class="md:col-span-2">
-              <label class="text-xs text-slate-500">Company</label>
-              <input x-model.trim="contact.company" placeholder="Your company" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-3 py-2 text-sm f-ring"/>
+              <label class="text-xs text-slate-500" for="c-company">Company</label>
+              <input id="c-company" x-model.trim="contact.company" placeholder="Your company" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-3 py-2 text-sm f-ring"/>
             </div>
             <div class="md:col-span-3">
-              <label class="text-xs text-slate-500">Notes</label>
-              <input x-model.trim="contact.notes" placeholder="Anything we should know for kickoff?" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-3 py-2 text-sm f-ring"/>
+              <label class="text-xs text-slate-500" for="c-notes">Notes</label>
+              <input id="c-notes" x-model.trim="contact.notes" placeholder="Anything we should know for kickoff?" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-3 py-2 text-sm f-ring"/>
             </div>
           </div>
 
@@ -416,15 +430,15 @@
 
   <footer class="py-10 text-center text-[11px] text-slate-500">SECURE CHECKOUT WITH STRIPE • NO PUSHY SALES — CLEAR PRICING</footer>
 
-  <!-- Scripts -->
+  <!-- App -->
   <script>
     function landingApp(){
       return {
-        // --- State ---
         year: new Date().getFullYear(),
         plan: 'oneTime',
         addonQuery: '',
         sortBy: 'popular',
+
         services: [
           { key:'web', name:'Web & App', blurb:'Launch a clean, mobile-first site fast.', base:{oneTime:300, monthly:500}, includes:['Kickoff & setup','Landing page (3–5 sections)','Light copy help'], addOns:[
             { id:'web-seo', label:'SEO Basics', desc:'Titles, speed checks, findable.', short:'Quick search wins', price:{oneTime:150, monthly:150}, badge:'Quick win', popular:true },
@@ -445,6 +459,7 @@
             { id:'web-photos', label:'Photo Sourcing', desc:'Handpicked stock + edits.', short:'Better visuals', price:{oneTime:90, monthly:90}, badge:'Visuals' },
             { id:'web-brandkit', label:'Brand Kit', desc:'Fonts, colors, components.', short:'Consistent look', price:{oneTime:200, monthly:150}, badge:'Brand' },
           ]},
+
           { key:'video', name:'Video / Audio', blurb:'Short, on-brand edits that convert.', base:{oneTime:600, monthly:1200}, includes:['Kickoff & plan','1–2 min edit','Clean edit, coastal vibe'], addOns:[
             { id:'vid-audio', label:'Clean Audio + Captions', desc:'Noise fix + captions.', short:'Watchable anywhere', price:{oneTime:200, monthly:250}, badge:'Accessibility', popular:true },
             { id:'vid-adv', label:'Advanced Edit / Series', desc:'More story, motion, polish.', short:'Flagship content', price:{oneTime:800, monthly:1000}, badge:'Premium', popular:true },
@@ -462,6 +477,7 @@
             { id:'vid-multi', label:'Multi-location Shoot', desc:'Up to 3 locations.', short:'More variety', price:{oneTime:400, monthly:400}, badge:'Scope' },
             { id:'vid-cast', label:'Talent Casting', desc:'Find on-brand talent.', short:'Right faces', price:{oneTime:300, monthly:300}, badge:'Talent' },
           ]},
+
           { key:'events', name:'Events', blurb:'Plan smooth, run tight, look great.', base:{oneTime:1000, monthly:1200}, includes:['Scope & timeline','Basic coordination','Day-of support'], addOns:[
             { id:'ev-ven', label:'Vendor/Venue Handling', desc:'We wrangle calls.', short:'Stress-free', price:{oneTime:500, monthly:600}, badge:'Stress-free', popular:true },
             { id:'ev-digital', label:'RSVP/Tickets Page', desc:'Modern guest flow.', short:'Smooth RSVPs', price:{oneTime:200, monthly:200}, badge:'Modern' },
@@ -476,6 +492,7 @@
             { id:'ev-photobooth', label:'Photo Booth', desc:'Branded photos on site.', short:'Fun moments', price:{oneTime:350, monthly:350}, badge:'Fun' },
             { id:'ev-ticketing', label:'Ticketing Integration', desc:'Stripe/Square, QR.', short:'Faster gates', price:{oneTime:220, monthly:220}, badge:'Revenue' },
           ]},
+
           { key:'ugc', name:'UGC', blurb:'Creators + clips that actually get seen.', base:{oneTime:450, monthly:600}, includes:['Kickoff & setup','30k verified views','Simple report'], addOns:[
             { id:'ugc-repurpose', label:'Ads-Ready Pack', desc:'Cut-downs + hooks.', short:'Convert more', price:{oneTime:200, monthly:200}, badge:'Ads-ready', popular:true },
             { id:'ugc-leads', label:'Lead Capture Page', desc:'Turn views to contacts.', short:'Capture demand', price:{oneTime:250, monthly:250}, badge:'Leads' },
@@ -494,6 +511,7 @@
             { id:'ugc-hooks', label:'A/B Hooks Pack', desc:'5 alt hooks to test.', short:'Test faster', price:{oneTime:140, monthly:140}, badge:'Test' },
           ]},
         ],
+
         addonIndex: {},
         openDescs: {},
         cartServices: [],
@@ -513,7 +531,8 @@
             svc.addOns.forEach(a => acc[a.id] = { ...a, service: svc.key });
             return acc;
           }, {});
-          // Restore cart from localStorage
+
+          // Restore cart
           try{
             const saved = JSON.parse(localStorage.getItem('coast_cart')||'{}');
             if(saved.services) this.cartServices = saved.services;
@@ -521,12 +540,13 @@
             if(saved.plan) this.plan = saved.plan;
             if(saved.contact) this.contact = {...this.contact, ...saved.contact};
           }catch{}
+
           // Sticky CTA
           const onScroll = () => { this.stickyCta = window.scrollY > 640 };
           onScroll(); window.addEventListener('scroll', onScroll);
         },
 
-        // --- Computeds ---
+        // --- Derived ---
         get total(){
           const baseSum = this.cartServices.reduce((s, key) => s + (this.services.find(x => x.key === key)?.base?.[this.plan] || 0), 0);
           const addonSum = this.cartAddons.reduce((s, id) => s + (this.addonIndex[id]?.price?.[this.plan] || 0), 0);
@@ -553,26 +573,45 @@
 
         // --- UI Actions ---
         setPlan(p){ this.plan = p; this.save(); },
-        toggleService(key){ const i = this.cartServices.indexOf(key); if(i>-1) this.cartServices.splice(i,1); else this.cartServices.push(key); this.save(); this.flash('Updated base services'); },
+        toggleService(key){
+          const i = this.cartServices.indexOf(key);
+          if(i>-1) this.cartServices.splice(i,1); else this.cartServices.push(key);
+          this.save(); this.flash('Updated base services');
+        },
         toggleAddon(id){
-          // If adding an add-on for a service that has no base selected, nudge user
           const svcKey = this.addonIndex[id]?.service;
-          if(!this.cartServices.includes(svcKey)){
-            this.flash(`Add the “${this.serviceName(svcKey)}” base to include this add-on.`);
-          }
           const i = this.cartAddons.indexOf(id);
-          if(i>-1) { this.cartAddons.splice(i,1); this.flash('Removed add-on'); }
-          else { this.cartAddons.push(id); this.flash('Added add-on'); }
+          if(i>-1){
+            this.cartAddons.splice(i,1);
+            this.flash('Removed add-on');
+          } else {
+            // Auto-add the base for seamless checkout
+            if(!this.cartServices.includes(svcKey)){
+              this.cartServices.push(svcKey);
+              this.flash(`Added “${this.serviceName(svcKey)}” base for this add-on.`);
+            }
+            this.cartAddons.push(id);
+            this.flash('Added add-on');
+          }
           this.save();
         },
-        toggleDesc(id){ this.$set(this.openDescs, id, !this.openDescs[id]); },
+        toggleDesc(id){
+          this.openDescs = { ...this.openDescs, [id]: !this.openDescs[id] }; // Alpine-safe (no Vue $set)
+        },
         quickPick(kind){
           const maps = {
             essentials: { web:['web-seo','web-auto'], video:['vid-audio','vid-sizes'], events:['ev-digital','ev-media'], ugc:['ugc-captions','ugc-enhance'] },
             premium:    { web:['web-mvp','web-api','web-copy'], video:['vid-adv','vid-drone-p'], events:['ev-ven','ev-hybrid'], ugc:['ugc-repurpose','ugc-leads','ugc-views-20k'] },
           };
           const add = maps[kind]?.[this.activeService] || [];
-          for(const id of add){ if(!this.cartAddons.includes(id)) this.cartAddons.push(id); }
+          for(const id of add){
+            if(!this.cartAddons.includes(id)){
+              // also ensure base
+              const svcKey = this.addonIndex[id]?.service;
+              if(!this.cartServices.includes(svcKey)) this.cartServices.push(svcKey);
+              this.cartAddons.push(id);
+            }
+          }
           this.save(); this.flash('Quick picks added');
         },
         openAddons(key){ this.activeService = key || 'web'; this.addonsOpen = true; },
@@ -580,36 +619,28 @@
         clearAll(){ this.cartServices = []; this.cartAddons = []; this.save(); this.flash('Cleared cart'); },
         flash(text){ this.toast.text = text; this.toast.show = true; setTimeout(()=> this.toast.show=false, 1400); },
 
-        // --- Checkout (server returns { url }) ---
+        // --- Checkout ---
         async beginCheckout(){
           try{
             if(this.isSubmitting) return;
-            // Require at least one base
-            if(!this.cartServices.length){ this.flash('Please add at least one Base Service to continue.'); return; }
-            // Email required
-            if(!this.emailValid(this.contact.email)){ this.flash('Enter a valid email for receipt & updates.'); return; }
 
-            // Ensure no orphan add-ons (add-ons for services without base)
-            const orphan = this.cartAddons.find(id => !this.cartServices.includes(this.addonIndex[id]?.service));
-            if(orphan){
-              const svcName = this.serviceName(this.addonIndex[orphan].service);
-              this.flash(`Add the “${svcName}” base to include its add-ons, or remove those add-ons.`);
+            if(!this.cartServices.length){
+              this.flash('Please add at least one Base Service to continue.');
+              return;
+            }
+            if(!this.emailValid(this.contact.email)){
+              this.flash('Enter a valid email for receipt & updates.');
               return;
             }
 
-            // Build cart for API: one entry per selected base service
+            // Build cart payload grouped by base service
             const cart = this.cartServices.map(svcKey => {
               const svc = this.services.find(s => s.key === svcKey);
               const base = svc?.base?.[this.plan] || 0;
               const addons = this.cartAddons
                 .filter(id => this.addonIndex[id]?.service === svcKey)
                 .map(id => ({ id, name: this.addonIndex[id].label, price: this.addonIndex[id].price[this.plan] }));
-              return {
-                service: svcKey,
-                base,
-                addons,
-                notes: '' // you can pipe this.contact.notes per-service if you want
-              };
+              return { service: svcKey, base, addons, notes: '' };
             });
 
             this.isSubmitting = true;
@@ -617,11 +648,7 @@
             const res = await fetch('/api/checkout', {
               method:'POST',
               headers:{ 'Content-Type':'application/json' },
-              body: JSON.stringify({
-                plan: this.plan,
-                cart,
-                contact: { ...this.contact }
-              })
+              body: JSON.stringify({ plan: this.plan, cart, contact: { ...this.contact } })
             });
 
             if(!res.ok){
@@ -630,7 +657,7 @@
             }
             const { url } = await res.json();
             if(!url) throw new Error('No checkout URL returned');
-            window.location = url; // Stripe-hosted checkout
+            window.location = url;
           }catch(e){
             console.error(e);
             this.flash(e.message || 'Checkout failed. Email 1coastmedia@gmail.com for help.');
