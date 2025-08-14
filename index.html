@@ -44,6 +44,21 @@
     @keyframes spin{to{transform:rotate(360deg)}}
     h1,h2,h3{letter-spacing:-0.02em}
     section{scroll-margin-top:80px}
+/* --- Modal scroll helpers --- */
+.no-scroll { overflow: hidden; }                 /* lock page behind a modal */
+.scroll-touch { -webkit-overflow-scrolling: touch; }
+.touch-pan-y { touch-action: pan-y; }
+.modal-shell { max-height: 92svh; }              /* stable viewport on mobile */
+@supports not (height: 1svh) {                   /* fallback for older browsers */
+  .modal-shell { max-height: 92vh; }
+}
+
+/* Slight visual polish */
+.card{border-radius:1.25rem;background:#fff;border:1px solid rgba(15,23,42,.08);box-shadow:0 12px 34px rgba(2,6,23,.06);transition:box-shadow .2s ease, transform .2s ease}
+.card:hover{box-shadow:0 18px 52px rgba(2,6,23,.10);transform:translateY(-1px)}
+.btn-primary{background:#4f46e5;color:#fff}
+.btn-primary:hover{background:#4338ca}
+.btn-outline{background:#fff;border:1px solid rgba(15,23,42,.10)}
   </style>
 </head>
 <body class="mesh text-slate-800" x-data="landingApp()" x-init="init()">
@@ -175,84 +190,97 @@
   </section>
 
   <!-- Explore Add-Ons -->
-  <div x-show="addonsOpen" x-transition.opacity class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
-    <div @click="addonsOpen=false" class="absolute inset-0 bg-slate-900/50"></div>
-    <div class="relative w-full sm:max-w-6xl rounded-2xl bg-white text-slate-900 shadow-2xl ring-1 ring-slate-200 max-h-[92vh] overflow-hidden">
-      <div class="p-5 border-b border-slate-200 flex items-center justify-between">
-        <h3 class="text-lg font-bold">Explore Add-Ons</h3>
-        <button @click="addonsOpen=false" class="h-9 w-9 grid place-items-center rounded-md hover:bg-slate-50 f-ring" aria-label="Close">
-          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 6l12 12M6 18L18 6"/></svg>
-        </button>
-      </div>
-      <div class="p-5 grid lg:grid-cols-4 gap-4 overflow-auto max-h-[calc(92vh-72px)]">
-        <!-- Filters -->
-        <aside class="lg:col-span-1 space-y-3">
-          <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-3">
-            <label class="text-xs text-slate-500">Service</label>
-            <select x-model="activeService" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-2 py-2 text-sm f-ring">
-              <template x-for="s in services" :key="'sel-'+s.key"><option :value="s.key" x-text="s.name"></option></template>
-            </select>
+<div x-show="addonsOpen" x-transition.opacity class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+  <!-- Backdrop -->
+  <button @click="addonsOpen=false" class="absolute inset-0 bg-slate-900/50" aria-label="Close overlay"></button>
+
+  <!-- Modal -->
+  <section
+    class="relative w-full sm:max-w-6xl rounded-2xl bg-white text-slate-900 shadow-2xl ring-1 ring-slate-200 flex flex-col modal-shell overflow-hidden"
+    role="dialog" aria-modal="true" aria-labelledby="addonsTitle"
+  >
+    <!-- Header (non-scrolling) -->
+    <div class="p-5 border-b border-slate-200 flex items-center justify-between shrink-0">
+      <h3 id="addonsTitle" class="text-lg font-bold">Explore Add-Ons</h3>
+      <button @click="addonsOpen=false" class="h-9 w-9 grid place-items-center rounded-md hover:bg-slate-50 f-ring" aria-label="Close">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 6l12 12M6 18L18 6"/></svg>
+      </button>
+    </div>
+
+    <!-- Scrollable content area -->
+    <div class="p-5 grid lg:grid-cols-4 gap-4 flex-1 overflow-y-auto scroll-touch touch-pan-y">
+      <!-- Filters -->
+      <aside class="lg:col-span-1 space-y-3">
+        <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-3">
+          <label class="text-xs text-slate-500">Service</label>
+          <select x-model="activeService" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-2 py-2 text-sm f-ring">
+            <template x-for="s in services" :key="'sel-'+s.key"><option :value="s.key" x-text="s.name"></option></template>
+          </select>
+        </div>
+        <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-3">
+          <label class="text-xs text-slate-500">Search add-ons</label>
+          <input x-model.trim="addonQuery" placeholder="e.g., SEO, drone, captions" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-2 py-2 text-sm f-ring" />
+        </div>
+        <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-3">
+          <label class="text-xs text-slate-500">Sort</label>
+          <select x-model="sortBy" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-2 py-2 text-sm f-ring">
+            <option value="popular">Popular</option>
+            <option value="price-asc">Price ↑</option>
+            <option value="price-desc">Price ↓</option>
+            <option value="alpha">A–Z</option>
+          </select>
+        </div>
+        <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-3">
+          <div class="text-xs text-slate-500">Quick picks</div>
+          <div class="mt-2 grid grid-cols-2 gap-2">
+            <button @click="quickPick('essentials')" class="rounded-lg btn-outline px-2 py-1 text-xs font-semibold">Essentials</button>
+            <button @click="quickPick('premium')" class="rounded-lg btn-outline px-2 py-1 text-xs font-semibold">Premium</button>
           </div>
-          <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-3">
-            <label class="text-xs text-slate-500">Search add-ons</label>
-            <input x-model.trim="addonQuery" placeholder="e.g., SEO, drone, captions" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-2 py-2 text-sm f-ring" />
-          </div>
-          <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-3">
-            <label class="text-xs text-slate-500">Sort</label>
-            <select x-model="sortBy" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-2 py-2 text-sm f-ring">
-              <option value="popular">Popular</option>
-              <option value="price-asc">Price ↑</option>
-              <option value="price-desc">Price ↓</option>
-              <option value="alpha">A–Z</option>
-            </select>
-          </div>
-          <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-3">
-            <div class="text-xs text-slate-500">Quick picks</div>
-            <div class="mt-2 grid grid-cols-2 gap-2">
-              <button @click="quickPick('essentials')" class="rounded-lg bg-white ring-1 ring-slate-200 px-2 py-1 text-xs font-semibold">Essentials</button>
-              <button @click="quickPick('premium')" class="rounded-lg bg-white ring-1 ring-slate-200 px-2 py-1 text-xs font-semibold">Premium</button>
-            </div>
-          </div>
-        </aside>
-        
-        <!-- Add-on list -->
-        <div class="lg:col-span-3">
-          <div class="flex items-center justify-between gap-2 flex-wrap">
-            <div class="text-sm text-slate-600">Selected add-ons: <strong x-text="cartAddons.length"></strong></div>
-            <div class="text-sm text-slate-600">Est. total: <strong x-text="fmtUSD(total)"></strong><span class="text-slate-500" x-show="plan==='monthly'">/mo</span></div>
-          </div>
-          <div class="mt-3 divide-y divide-slate-200 ring-1 ring-slate-200 rounded-xl overflow-hidden max-h-[60vh] overflow-auto pr-1 bg-white">
-            <template x-for="ad in visibleAddons" :key="ad.id">
-              <div>
-                <div class="flex items-center justify-between p-3">
-                  <div class="min-w-0">
-                    <div class="font-medium truncate" x-text="ad.label"></div>
-                    <div class="text-[11px] text-slate-500 mt-0.5 inline-flex items-center gap-2">
-                      <span class="rounded-full bg-slate-100 ring-1 ring-slate-200 px-2 py-0.5 uppercase tracking-wide" x-text="ad.badge"></span>
-                      <span x-show="ad.popular" class="rounded-full bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200 px-2 py-0.5">Popular</span>
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-3">
-                    <div class="text-sm font-semibold whitespace-nowrap" x-text="fmtUSD(ad.price[plan])"></div>
-                    <button @click="toggleAddon(ad.id)" class="tap rounded-md px-2 py-1 text-xs font-semibold f-ring" :class="cartAddons.includes(ad.id)?'bg-emerald-600 text-white':'ring-1 ring-slate-200'" x-text="cartAddons.includes(ad.id)?'Added':'Add'"></button>
+        </div>
+      </aside>
+
+      <!-- Add-on list -->
+      <div class="lg:col-span-3">
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+          <div class="text-sm text-slate-600">Selected add-ons: <strong x-text="cartAddons.length"></strong></div>
+          <div class="text-sm text-slate-600">Est. total: <strong x-text="fmtUSD(total)"></strong><span class="text-slate-500" x-show="plan==='monthly'">/mo</span></div>
+        </div>
+
+        <!-- The list itself scrolls if needed, independently -->
+        <div class="mt-3 divide-y divide-slate-200 ring-1 ring-slate-200 rounded-xl bg-white overflow-hidden max-h-[60vh] overflow-y-auto pr-1 scroll-touch touch-pan-y">
+          <template x-for="ad in visibleAddons" :key="ad.id">
+            <div>
+              <div class="flex items-center justify-between p-3">
+                <div class="min-w-0">
+                  <div class="font-medium truncate" x-text="ad.label"></div>
+                  <div class="text-[11px] text-slate-500 mt-0.5 inline-flex items-center gap-2">
+                    <span class="rounded-full bg-slate-100 ring-1 ring-slate-200 px-2 py-0.5 uppercase tracking-wide" x-text="ad.badge"></span>
+                    <span x-show="ad.popular" class="rounded-full bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200 px-2 py-0.5">Popular</span>
                   </div>
                 </div>
-                <button @click="toggleDesc(ad.id)" class="w-full text-left px-3 pb-3 text-xs text-slate-500 flex items-center gap-1 f-ring">
-                  <span class="underline">Details</span>
-                  <svg class="h-3 w-3 transition" :class="{ 'rotate-180': openDescs[ad.id] }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-                </button>
-                <div class="px-3 pb-3 text-sm text-slate-600" x-show="openDescs[ad.id]" x-transition x-text="ad.desc"></div>
+                <div class="flex items-center gap-3">
+                  <div class="text-sm font-semibold whitespace-nowrap" x-text="fmtUSD(ad.price[plan])"></div>
+                  <button @click="toggleAddon(ad.id)" class="tap rounded-md px-2 py-1 text-xs font-semibold f-ring" :class="cartAddons.includes(ad.id)?'bg-emerald-600 text-white':'ring-1 ring-slate-200'" x-text="cartAddons.includes(ad.id)?'Added':'Add'"></button>
+                </div>
               </div>
-            </template>
-          </div>
-          <div class="mt-4 flex items-center justify-end gap-2">
-            <button @click="addonsOpen=false" class="rounded-lg ring-1 ring-slate-200 px-4 py-2 bg-white f-ring">Close</button>
-            <button @click="addonsOpen=false; openBuilder()" class="rounded-lg bg-slate-900 text-white px-4 py-2 font-semibold f-ring">Review & Checkout</button>
-          </div>
+              <button @click="toggleDesc(ad.id)" class="w-full text-left px-3 pb-3 text-xs text-slate-500 flex items-center gap-1 f-ring">
+                <span class="underline">Details</span>
+                <svg class="h-3 w-3 transition" :class="{ 'rotate-180': openDescs[ad.id] }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+              <div class="px-3 pb-3 text-sm text-slate-600" x-show="openDescs[ad.id]" x-transition x-text="ad.desc"></div>
+            </div>
+          </template>
+        </div>
+
+        <div class="mt-4 flex items-center justify-end gap-2">
+          <button @click="addonsOpen=false" class="rounded-lg btn-outline px-4 py-2 f-ring">Close</button>
+          <button @click="addonsOpen=false; openBuilder()" class="rounded-lg btn-primary px-4 py-2 font-semibold f-ring">Review & Checkout</button>
         </div>
       </div>
     </div>
-  </div>
+  </section>
+</div>
+
 
   <!-- Builder (Review & Checkout) -->
   <div x-show="builderOpen" x-transition.opacity class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
@@ -508,6 +536,15 @@
           // sticky CTA
           const onScroll = () => { this.stickyCta = window.scrollY > 640 };
           onScroll(); window.addEventListener('scroll', onScroll);
+          // Lock document scroll when any overlay is open
+          const lock = () => {
+          const shouldLock = this.addonsOpen || this.builderOpen;
+          document.documentElement.classList.toggle('no-scroll', shouldLock);
+          };
+          this.$watch('addonsOpen', lock);
+          this.$watch('builderOpen', lock);
+          lock();
+
         },
 
         get total(){
