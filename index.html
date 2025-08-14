@@ -3,46 +3,49 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>1CoastMedia — Digital • Web • Creative • Events</title>
-<meta name="description" content="1CoastMedia helps Gulf Coast creators and brands with Web & App, Video/Audio, Events, and UGC. Transparent pricing. Fast turnarounds. Results-driven." />
-<link rel="canonical" href="https://1coastmedia.vercel.app/" />
 
-<!-- Favicons / app icons -->
-<link rel="icon" type="image/jpeg" href="/assets/brand/1coastmedia_logo_B_badge_2048.jpg" />
-<link rel="apple-touch-icon" href="/assets/brand/1coastmedia_logo_B_badge_2048.jpg" />
-<meta name="theme-color" content="#0b1220" />
+  <title>1CoastMedia — Digital • Web • Creative • Events</title>
+  <meta name="description" content="1CoastMedia helps Gulf Coast creators and brands with Web & App, Video/Audio, Events, and UGC. Transparent pricing. Fast turnarounds. Results-driven." />
+  <link rel="canonical" href="https://1coastmedia.vercel.app/" />
 
-<!-- Open Graph -->
-<meta property="og:site_name" content="1CoastMedia" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://1coastmedia.vercel.app/" />
-<meta property="og:title" content="1CoastMedia — Gulf Coast Digital, Web, Creative & Events" />
-<meta property="og:description" content="Pick a base service, stack add-ons anywhere, or build from scratch. One-time for quick wins, monthly for momentum." />
-<meta property="og:image" content="https://1coastmedia.vercel.app/assets/brand/1coastmedia_wordmark_horizontal_3000.jpg" />
-<meta property="og:image:type" content="image/jpeg" />
-<meta property="og:image:alt" content="1CoastMedia wordmark" />
+  <!-- Brand fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-<!-- Twitter (many SMS apps use this too) -->
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="1CoastMedia — Gulf Coast Digital, Web, Creative & Events" />
-<meta name="twitter:description" content="Premium Web & App, Video/Audio, Events, and UGC services. Transparent pricing. Fast turnarounds." />
-<meta name="twitter:image" content="https://1coastmedia.vercel.app/assets/brand/1coastmedia_wordmark_horizontal_3000.jpg" />
+  <!-- Favicons / app icons (badge) -->
+  <link rel="icon" type="image/jpeg" href="/assets/1coastmedia_logo_B_badge_2048.jpg" />
+  <link rel="apple-touch-icon" href="/assets/1coastmedia_logo_B_badge_2048.jpg" />
+  <meta name="theme-color" content="#0b1220" />
 
+  <!-- Open Graph (link previews) -->
+  <meta property="og:site_name" content="1CoastMedia" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://1coastmedia.vercel.app/" />
+  <meta property="og:title" content="1CoastMedia — Gulf Coast Digital, Web, Creative & Events" />
+  <meta property="og:description" content="Pick a base service, stack add-ons anywhere, or build from scratch. One-time for quick wins, monthly for momentum." />
+  <meta property="og:image" content="https://1coastmedia.vercel.app/assets/1coastmedia_wordmark_horizontal_3000.jpg" />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:image:alt" content="1CoastMedia wordmark" />
 
-  <!-- Where to POST (we'll create/fix in Step 2) -->
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="1CoastMedia — Gulf Coast Digital, Web, Creative & Events" />
+  <meta name="twitter:description" content="Premium Web & App, Video/Audio, Events, and UGC services. Transparent pricing. Fast turnarounds." />
+  <meta name="twitter:image" content="https://1coastmedia.vercel.app/assets/1coastmedia_wordmark_horizontal_3000.jpg" />
+
+  <!-- Where to POST -->
   <meta name="checkout-endpoint" content="/api/checkout" />
 
-  <!-- Safe to expose publishable key (used only for Stripe.js fallback) -->
+  <!-- Stripe publishable key (client fallback) -->
   <meta name="stripe-publishable-key" content="pk_live_51O4Qh0KoF1Q8iKteAbGsSkEj65fg0tSGOG6dcJCcLyvz0PHC5y8jEAkMDfDFfCTdEeRyPcOtZ7O13MBNZkDhBMR900NqzTN4LN" />
 
-  <!-- TEMPORARY: Tailwind CDN (we'll replace with CLI build in Step 3) -->
+  <!-- TEMP: Tailwind CDN (swap to build later) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>tailwind.config = { theme:{ extend:{} } };</script>
 
   <!-- Alpine.js -->
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-  <!-- Stripe.js (for sessionId fallback; not strictly required) -->
+  <!-- Stripe.js (for sessionId fallback) -->
   <script src="https://js.stripe.com/v3/"></script>
 
   <style>
@@ -57,8 +60,8 @@
     .glass{backdrop-filter:saturate(170%) blur(14px);background:rgba(255,255,255,.84)}
     .halo{position:relative;border-radius:1.25rem}
     .halo:before{content:"";position:absolute;inset:-1px;border-radius:inherit;background:linear-gradient(120deg, rgba(2,6,23,.08), rgba(79,70,229,.32), rgba(6,182,212,.32), rgba(2,6,23,.08));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;padding:1px;pointer-events:none}
-    .card{border-radius:1.25rem;background:#fff;border:1px solid rgba(15,23,42,.08);box-shadow:0 10px 30px rgba(2,6,23,.04);transition:box-shadow .2s ease, transform .2s ease}
-    .card:hover{box-shadow:0 16px 44px rgba(2,6,23,.08);transform:translateY(-1px)}
+    .card{border-radius:1.25rem;background:#fff;border:1px solid rgba(15,23,42,.08);box-shadow:0 12px 34px rgba(2,6,23,.06);transition:box-shadow .2s ease, transform .2s ease}
+    .card:hover{box-shadow:0 18px 52px rgba(2,6,23,.10);transform:translateY(-1px)}
     .btn{transition:transform .2s ease, box-shadow .2s ease}
     .btn:hover{transform:translateY(-1px)}
     .tap:active{transform:scale(.98)}
@@ -67,39 +70,38 @@
     @keyframes spin{to{transform:rotate(360deg)}}
     h1,h2,h3{letter-spacing:-0.02em}
     section{scroll-margin-top:80px}
-/* --- Modal scroll helpers --- */
-.no-scroll { overflow: hidden; }                 /* lock page behind a modal */
-.scroll-touch { -webkit-overflow-scrolling: touch; }
-.touch-pan-y { touch-action: pan-y; }
-.modal-shell { max-height: 92svh; }              /* stable viewport on mobile */
-@supports not (height: 1svh) {                   /* fallback for older browsers */
-  .modal-shell { max-height: 92vh; }
-}
 
-/* Slight visual polish */
-.card{border-radius:1.25rem;background:#fff;border:1px solid rgba(15,23,42,.08);box-shadow:0 12px 34px rgba(2,6,23,.06);transition:box-shadow .2s ease, transform .2s ease}
-.card:hover{box-shadow:0 18px 52px rgba(2,6,23,.10);transform:translateY(-1px)}
-.btn-primary{background:#4f46e5;color:#fff}
-.btn-primary:hover{background:#4338ca}
-.btn-outline{background:#fff;border:1px solid rgba(15,23,42,.10)}
+    /* Modal scroll helpers */
+    .no-scroll { overflow: hidden; }
+    .scroll-touch { -webkit-overflow-scrolling: touch; }
+    .touch-pan-y { touch-action: pan-y; }
+    .modal-shell { max-height: 92svh; }
+    @supports not (height: 1svh) { .modal-shell { max-height: 92vh; } }
+
+    /* Buttons */
+    .btn-primary{background:#4f46e5;color:#fff}
+    .btn-primary:hover{background:#4338ca}
+    .btn-outline{background:#fff;border:1px solid rgba(15,23,42,.10)}
   </style>
 </head>
+
 <body class="mesh text-slate-800" x-data="landingApp()" x-init="init()">
   <!-- NAV -->
   <header class="sticky top-0 z-50 backdrop-blur bg-white/80 border-b border-slate-200/70">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <a href="#top" class="inline-flex items-center gap-2">
-  <span class="inline-grid place-items-center h-9 w-9 rounded-xl bg-white ring-1 ring-slate-200 overflow-hidden">
-    <img
-      src="/assets/brand/1coastmedia_logo_A_primary_mark_2048.jpg"
-      alt="1CoastMedia logo"
-      class="h-9 w-9 object-cover"
-      loading="eager"
-      fetchpriority="high"
-    />
-  </span>
-  <span class="font-extrabold tracking-tight">1CoastMedia</span>
-</a>
+        <span class="inline-grid place-items-center h-9 w-9 rounded-xl bg-white ring-1 ring-slate-200 overflow-hidden">
+          <img
+            src="/assets/1coastmedia_logo_A_primary_mark_2048.jpg"
+            alt="1CoastMedia logo"
+            class="h-9 w-9 object-cover"
+            width="36" height="36"
+            loading="eager"
+            fetchpriority="high"
+          />
+        </span>
+        <span class="font-extrabold tracking-tight">1CoastMedia</span>
+      </a>
       <nav class="hidden md:flex items-center gap-6 text-sm">
         <a href="#services" class="hover:text-slate-900 text-slate-600 f-ring">Base Services</a>
         <button @click="openAddons('web')" class="hover:text-slate-900 text-slate-600 f-ring">Explore Add-Ons</button>
@@ -136,12 +138,14 @@
         </div>
       </div>
     </div>
-    <img
-  src="/assets/brand/1coastmedia_wordmark_horizontal_3000.jpg"
-  alt="1CoastMedia wordmark"
-  class="mt-6 max-w-full sm:max-w-xl rounded-xl ring-1 ring-slate-200 shadow-sm"
-/>
 
+    <!-- Wordmark in hero -->
+    <img
+      src="/assets/1coastmedia_wordmark_horizontal_3000.jpg"
+      alt="1CoastMedia wordmark"
+      class="mt-6 max-w-full sm:max-w-xl rounded-xl ring-1 ring-slate-200 shadow-sm"
+      width="3000" height="512"
+    />
 
     <!-- trust strip -->
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-6">
@@ -222,97 +226,96 @@
   </section>
 
   <!-- Explore Add-Ons -->
-<div x-show="addonsOpen" x-transition.opacity class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
-  <!-- Backdrop -->
-  <button @click="addonsOpen=false" class="absolute inset-0 bg-slate-900/50" aria-label="Close overlay"></button>
+  <div x-show="addonsOpen" x-transition.opacity class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+    <!-- Backdrop -->
+    <button @click="addonsOpen=false" class="absolute inset-0 bg-slate-900/50" aria-label="Close overlay"></button>
 
-  <!-- Modal -->
-  <section
-    class="relative w-full sm:max-w-6xl rounded-2xl bg-white text-slate-900 shadow-2xl ring-1 ring-slate-200 flex flex-col modal-shell overflow-hidden"
-    role="dialog" aria-modal="true" aria-labelledby="addonsTitle"
-  >
-    <!-- Header (non-scrolling) -->
-    <div class="p-5 border-b border-slate-200 flex items-center justify-between shrink-0">
-      <h3 id="addonsTitle" class="text-lg font-bold">Explore Add-Ons</h3>
-      <button @click="addonsOpen=false" class="h-9 w-9 grid place-items-center rounded-md hover:bg-slate-50 f-ring" aria-label="Close">
-        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 6l12 12M6 18L18 6"/></svg>
-      </button>
-    </div>
+    <!-- Modal -->
+    <section
+      class="relative w-full sm:max-w-6xl rounded-2xl bg-white text-slate-900 shadow-2xl ring-1 ring-slate-200 flex flex-col modal-shell overflow-hidden"
+      role="dialog" aria-modal="true" aria-labelledby="addonsTitle"
+    >
+      <!-- Header (non-scrolling) -->
+      <div class="p-5 border-b border-slate-200 flex items-center justify-between shrink-0">
+        <h3 id="addonsTitle" class="text-lg font-bold">Explore Add-Ons</h3>
+        <button @click="addonsOpen=false" class="h-9 w-9 grid place-items-center rounded-md hover:bg-slate-50 f-ring" aria-label="Close">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 6l12 12M6 18L18 6"/></svg>
+        </button>
+      </div>
 
-    <!-- Scrollable content area -->
-    <div class="p-5 grid lg:grid-cols-4 gap-4 flex-1 overflow-y-auto scroll-touch touch-pan-y">
-      <!-- Filters -->
-      <aside class="lg:col-span-1 space-y-3">
-        <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-3">
-          <label class="text-xs text-slate-500">Service</label>
-          <select x-model="activeService" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-2 py-2 text-sm f-ring">
-            <template x-for="s in services" :key="'sel-'+s.key"><option :value="s.key" x-text="s.name"></option></template>
-          </select>
-        </div>
-        <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-3">
-          <label class="text-xs text-slate-500">Search add-ons</label>
-          <input x-model.trim="addonQuery" placeholder="e.g., SEO, drone, captions" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-2 py-2 text-sm f-ring" />
-        </div>
-        <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-3">
-          <label class="text-xs text-slate-500">Sort</label>
-          <select x-model="sortBy" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-2 py-2 text-sm f-ring">
-            <option value="popular">Popular</option>
-            <option value="price-asc">Price ↑</option>
-            <option value="price-desc">Price ↓</option>
-            <option value="alpha">A–Z</option>
-          </select>
-        </div>
-        <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-3">
-          <div class="text-xs text-slate-500">Quick picks</div>
-          <div class="mt-2 grid grid-cols-2 gap-2">
-            <button @click="quickPick('essentials')" class="rounded-lg btn-outline px-2 py-1 text-xs font-semibold">Essentials</button>
-            <button @click="quickPick('premium')" class="rounded-lg btn-outline px-2 py-1 text-xs font-semibold">Premium</button>
+      <!-- Scrollable content area -->
+      <div class="p-5 grid lg:grid-cols-4 gap-4 flex-1 overflow-y-auto scroll-touch touch-pan-y">
+        <!-- Filters -->
+        <aside class="lg:col-span-1 space-y-3">
+          <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-3">
+            <label class="text-xs text-slate-500">Service</label>
+            <select x-model="activeService" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-2 py-2 text-sm f-ring">
+              <template x-for="s in services" :key="'sel-'+s.key"><option :value="s.key" x-text="s.name"></option></template>
+            </select>
           </div>
-        </div>
-      </aside>
+          <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-3">
+            <label class="text-xs text-slate-500">Search add-ons</label>
+            <input x-model.trim="addonQuery" placeholder="e.g., SEO, drone, captions" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-2 py-2 text-sm f-ring" />
+          </div>
+          <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-3">
+            <label class="text-xs text-slate-500">Sort</label>
+            <select x-model="sortBy" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-2 py-2 text-sm f-ring">
+              <option value="popular">Popular</option>
+              <option value="price-asc">Price ↑</option>
+              <option value="price-desc">Price ↓</option>
+              <option value="alpha">A–Z</option>
+            </select>
+          </div>
+          <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-3">
+            <div class="text-xs text-slate-500">Quick picks</div>
+            <div class="mt-2 grid grid-cols-2 gap-2">
+              <button @click="quickPick('essentials')" class="rounded-lg btn-outline px-2 py-1 text-xs font-semibold">Essentials</button>
+              <button @click="quickPick('premium')" class="rounded-lg btn-outline px-2 py-1 text-xs font-semibold">Premium</button>
+            </div>
+          </div>
+        </aside>
 
-      <!-- Add-on list -->
-      <div class="lg:col-span-3">
-        <div class="flex items-center justify-between gap-2 flex-wrap">
-          <div class="text-sm text-slate-600">Selected add-ons: <strong x-text="cartAddons.length"></strong></div>
-          <div class="text-sm text-slate-600">Est. total: <strong x-text="fmtUSD(total)"></strong><span class="text-slate-500" x-show="plan==='monthly'">/mo</span></div>
-        </div>
+        <!-- Add-on list -->
+        <div class="lg:col-span-3">
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <div class="text-sm text-slate-600">Selected add-ons: <strong x-text="cartAddons.length"></strong></div>
+            <div class="text-sm text-slate-600">Est. total: <strong x-text="fmtUSD(total)"></strong><span class="text-slate-500" x-show="plan==='monthly'">/mo</span></div>
+          </div>
 
-        <!-- The list itself scrolls if needed, independently -->
-        <div class="mt-3 divide-y divide-slate-200 ring-1 ring-slate-200 rounded-xl bg-white overflow-hidden max-h-[60vh] overflow-y-auto pr-1 scroll-touch touch-pan-y">
-          <template x-for="ad in visibleAddons" :key="ad.id">
-            <div>
-              <div class="flex items-center justify-between p-3">
-                <div class="min-w-0">
-                  <div class="font-medium truncate" x-text="ad.label"></div>
-                  <div class="text-[11px] text-slate-500 mt-0.5 inline-flex items-center gap-2">
-                    <span class="rounded-full bg-slate-100 ring-1 ring-slate-200 px-2 py-0.5 uppercase tracking-wide" x-text="ad.badge"></span>
-                    <span x-show="ad.popular" class="rounded-full bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200 px-2 py-0.5">Popular</span>
+          <!-- The list itself scrolls if needed, independently -->
+          <div class="mt-3 divide-y divide-slate-200 ring-1 ring-slate-200 rounded-xl bg-white overflow-hidden max-h-[60vh] overflow-y-auto pr-1 scroll-touch touch-pan-y">
+            <template x-for="ad in visibleAddons" :key="ad.id">
+              <div>
+                <div class="flex items-center justify-between p-3">
+                  <div class="min-w-0">
+                    <div class="font-medium truncate" x-text="ad.label"></div>
+                    <div class="text-[11px] text-slate-500 mt-0.5 inline-flex items-center gap-2">
+                      <span class="rounded-full bg-slate-100 ring-1 ring-slate-200 px-2 py-0.5 uppercase tracking-wide" x-text="ad.badge"></span>
+                      <span x-show="ad.popular" class="rounded-full bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200 px-2 py-0.5">Popular</span>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <div class="text-sm font-semibold whitespace-nowrap" x-text="fmtUSD(ad.price[plan])"></div>
+                    <button @click="toggleAddon(ad.id)" class="tap rounded-md px-2 py-1 text-xs font-semibold f-ring" :class="cartAddons.includes(ad.id)?'bg-emerald-600 text-white':'ring-1 ring-slate-200'" x-text="cartAddons.includes(ad.id)?'Added':'Add'"></button>
                   </div>
                 </div>
-                <div class="flex items-center gap-3">
-                  <div class="text-sm font-semibold whitespace-nowrap" x-text="fmtUSD(ad.price[plan])"></div>
-                  <button @click="toggleAddon(ad.id)" class="tap rounded-md px-2 py-1 text-xs font-semibold f-ring" :class="cartAddons.includes(ad.id)?'bg-emerald-600 text-white':'ring-1 ring-slate-200'" x-text="cartAddons.includes(ad.id)?'Added':'Add'"></button>
-                </div>
+                <button @click="toggleDesc(ad.id)" class="w-full text-left px-3 pb-3 text-xs text-slate-500 flex items-center gap-1 f-ring">
+                  <span class="underline">Details</span>
+                  <svg class="h-3 w-3 transition" :class="{ 'rotate-180': openDescs[ad.id] }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="px-3 pb-3 text-sm text-slate-600" x-show="openDescs[ad.id]" x-transition x-text="ad.desc"></div>
               </div>
-              <button @click="toggleDesc(ad.id)" class="w-full text-left px-3 pb-3 text-xs text-slate-500 flex items-center gap-1 f-ring">
-                <span class="underline">Details</span>
-                <svg class="h-3 w-3 transition" :class="{ 'rotate-180': openDescs[ad.id] }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-              </button>
-              <div class="px-3 pb-3 text-sm text-slate-600" x-show="openDescs[ad.id]" x-transition x-text="ad.desc"></div>
-            </div>
-          </template>
-        </div>
+            </template>
+          </div>
 
-        <div class="mt-4 flex items-center justify-end gap-2">
-          <button @click="addonsOpen=false" class="rounded-lg btn-outline px-4 py-2 f-ring">Close</button>
-          <button @click="addonsOpen=false; openBuilder()" class="rounded-lg btn-primary px-4 py-2 font-semibold f-ring">Review & Checkout</button>
+          <div class="mt-4 flex items-center justify-end gap-2">
+            <button @click="addonsOpen=false" class="rounded-lg btn-outline px-4 py-2 f-ring">Close</button>
+            <button @click="addonsOpen=false; openBuilder()" class="rounded-lg btn-primary px-4 py-2 font-semibold f-ring">Review & Checkout</button>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
-</div>
-
+    </section>
+  </div>
 
   <!-- Builder (Review & Checkout) -->
   <div x-show="builderOpen" x-transition.opacity class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
@@ -458,8 +461,9 @@
     </div>
   </section>
 
-  <footer class="py-10 border-t border-slate-200 text-center text-xs text-slate-500">© <span x-text="year"></span> 1 Coast Media • Mississippi Gulf Coast • All rights reserved.</footer>
+  <footer class="py-10 border-t border-slate-200 text-center text-xs text-slate-500">© <span x-text="year"></span> 1CoastMedia • Mississippi Gulf Coast • All rights reserved.</footer>
 
+  <!-- App -->
   <script>
     function landingApp(){
       return {
@@ -552,12 +556,12 @@
         contact:{ name:'', email:'', company:'', phone:'', notes:'' },
 
         init(){
-          // build add-on index
+          // Build add-on index
           this.addonIndex = this.services.reduce((acc, svc) => {
             svc.addOns.forEach(a => acc[a.id] = { ...a, service: svc.key });
             return acc;
           }, {});
-          // restore cart
+          // Restore cart
           try{
             const saved = JSON.parse(localStorage.getItem('coast_cart')||'{}');
             if(saved.services) this.cartServices = saved.services;
@@ -565,20 +569,20 @@
             if(saved.plan) this.plan = saved.plan;
             if(saved.contact) this.contact = {...this.contact, ...saved.contact};
           }catch{}
-          // sticky CTA
+          // Sticky CTA
           const onScroll = () => { this.stickyCta = window.scrollY > 640 };
           onScroll(); window.addEventListener('scroll', onScroll);
-          // Lock document scroll when any overlay is open
+          // Lock document scroll when overlays open
           const lock = () => {
-          const shouldLock = this.addonsOpen || this.builderOpen;
-          document.documentElement.classList.toggle('no-scroll', shouldLock);
+            const shouldLock = this.addonsOpen || this.builderOpen;
+            document.documentElement.classList.toggle('no-scroll', shouldLock);
           };
           this.$watch('addonsOpen', lock);
           this.$watch('builderOpen', lock);
           lock();
-
         },
 
+        // Computed
         get total(){
           const baseSum = this.cartServices.reduce((s, key) => s + (this.services.find(x => x.key === key)?.base?.[this.plan] || 0), 0);
           const addonSum = this.cartAddons.reduce((s, id) => s + (this.addonIndex[id]?.price?.[this.plan] || 0), 0);
@@ -595,6 +599,7 @@
           return items;
         },
 
+        // Helpers
         addonsFor(key){ return (this.services.find(s => s.key === key) || {}).addOns || []; },
         serviceName(key){ return (this.services.find(s => s.key === key) || {}).name || key; },
         serviceBase(key){ return (this.services.find(s => s.key === key) || {}).base?.[this.plan] || 0; },
@@ -602,6 +607,7 @@
         save(){ localStorage.setItem('coast_cart', JSON.stringify({ services:this.cartServices, addons:this.cartAddons, plan:this.plan, contact:this.contact })); },
         emailValid(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e||''); },
 
+        // UI Actions
         setPlan(p){ this.plan = p; this.save(); },
         toggleService(key){
           const i = this.cartServices.indexOf(key);
@@ -615,7 +621,6 @@
             this.cartAddons.splice(i,1);
             this.flash('Removed add-on');
           } else {
-            // auto-add base for seamless checkout
             if(!this.cartServices.includes(svcKey)){
               this.cartServices.push(svcKey);
               this.flash(`Added “${this.serviceName(svcKey)}” base for this add-on.`);
@@ -646,20 +651,23 @@
         clearAll(){ this.cartServices = []; this.cartAddons = []; this.save(); this.flash('Cleared cart'); },
         flash(text){ this.toast = { text, show:true }; setTimeout(()=> this.toast.show=false, 1400); },
 
+        // Checkout
+        isSubmitting:false,
+        contact:{ name:'', email:'', company:'', phone:'', notes:'' },
         async beginCheckout(){
           try{
             if(this.isSubmitting) return;
             if(!this.cartServices.length){ this.flash('Add at least one Base Service.'); return; }
             if(!this.emailValid(this.contact.email)){ this.flash('Enter a valid email.'); return; }
 
-            // build payload grouped by base service
+            // Build payload grouped by base service
             const cart = this.cartServices.map(svcKey => {
               const svc = this.services.find(s => s.key === svcKey);
               const base = svc?.base?.[this.plan] || 0;
               const addons = this.cartAddons
                 .filter(id => this.addonIndex[id]?.service === svcKey)
                 .map(id => ({ id, name: this.addonIndex[id].label, price: this.addonIndex[id].price[this.plan] }));
-              return { service: svcKey, base, addons, /* notes optional */ };
+              return { service: svcKey, base, addons };
             });
 
             const endpoint = document.querySelector('meta[name="checkout-endpoint"]')?.content || '/api/checkout';
@@ -672,12 +680,10 @@
             });
 
             const out = await res.json().catch(()=> ({}));
-            if(!res.ok){
-              throw new Error(out?.error || `Checkout failed (${res.status})`);
-            }
+            if(!res.ok){ throw new Error(out?.error || `Checkout failed (${res.status})`); }
 
             if(out?.url){
-              location.assign(out.url); // Stripe Checkout URL
+              location.assign(out.url);
             }else if(out?.id && window.Stripe){
               const pk = document.querySelector('meta[name="stripe-publishable-key"]')?.content;
               const stripe = Stripe(pk);
