@@ -1,6 +1,10 @@
 import { sql } from '@vercel/postgres';
 import { requireAdmin } from '../../lib/requireAdmin.js';
 
+if (!process.env.POSTGRES_URL && process.env.POSTGRES_URL_NO_SSL) {
+  process.env.POSTGRES_URL = process.env.POSTGRES_URL_NO_SSL + (process.env.POSTGRES_URL_NO_SSL.includes('?') ? '&' : '?') + 'sslmode=require';
+}
+
 export default async function handler(req, res) {
   const me = requireAdmin(req, res);
   if (!me) return;
@@ -15,8 +19,14 @@ export default async function handler(req, res) {
       return res.status(200).json(rows);
     }
 
-    if (req.method === 'POST') {
+    if (req.method === 'POST' || req.method === 'PUT') {
       const b = req.body || {};
+      if (!b.id || !b.service_id || !b.label) return res.status(400).json({ error: 'id, service_id, label required' });
+
+      // ensure service exists
+      const s = await sql`SELECT 1 FROM services WHERE id=${b.service_id} LIMIT 1`;
+      if (!s.rowCount) return res.status(400).json({ error: 'service_id not found' });
+
       await sql`
         INSERT INTO addons (id, service_id, label, description, short, badge, popular, price_one_time_cents, price_monthly_cents)
         VALUES (${b.id}, ${b.service_id}, ${b.label}, ${b.description || null}, ${b.short || null}, ${b.badge || null}, ${!!b.popular}, ${b.price_one_time_cents || 0}, ${b.price_monthly_cents || 0})
