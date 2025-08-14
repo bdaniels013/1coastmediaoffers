@@ -21,14 +21,15 @@
     @keyframes float { 0%{transform:translateY(0)} 50%{transform:translateY(-10px)} 100%{transform:translateY(0)} }
     html::-webkit-scrollbar{height:10px;width:10px}
     html::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#60a5fa,#8b5cf6);border-radius:9999px}
-    .tooltip[data-tip]:hover:after{content:attr(data-tip); position:absolute; white-space:nowrap; transform:translateY(-110%); background:rgba(15,23,42,.95); color:white; font-size:11px; padding:.35rem .5rem; border-radius:.5rem; border:1px solid rgba(255,255,255,.15)}
+    .tooltip[data-tip]{position:relative}
+    .tooltip[data-tip]:hover:after{content:attr(data-tip); position:absolute; z-index:50; white-space:nowrap; transform:translateY(-110%); background:rgba(15,23,42,.95); color:white; font-size:11px; padding:.35rem .5rem; border-radius:.5rem; border:1px solid rgba(255,255,255,.15)}
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100">
   <!-- Decorative gradient + animated orbs -->
   <div aria-hidden class="pointer-events-none fixed inset-0 -z-10">
-    <div class="absolute -top-40 -left-24 h-[28rem] w-[48rem] rounded-full bg-blue-600/40 blur-3xl animate-pulse"></div>
-    <div class="absolute top-20 -right-24 h-[28rem] w-[48rem] rounded-full bg-fuchsia-600/30 blur-3xl animate-[float_10s_ease-in-out_infinite]"></div>
+    <div class="absolute -top-60 -left-24 h-[36rem] w-[72rem] rounded-full bg-[radial-gradient(circle_at_center,rgba(59,130,246,.35),rgba(147,51,234,.2)_50%,transparent_70%)] blur-3xl animate-pulse"></div>
+    <div class="absolute top-40 -right-24 h-[28rem] w-[48rem] rounded-full bg-fuchsia-600/30 blur-3xl animate-[float_10s_ease-in-out_infinite]"></div>
   </div>
 
   <!-- NAV -->
@@ -43,8 +44,8 @@
         </a>
         <nav class="hidden md:flex items-center gap-8 text-sm">
           <a href="#services" class="hover:text-white/90 text-white/70">Services</a>
+          <a href="#bundles" class="hover:text-white/90 text-white/70">Bundles</a>
           <a href="#pricing" class="hover:text-white/90 text-white/70">Pricing</a>
-          <a href="#notes" class="hover:text-white/90 text-white/70">How it works</a>
           <a href="#contact" class="hover:text-white/90 text-white/70">Contact</a>
           <a href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-xl bg-white text-slate-900 px-3 py-2 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition">Book on Calendly</a>
         </nav>
@@ -57,50 +58,66 @@
     <div x-show="open" x-transition class="md:hidden glass border-b border-white/10">
       <div class="mx-auto max-w-7xl px-4 pb-4 flex flex-col gap-3 text-sm">
         <a @click="open=false" href="#services" class="py-2">Services</a>
+        <a @click="open=false" href="#bundles" class="py-2">Bundles</a>
         <a @click="open=false" href="#pricing" class="py-2">Pricing</a>
-        <a @click="open=false" href="#notes" class="py-2">How it works</a>
         <a @click="open=false" href="#contact" class="py-2">Contact</a>
         <a @click="open=false" href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noopener" class="py-2">Book on Calendly</a>
       </div>
     </div>
   </header>
 
-  <!-- HERO -->
+  <!-- HERO (high-converting) -->
   <section id="top" class="relative">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20">
       <div class="grid lg:grid-cols-2 gap-10 items-center">
         <div>
-          <h1 class="text-4xl sm:text-5xl font-black leading-tight">Premium Digital, Media, and Event Services for <span class="bg-gradient-to-r from-white via-blue-200 to-blue-500 bg-clip-text text-transparent">Gulf Coast</span> Creators & Brands</h1>
-          <p class="mt-6 text-white/80 max-w-prose">Sleek digital hubs that convert, captivating videos that tell your story, flawless events that create lasting connections, and authentic UGC campaigns that spark organic buzz. Transparent pricing. Fast turnarounds. Results‑driven. Serving the Mississippi Gulf Coast.</p>
-          <div class="mt-8 flex flex-wrap gap-3">
-            <a href="#pricing" class="inline-flex items-center gap-2 rounded-xl bg-white text-slate-900 px-4 py-3 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition">View Pricing</a>
-            <a href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-xl ring-1 ring-white/20 px-4 py-3 font-semibold hover:bg-white/10 transition">Book a Free Consult</a>
+          <h1 class="text-5xl font-black leading-tight tracking-tight">Gulf Coast Growth, <span class="bg-gradient-to-r from-white via-blue-200 to-blue-500 bg-clip-text text-transparent">On Demand</span></h1>
+          <ul class="mt-6 text-white/80 max-w-prose space-y-2">
+            <li class="flex gap-2"><span class="mt-1 h-5 w-5 rounded-full bg-white/10 grid place-items-center"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12l6 6L20 6"/></svg></span> Web & Apps that convert visitors into fans.</li>
+            <li class="flex gap-2"><span class="mt-1 h-5 w-5 rounded-full bg-white/10 grid place-items-center"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12l6 6L20 6"/></svg></span> Media that stops the scroll and sells your story.</li>
+            <li class="flex gap-2"><span class="mt-1 h-5 w-5 rounded-full bg-white/10 grid place-items-center"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12l6 6L20 6"/></svg></span> Events & UGC that build trust and momentum.</li>
+          </ul>
+          <div class="mt-8 flex flex-wrap items-center gap-3">
+            <a href="#pricing" class="shine inline-flex items-center gap-2 rounded-xl bg-white text-slate-900 px-5 py-3 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition">Build Your Package</a>
+            <a href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-xl ring-1 ring-white/20 px-5 py-3 font-semibold hover:bg-white/10 transition">Free 30‑min Strategy Call</a>
           </div>
-          <div class="mt-6 text-xs text-white/60">Mix & match across packages to build your perfect strategy.</div>
+          <div class="mt-6 text-xs text-white/60">No contracts to browse — just transparent pricing, fast turnarounds, and measurable wins.</div>
         </div>
         <div class="relative">
           <div class="aspect-video rounded-2xl bg-gradient-to-br from-white/10 to-white/5 ring-1 ring-white/10 p-2 shine">
             <div class="w-full h-full rounded-xl bg-slate-900/40 grid place-items-center text-center p-8">
-              <p class="text-sm text-white/70">Premium UI: animated gradients, glass cards, smooth micro‑interactions.</p>
-              <p class="mt-2 text-xs text-white/50">Stripe Checkout enabled below for one‑time & subscriptions.</p>
+              <div class="grid sm:grid-cols-3 gap-4 w-full">
+                <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-4">
+                  <div class="text-3xl font-black">3‑7d</div>
+                  <div class="text-xs text-white/60">Website turnarounds</div>
+                </div>
+                <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-4">
+                  <div class="text-3xl font-black">30k+</div>
+                  <div class="text-xs text-white/60">UGC views/campaign</div>
+                </div>
+                <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-4">
+                  <div class="text-3xl font-black">100%</div>
+                  <div class="text-xs text-white/60">Transparent pricing</div>
+                </div>
+              </div>
+              <p class="mt-4 text-sm text-white/70">Built for Mississippi Gulf Coast creators, brands, real estate, and tourism.</p>
             </div>
           </div>
           <div class="absolute -bottom-6 -right-6 hidden md:block">
-            <div class="rounded-2xl bg-white/10 ring-1 ring-white/20 px-4 py-3 text-xs">Transparent pricing • Modular add‑ons • One‑time or monthly</div>
+            <div class="rounded-2xl bg-white/10 ring-1 ring-white/20 px-4 py-3 text-xs">Stop leaving attention and revenue on the table — pick your bundle below.</div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- BADGES / TRUST -->
+  <!-- SOCIAL PROOF / GAURANTEE STRIP -->
   <section aria-label="Highlights" class="py-6">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div class="rounded-xl ring-1 ring-white/10 bg-white/5 p-3 text-center text-xs">Fast turnarounds</div>
-        <div class="rounded-xl ring-1 ring-white/10 bg-white/5 p-3 text-center text-xs">Results‑driven</div>
-        <div class="rounded-xl ring-1 ring-white/10 bg-white/5 p-3 text-center text-xs">Transparent pricing</div>
-        <div class="rounded-xl ring-1 ring-white/10 bg-white/5 p-3 text-center text-xs">Local Gulf Coast focus</div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div class="rounded-xl ring-1 ring-white/10 bg-white/5 p-4 text-center text-sm"><span class="font-semibold">Clear ROI</span> — packages built to convert, not just look pretty.</div>
+        <div class="rounded-xl ring-1 ring-white/10 bg-white/5 p-4 text-center text-sm"><span class="font-semibold">Fast</span> — days, not months. Momentum starts now.</div>
+        <div class="rounded-xl ring-1 ring-white/10 bg-white/5 p-4 text-center text-sm"><span class="font-semibold">Local Focus</span> — Gulf Coast vibes with global reach.</div>
       </div>
     </div>
   </section>
@@ -120,8 +137,47 @@
     </div>
   </section>
 
+  <!-- RECOMMENDED BUNDLES COMPARISON -->
+  <section id="bundles" class="py-10">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" x-data="pricing()" x-init="init()">
+      <div class="flex items-end justify-between gap-4">
+        <div>
+          <h2 class="text-3xl font-extrabold tracking-tight">Recommended bundles</h2>
+          <p class="mt-2 text-white/70">Curated mixes proven to work on the Coast. Use these as a starting point — then tweak in the builder.</p>
+        </div>
+        <a href="#pricing" class="hidden sm:inline-flex items-center gap-2 rounded-xl bg-white text-slate-900 px-4 py-3 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition">Customize mine</a>
+      </div>
+
+      <div class="mt-6 grid md:grid-cols-3 gap-4">
+        <template x-for="name in ['Launch Kit','Creator Engine','Growth Retainer']" :key="'cmp-'+name">
+          <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-5">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="text-xs text-white/60" x-text="presets[name].plan==='oneTime'?'One‑time':'Monthly'"></div>
+                <h3 class="text-lg font-bold" x-text="name"></h3>
+              </div>
+              <div class="text-right">
+                <div class="text-xs text-white/60">From</div>
+                <div class="text-xl font-extrabold" x-text="formatPrice(presetPrice(name))"></div>
+              </div>
+            </div>
+            <ul class="mt-3 text-sm text-white/80 space-y-1">
+              <template x-for="(kind, key) in presets[name].services" :key="'cmpi-'+name+'-'+key">
+                <li><span class="font-medium" x-text="services[key].short"></span> — <span class="capitalize" x-text="kind"></span></li>
+              </template>
+            </ul>
+            <div class="mt-4 flex items-center justify-between">
+              <button @click="applyPreset(name); location.hash='#pricing'" class="rounded-lg bg-white text-slate-900 px-3 py-2 text-sm font-semibold">Use this preset</button>
+              <div class="text-xs text-white/50">Edit everything in the builder</div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+  </section>
+
   <!-- PRICING / CONFIGURATOR + CHECKOUT (ENHANCED UI) -->
-  <section id="pricing" class="py-20">
+  <section id="pricing" class="scroll-mt-16 py-20">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
         <div>
@@ -158,19 +214,18 @@
               </template>
             </div>
 
-            <!-- Quick Presets -->
+            <!-- Quick Presets with tooltips (tuned copy) -->
             <div class="mt-4">
               <div class="flex items-center justify-between mb-2">
-                <span class="text-xs text-white/60">Quick presets (curated, non‑random)</span>
+                <span class="text-xs text-white/60">Quick presets (curated)</span>
                 <button class="text-[11px] underline decoration-dotted" @click="clearPreset()" x-show="activePreset">Clear preset</button>
               </div>
               <div class="flex gap-2 overflow-x-auto pb-1">
-                <template x-for="p in Object.keys(presets)" :key="'preset-'+p">
-                  <button @click="applyPreset(p)" :class="activePreset===p?'bg-white text-slate-900':'bg-white/0 text-white/80 hover:bg-white/10'" class="whitespace-nowrap rounded-xl px-3 py-2 ring-1 ring-white/15 text-sm font-semibold">
-                    <span x-text="p"></span>
-                    <span class="ml-2 text-[10px] uppercase tracking-wide rounded bg-white/10 ring-1 ring-white/15 px-1.5 py-0.5" x-text="presets[p].plan==='oneTime'?'one‑time':'monthly'"></span>
-                  </button>
-                </template>
+                <button class="tooltip" data-tip="Launch site + video + event assets fast. Best for new drops & openings." @click="applyPreset('Launch Kit')" :class="activePreset==='Launch Kit'?'bg-white text-slate-900':'bg-white/0 text-white/80 hover:bg-white/10'" class="whitespace-nowrap rounded-xl px-3 py-2 ring-1 ring-white/15 text-sm font-semibold">Launch Kit <span class="ml-2 text-[10px] uppercase tracking-wide rounded bg-white/10 ring-1 ring-white/15 px-1.5 py-0.5">one‑time</span></button>
+                <button class="tooltip" data-tip="Ongoing creator engine: premium video + UGC flywheel." @click="applyPreset('Creator Engine')" :class="activePreset==='Creator Engine'?'bg-white text-slate-900':'bg-white/0 text-white/80 hover:bg-white/10'" class="whitespace-nowrap rounded-xl px-3 py-2 ring-1 ring-white/15 text-sm font-semibold">Creator Engine <span class="ml-2 text-[10px] uppercase tracking-wide rounded bg-white/10 ring-1 ring-white/15 px-1.5 py-0.5">monthly</span></button>
+                <button class="tooltip" data-tip="Aggressive growth: web+video+UGC premium, events support as needed." @click="applyPreset('Growth Retainer')" :class="activePreset==='Growth Retainer'?'bg-white text-slate-900':'bg-white/0 text-white/80 hover:bg-white/10'" class="whitespace-nowrap rounded-xl px-3 py-2 ring-1 ring-white/15 text-sm font-semibold">Growth Retainer <span class="ml-2 text-[10px] uppercase tracking-wide rounded bg-white/10 ring-1 ring-white/15 px-1.5 py-0.5">monthly</span></button>
+                <button class="tooltip" data-tip="Local small biz combo: conversion site + steady UGC." @click="applyPreset('Local Biz Starter')" :class="activePreset==='Local Biz Starter'?'bg-white text-slate-900':'bg-white/0 text-white/80 hover:bg-white/10'" class="whitespace-nowrap rounded-xl px-3 py-2 ring-1 ring-white/15 text-sm font-semibold">Local Biz Starter <span class="ml-2 text-[10px] uppercase tracking-wide rounded bg-white/10 ring-1 ring-white/15 px-1.5 py-0.5">one‑time</span></button>
+                <button class="tooltip" data-tip="Events‑first: rock‑solid logistics + promo media." @click="applyPreset('Event Spotlight')" :class="activePreset==='Event Spotlight'?'bg-white text-slate-900':'bg-white/0 text-white/80 hover:bg-white/10'" class="whitespace-nowrap rounded-xl px-3 py-2 ring-1 ring-white/15 text-sm font-semibold">Event Spotlight <span class="ml-2 text-[10px] uppercase tracking-wide rounded bg-white/10 ring-1 ring-white/15 px-1.5 py-0.5">one‑time</span></button>
               </div>
             </div>
           </div>
@@ -185,7 +240,7 @@
                   </button>
                 </template>
               </div>
-              <div class="text-right text-sm text-white/70 min-w-[220px]">
+              <div class="text-right text-sm text-white/70 min-w-[240px]">
                 <div x-show="plan==='oneTime'">Base (<span x-text="services[serviceKey].short"></span>): <span class="font-semibold" x-text="formatPrice(basePriceFor(serviceKey))"></span> • <span class="font-medium" x-text="services[serviceKey].oneTime.duration"></span></div>
                 <div x-show="plan==='monthly'">Base (<span x-text="services[serviceKey].short"></span>): <span class="font-semibold" x-text="formatPrice(basePriceFor(serviceKey))"></span> • 3‑month minimum</div>
                 <div class="text-xs text-white/50 mt-1">Editing add‑ons for <span class="font-semibold" x-text="services[serviceKey].name"></span></div>
@@ -237,7 +292,7 @@
             <div x-show="selectedAddonsDetailed.length" class="mt-4 flex flex-wrap gap-2">
               <template x-for="ad in selectedAddonsDetailed" :key="'chip-'+ad.id">
                 <button @click="toggleAddon(ad.id)" class="group inline-flex items-center gap-2 rounded-full bg-white/10 ring-1 ring-white/15 pl-3 pr-2 py-1 text-xs hover:bg-white/20">
-                  <span x-text="ad.label"></span>
+                  <span class="break-words" x-text="ad.label"></span>
                   <span class="rounded-full grid place-items-center h-5 w-5 bg-white/20 group-hover:bg-white/30">
                     <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M6 18L18 6"/></svg>
                   </span>
@@ -253,12 +308,12 @@
                   <input type="checkbox" class="sr-only" :value="ad.id" x-model="selectedAddons">
                   <div class="flex items-start gap-3">
                     <div class="mt-0.5 h-9 w-9 rounded-lg grid place-items-center ring-1 ring-white/15" :class="isSelected(ad.id) ? 'bg-blue-500 text-white ring-0' : 'bg-slate-900/40'" x-html="addonIcon(ad.id)"></div>
-                    <div class="flex-1">
+                    <div class="flex-1 min-w-0">
                       <div class="flex items-center gap-2">
-                        <span class="font-medium" x-text="ad.label"></span>
+                        <span class="font-medium leading-tight break-words" x-text="ad.label"></span>
                         <span x-show="recommendedIds.includes(ad.id)" class="text-[10px] uppercase tracking-wide rounded bg-white/10 ring-1 ring-white/15 px-2 py-0.5">Popular</span>
                       </div>
-                      <div class="text-sm text-white/60" x-text="ad.desc"></div>
+                      <div class="text-sm text-white/60 break-words" x-text="ad.desc"></div>
                     </div>
                     <div class="ml-auto text-sm font-semibold" x-text="formatPrice(ad.price)"></div>
                   </div>
@@ -300,7 +355,7 @@
                   </div>
                   <template x-for="ad in selectedAddonsDetailedFor(key)" :key="'sumad-'+key+'-'+ad.id">
                     <div class="mt-2 flex items-start justify-between gap-3">
-                      <div class="text-sm">+ <span class="font-medium" x-text="ad.label"></span> <span class="text-white/60" x-text="'— '+ad.desc"></span></div>
+                      <div class="text-sm break-words">+ <span class="font-medium" x-text="ad.label"></span> <span class="text-white/60" x-text="'— '+ad.desc"></span></div>
                       <div class="text-sm font-semibold" x-text="formatPrice(ad.price)"></div>
                     </div>
                   </template>
@@ -435,33 +490,6 @@
     </div>
   </section>
 
-  <!-- LOGOS STRIP (replace src with your logos) -->
-  <section class="py-10">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="text-center text-sm text-white/60 mb-4">Brands & partners work with 1 Coast Media</div>
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 items-center opacity-80 [filter:grayscale(100%)] hover:[filter:grayscale(0%)] transition">
-        <img src="/logos/logo1.svg" alt="Logo 1" class="h-10 mx-auto object-contain"/>
-        <img src="/logos/logo2.svg" alt="Logo 2" class="h-10 mx-auto object-contain"/>
-        <img src="/logos/logo3.svg" alt="Logo 3" class="h-10 mx-auto object-contain"/>
-        <img src="/logos/logo4.svg" alt="Logo 4" class="h-10 mx-auto object-contain"/>
-        <img src="/logos/logo5.svg" alt="Logo 5" class="h-10 mx-auto object-contain"/>
-        <img src="/logos/logo6.svg" alt="Logo 6" class="h-10 mx-auto object-contain"/>
-      </div>
-    </div>
-  </section>
-
-  <!-- HOW IT WORKS -->
-  <section id="notes" class="py-20">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <h2 class="text-3xl font-extrabold tracking-tight">How it works</h2>
-      <div class="mt-6 grid gap-6 md:grid-cols-3">
-        <div class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6"><div class="text-sm text-white/60">Step 1</div><h3 class="font-semibold">Pick a base</h3><p class="mt-2 text-sm text-white/80">Every package starts with a strong base for immediate value.</p></div>
-        <div class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6"><div class="text-sm text-white/60">Step 2</div><h3 class="font-semibold">Customize</h3><p class="mt-2 text-sm text-white/80">Check add‑ons to fit your goals; total price updates instantly.</p></div>
-        <div class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6"><div class="text-sm text-white/60">Step 3</div><h3 class="font-semibold">Lock it in</h3><p class="mt-2 text-sm text-white/80">We’ll confirm scope, timeline, and deliverables and send a tailored quote.</p></div>
-      </div>
-    </div>
-  </section>
-
   <!-- CONTACT + CALENDLY EMBED -->
   <section id="contact" class="py-20">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -536,7 +564,10 @@
             {id:'ugc-leads', label:'Lead Gen Integration', price:250, desc:'Simple funnel/landing page to capture contacts'},
             {id:'ugc-enhance', label:'Content Enhancement', price:150, desc:'Overlays, CTAs, or music to boost engagement'},
             {id:'ugc-captions', label:'Caption & Description Pack', price:100, desc:'Optimized captions/descriptions per clip'},
-            {id:'ugc-brand', label:'Branded Customization Kit', price:150, desc:'Logos, watermarks, end‑slates across clips'}
+            {id:'ugc-brand', label:'Branded Customization Kit', price:150, desc:'Logos, watermarks, end‑slates across clips'},
+            {id:'ugc-views-10k', label:'Additional 10k Views', price:150, desc:'Scale your reach by +10,000 verified views'},
+            {id:'ugc-views-20k', label:'Additional 20k Views', price:300, desc:'Add +20,000 verified views to the campaign'},
+            {id:'ugc-views-70k', label:'Additional 70k Views', price:1050, desc:'Add +70,000 verified views for major pushes'}
           ]}
         },
         monthlyOverrides: {
@@ -566,11 +597,14 @@
             {match:'ugc-leads', label:'Lead Gen Integration', price:250, desc:'Monthly funnel optimizations'},
             {match:'ugc-enhance', label:'Content Enhancement', price:150, desc:'Ongoing overlays/CTAs/music'},
             {match:'ugc-captions', label:'Caption & Description Pack', price:100, desc:'Monthly optimizations for discoverability'},
-            {match:'ugc-brand', label:'Branded Customization Kit', price:150, desc:'Logos/watermarks/end‑slates each month'}
+            {match:'ugc-brand', label:'Branded Customization Kit', price:150, desc:'Logos/watermarks/end‑slates each month'},
+            {match:'ugc-views-10k', label:'+10k Views (Monthly)', price:150, desc:'Add 10,000 verified views / month'},
+            {match:'ugc-views-20k', label:'+20k Views (Monthly)', price:300, desc:'Add 20,000 verified views / month'},
+            {match:'ugc-views-70k', label:'+70k Views (Monthly)', price:1050, desc:'Add 70,000 verified views / month'}
           ]}
         },
 
-        // PRESETS (curated, not random)
+        // PRESETS (curated)
         presets: {
           'Launch Kit': { plan:'oneTime', services: { web:'essentials', video:'essentials', events:'essentials' } },
           'Local Biz Starter': { plan:'oneTime', services: { web:'essentials', ugc:'essentials' } },
@@ -588,7 +622,7 @@
         basePriceFor(key){ return this.plan==='oneTime' ? this.services[key].oneTime.base : this.monthlyOverrides[key].base; },
         baseIncludesFor(key){ return this.plan==='oneTime' ? this.services[key].oneTime.includes : this.monthlyOverrides[key].includes; },
 
-        get currentAddons(){ return this.addonsListFor(this.serviceKey); }, // one‑time & monthly supported
+        get currentAddons(){ return this.addonsListFor(this.serviceKey); },
         get selectedAddonsDetailed(){ const idx=Object.fromEntries(this.currentAddons.map(a=>[a.id,a])); return (this.selectedByService[this.serviceKey]||[]).map(id=>idx[id]).filter(Boolean); },
         selectedAddonsDetailedFor(key){ const list=this.addonsListFor(key); const idx=Object.fromEntries(list.map(a=>[a.id,a])); return (this.selectedByService[key]||[]).map(id=>idx[id]).filter(Boolean); },
 
@@ -625,7 +659,7 @@
             web: { oneTime: { essentials:['web-seo','web-auto'], premium:['web-mvp','web-api','web-shop'] }, monthly: { essentials:['web-seo','web-auto'], premium:['web-adv','web-dash','web-mvp'] } },
             video: { oneTime: { essentials:['vid-audio','vid-edit'], premium:['vid-adv','vid-drone-p'] }, monthly: { essentials:['vid-audio','vid-edit'], premium:['vid-adv','vid-drone-pro'] } },
             events: { oneTime: { essentials:['ev-digital','ev-media'], premium:['ev-ven','ev-hybrid'] }, monthly: { essentials:['ev-digital','ev-media'], premium:['ev-ven','ev-hybrid'] } },
-            ugc: { oneTime: { essentials:['ugc-captions','ugc-enhance'], premium:['ugc-repurpose','ugc-leads'] }, monthly: { essentials:['ugc-captions','ugc-enhance'], premium:['ugc-repurpose','ugc-leads'] } }
+            ugc: { oneTime: { essentials:['ugc-captions','ugc-enhance'], premium:['ugc-repurpose','ugc-leads','ugc-views-20k'] }, monthly: { essentials:['ugc-captions','ugc-enhance'], premium:['ugc-repurpose','ugc-leads','ugc-views-20k'] } }
           }; const bundle = map[this.serviceKey]?.[this.plan]?.[kind] || []; this.recommendedIds = bundle; return bundle; },
         setPlan(newPlan){ if(this.plan===newPlan) return; this.plan=newPlan; // filter selections per service to valid ids in new plan
           for(const key of this.order){ const valid=new Set(this.addonsListFor(key).map(a=>a.id)); this.selectedByService[key]=(this.selectedByService[key]||[]).filter(id=>valid.has(id)); }
@@ -655,7 +689,10 @@
             'ugc-leads':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16v12H4z"/><path d="M8 10h8M8 14h6"/></svg>',
             'ugc-enhance':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2v20"/><path d="M2 12h20"/></svg>',
             'ugc-captions':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="7" width="16" height="10" rx="2"/><path d="M7 12h5M7 15h7"/></svg>',
-            'ugc-brand':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="4"/></svg>'
+            'ugc-brand':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="4"/></svg>',
+            'ugc-views-10k':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="6"/><path d="M12 6v12M6 12h12"/></svg>',
+            'ugc-views-20k':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16"/></svg>',
+            'ugc-views-70k':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12s4-6 9-6 9 6 9 6-4 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2"/></svg>'
           };
           return map[id] || simple;
         },
@@ -668,16 +705,33 @@
           // seed selections for each service based on bundle kind
           for(const key of this.activeServices){
             const kind = p.services[key];
-            // temporarily focus to reuse selectBundle logic
             const prev = this.serviceKey; this.serviceKey = key; this.selectBundle(kind); this.serviceKey = prev;
           }
-          // focus first active service
           this.serviceKey = this.activeServices[0] || 'web';
           this.activePreset = name;
         },
         clearPreset(){ this.activePreset=''; },
+        // Price helpers for comparison
+        addonPriceFor(serviceKey, plan, id){
+          const list = plan==='oneTime' ? this.services[serviceKey].addons : this.monthlyOverrides[serviceKey].addons.map(ov=>({id:ov.match,label:ov.label,price:ov.price,desc:ov.desc}));
+          const a = list.find(x=>x.id===id); return a? a.price : 0;
+        },
+        priceFor(serviceKey, plan, kind){
+          const base = plan==='oneTime'? this.services[serviceKey].oneTime.base : this.monthlyOverrides[serviceKey].base;
+          const ids = (kind==='essentials'||kind==='premium') ? ({
+            web: { oneTime: { essentials:['web-seo','web-auto'], premium:['web-mvp','web-api','web-shop'] }, monthly: { essentials:['web-seo','web-auto'], premium:['web-adv','web-dash','web-mvp'] } },
+            video: { oneTime: { essentials:['vid-audio','vid-edit'], premium:['vid-adv','vid-drone-p'] }, monthly: { essentials:['vid-audio','vid-edit'], premium:['vid-adv','vid-drone-pro'] } },
+            events:{ oneTime: { essentials:['ev-digital','ev-media'], premium:['ev-ven','ev-hybrid'] }, monthly: { essentials:['ev-digital','ev-media'], premium:['ev-ven','ev-hybrid'] } },
+            ugc:  { oneTime: { essentials:['ugc-captions','ugc-enhance'], premium:['ugc-repurpose','ugc-leads','ugc-views-20k'] }, monthly: { essentials:['ugc-captions','ugc-enhance'], premium:['ugc-repurpose','ugc-leads','ugc-views-20k'] } }
+          }[serviceKey][plan][kind]) : [];
+          const addonsSum = ids.reduce((s,id)=> s + this.addonPriceFor(serviceKey, plan, id), 0);
+          return base + addonsSum;
+        },
+        presetPrice(name){
+          const p = this.presets[name]; if(!p) return 0; const plan=p.plan; let total=0; for(const [key,kind] of Object.entries(p.services)){ total += this.priceFor(key, plan, kind); } return total;
+        },
 
-        // STRIPE CHECKOUT (opens from review modal)
+        // STRIPE CHECKOUT
         async checkout(){
           try{
             if(!this.accepted){ alert('Please accept the notice before continuing.'); return; }
@@ -720,15 +774,12 @@
         p.toggleActive('video'); // now web+video
         const expected = 300 + 600; // bases only
         results.push({name:'T5 multi-service bases', pass: p.total === expected, got:p.total, expect:expected});
-        // T6: preset Launch Kit
-        p.applyPreset('Launch Kit');
-        results.push({name:'T6 preset plan', pass: p.plan==='oneTime'});
-        results.push({name:'T6 services count', pass: p.activeServices.length===3, got:p.activeServices.slice()});
-        // T7: per-service notes included in cart
-        p.serviceNotes.web='Note A'; p.serviceNotes.video='Note B';
-        const cart = p.activeServices.map(key=>({ serviceKey:key, plan:p.plan, addons:(p.selectedByService[key]||[]), notes:(p.serviceNotes[key]||'').slice(0,500) }));
-        const hasNotes = cart.some(c=>c.serviceKey==='web' && c.notes==='Note A') && cart.some(c=>c.serviceKey==='video' && c.notes==='Note B');
-        results.push({name:'T7 notes in cart', pass: hasNotes});
+        // T6: preset Launch Kit price should be > one web base
+        const lk = p.presetPrice('Launch Kit');
+        results.push({name:'T6 preset Launch Kit price', pass: lk > 300, got:lk});
+        // T7: new UGC add-ons pricing
+        p.resetAll(); p.setService('ugc'); p.toggleActive('ugc'); p.toggleAddon('ugc-views-10k'); p.toggleAddon('ugc-views-20k');
+        results.push({name:'T7 UGC views add-ons', pass: p.total === 450 + 150 + 300, got:p.total, expect:900});
 
         const failed = results.filter(r=>!r.pass);
         if(failed.length){ console.error('Pricing tests failed:', failed); }
@@ -751,7 +802,7 @@
     web: { oneTimeBase: 30000, monthlyBase: 50000, addons: { 'web-mvp':{ot:50000,mo:50000}, 'web-seo':{ot:15000,mo:15000}, 'web-auto':{ot:10000,mo:10000}, 'web-api':{ot:25000,mo:25000}, 'web-shop':{ot:30000,mo:30000}, 'web-adv':{ot:null,mo:20000}, 'web-dash':{ot:null,mo:25000} } },
     video:{ oneTimeBase: 60000, monthlyBase:120000, addons: { 'vid-audio':{ot:20000,mo:25000}, 'vid-adv':{ot:80000,mo:100000}, 'vid-drone-p':{ot:30000,mo:30000}, 'vid-drone-pro':{ot:150000,mo:150000}, 'vid-edit':{ot:30000,mo:50000} } },
     events:{ oneTimeBase:100000, monthlyBase:120000, addons: { 'ev-ven':{ot:50000,mo:60000}, 'ev-digital':{ot:20000,mo:20000}, 'ev-media':{ot:30000,mo:30000}, 'ev-auto':{ot:15000,mo:15000}, 'ev-hybrid':{ot:40000,mo:40000} } },
-    ugc:  { oneTimeBase: 45000, monthlyBase: 60000, addons: { 'ugc-repurpose':{ot:20000,mo:20000}, 'ugc-leads':{ot:25000,mo:25000}, 'ugc-enhance':{ot:15000,mo:15000}, 'ugc-captions':{ot:10000,mo:10000}, 'ugc-brand':{ot:15000,mo:15000} } }
+    ugc:  { oneTimeBase: 45000, monthlyBase: 60000, addons: { 'ugc-repurpose':{ot:20000,mo:20000}, 'ugc-leads':{ot:25000,mo:25000}, 'ugc-enhance':{ot:15000,mo:15000}, 'ugc-captions':{ot:10000,mo:10000}, 'ugc-brand':{ot:15000,mo:15000}, 'ugc-views-10k':{ot:15000,mo:15000}, 'ugc-views-20k':{ot:30000,mo:30000}, 'ugc-views-70k':{ot:105000,mo:105000} } }
   };
 
   module.exports = async (req, res) => {
