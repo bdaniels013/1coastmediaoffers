@@ -16,7 +16,7 @@
     body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
     .glass { backdrop-filter: saturate(160%) blur(14px); background: rgba(255,255,255,.07); }
     .shine { position: relative; overflow: hidden; }
-    .shine:before { content: ""; position: absolute; inset: -200% -50%; background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.18) 50%, transparent 60%); transform: translateX(-100%); animation: shine 6s linear infinite; }
+    .shine:before { content: ""; position: absolute; inset: -200% -50%; background: linear-gradient(105deg, transparent 45%, rgba(255,255,255,.18) 50%, transparent 55%); transform: translateX(-100%); animation: shine 6s linear infinite; }
     @keyframes shine { to { transform: translateX(100%); } }
     @keyframes float { 0%{transform:translateY(0)} 50%{transform:translateY(-10px)} 100%{transform:translateY(0)} }
     html::-webkit-scrollbar{height:10px;width:10px}
@@ -186,7 +186,7 @@
               <div class="hidden sm:flex gap-2">
                 <button @click="selectBundle('essentials')" class="text-xs rounded-lg px-3 py-1 ring-1 ring-white/15 hover:bg-white/10">Essentials</button>
                 <button @click="selectBundle('premium')" class="text-xs rounded-lg px-3 py-1 ring-1 ring-white/15 hover:bg-white/10">Premium</button>
-                <button @click="reset()" class="text-xs rounded-lg px-3 py-1 ring-1 ring-white/15 hover:bg-white/10">Clear</button>
+                <button @click="selectedAddons=[]" class="text-xs rounded-lg px-3 py-1 ring-1 ring-white/15 hover:bg-white/10">Clear</button>
               </div>
             </div>
 
@@ -200,7 +200,7 @@
               <div class="sm:hidden text-[11px] grid grid-cols-3 gap-2">
                 <button @click="selectBundle('essentials')" class="rounded-lg px-2 py-1 ring-1 ring-white/15 hover:bg-white/10">Essentials</button>
                 <button @click="selectBundle('premium')" class="rounded-lg px-2 py-1 ring-1 ring-white/15 hover:bg-white/10">Premium</button>
-                <button @click="reset()" class="rounded-lg px-2 py-1 ring-1 ring-white/15 hover:bg-white/10">Clear</button>
+                <button @click="selectedAddons=[]" class="rounded-lg px-2 py-1 ring-1 ring-white/15 hover:bg-white/10">Clear</button>
               </div>
             </div>
 
@@ -264,12 +264,12 @@
               </template>
             </div>
             <div class="mt-6 flex flex-col gap-3">
-              <button @click="checkout()" class="shine inline-flex items-center justify-center gap-2 rounded-xl bg-blue-500 text-white px-4 py-3 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition">
+              <button @click="reviewOpen=true" class="shine inline-flex items-center justify-center gap-2 rounded-xl bg-blue-500 text-white px-4 py-3 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/></svg>
-                Checkout with Stripe
+                Review & Checkout
               </button>
               <a href="#contact" class="inline-flex items-center justify-center gap-2 rounded-xl bg-white text-slate-900 px-4 py-3 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition">Request Formal Quote</a>
-              <button @click="reset()" class="inline-flex items-center justify-center gap-2 rounded-xl ring-1 ring-white/20 px-4 py-3 font-semibold hover:bg-white/10 transition">Clear Add‑ons</button>
+              <button @click="selectedAddons=[]" class="inline-flex items-center justify-center gap-2 rounded-xl ring-1 ring-white/20 px-4 py-3 font-semibold hover:bg-white/10 transition">Clear Add‑ons</button>
               <div class="text-[11px] text-white/60 flex items-center gap-1"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span> Secure Stripe Checkout • Email support: <span class="underline">1coastmedia@gmail.com</span></div>
             </div>
           </div>
@@ -282,9 +282,107 @@
               <div class="text-xs text-slate-600">Estimated total</div>
               <div class="text-lg font-extrabold" x-text="formatPrice(total)"></div>
             </div>
-            <button @click="checkout()" class="rounded-xl bg-slate-900 text-white px-4 py-2 font-semibold">Checkout</button>
+            <button @click="reviewOpen=true" class="rounded-xl bg-slate-900 text-white px-4 py-2 font-semibold">Checkout</button>
           </div>
         </div>
+
+        <!-- REVIEW & CHECKOUT MODAL -->
+        <div x-show="reviewOpen" x-transition.opacity x-cloak class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+          <div @click="reviewOpen=false" class="absolute inset-0 bg-black/60"></div>
+          <div class="relative w-full sm:max-w-2xl rounded-2xl bg-white text-slate-900 shadow-2xl ring-1 ring-black/10 max-h-[90vh] overflow-auto">
+            <div class="p-6 border-b border-black/10 flex items-center justify-between">
+              <h3 class="text-lg font-bold">Review your selection</h3>
+              <button @click="reviewOpen=false" class="h-9 w-9 grid place-items-center rounded-md hover:bg-black/5">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6l12 12M6 18L18 6"/></svg>
+              </button>
+            </div>
+            <div class="p-6 grid gap-6">
+              <div class="rounded-xl bg-slate-50 ring-1 ring-black/10 p-4">
+                <div class="text-xs text-slate-600">Package</div>
+                <div class="mt-1 font-semibold" x-text="services[serviceKey].name + ' — ' + (plan==='oneTime'?'One‑time':'Monthly')"></div>
+                <ul class="mt-3 text-sm text-slate-700 space-y-1">
+                  <li class="flex items-center justify-between"><span>Base</span><span x-text="formatPrice(basePrice)" class="font-semibold"></span></li>
+                  <template x-for="ad in selectedAddonsDetailed" :key="ad.id">
+                    <li class="flex items-start justify-between gap-3"><span>+ <span class="font-medium" x-text="ad.label"></span> <span class="text-slate-500" x-text="'— '+ad.desc"></span></span><span class="font-semibold" x-text="formatPrice(ad.price)"></span></li>
+                  </template>
+                </ul>
+                <div class="mt-3 flex items-center justify-between border-t border-black/10 pt-3">
+                  <div class="text-sm text-slate-600">Estimated total <span x-show="plan==='monthly'">(per month)</span></div>
+                  <div class="text-lg font-extrabold" x-text="formatPrice(total)"></div>
+                </div>
+              </div>
+
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="text-sm text-slate-700">Full name</label>
+                  <input x-model.trim="customer.name" class="mt-1 w-full rounded-lg ring-1 ring-black/10 px-3 py-2" placeholder="Jane Doe" />
+                </div>
+                <div>
+                  <label class="text-sm text-slate-700">Company</label>
+                  <input x-model.trim="customer.company" class="mt-1 w-full rounded-lg ring-1 ring-black/10 px-3 py-2" placeholder="Acme Co." />
+                </div>
+                <div>
+                  <label class="text-sm text-slate-700">Email (optional)</label>
+                  <input x-model.trim="customer.email" type="email" class="mt-1 w-full rounded-lg ring-1 ring-black/10 px-3 py-2" placeholder="you@example.com" />
+                </div>
+                <div>
+                  <label class="text-sm text-slate-700">Phone (optional)</label>
+                  <input x-model.trim="customer.phone" class="mt-1 w-full rounded-lg ring-1 ring-black/10 px-3 py-2" placeholder="(555) 555‑5555" />
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="text-sm text-slate-700">Project notes</label>
+                  <textarea x-model.trim="customer.notes" rows="3" class="mt-1 w-full rounded-lg ring-1 ring-black/10 px-3 py-2" placeholder="Goals, audience, examples, deadlines…"></textarea>
+                </div>
+              </div>
+
+              <label class="flex items-start gap-3 text-sm"><input type="checkbox" x-model="accepted" class="mt-1"> <span>I agree to be contacted at the info provided. Payment is processed by Stripe on a secure page.</span></label>
+
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div class="text-xs text-slate-500">Questions? Email <a class="underline" href="mailto:1coastmedia@gmail.com">1coastmedia@gmail.com</a> or <a class="underline" href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noopener">book a call</a>.</div>
+                <div class="flex gap-2">
+                  <button @click="reviewOpen=false" class="rounded-lg ring-1 ring-black/10 px-4 py-2">Back</button>
+                  <button @click="checkout()" class="rounded-lg bg-slate-900 text-white px-4 py-2 font-semibold">Continue to Stripe</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- WHY MONTHLY? comparison -->
+      <div class="mt-16 grid lg:grid-cols-2 gap-6">
+        <div class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6">
+          <h3 class="text-lg font-bold">One‑time: launch fast</h3>
+          <ul class="mt-3 text-sm text-white/80 space-y-2 list-disc list-inside">
+            <li>Immediate impact for launches or pilots</li>
+            <li>Clear scope and timeline</li>
+            <li>Great for testing ideas and one‑off events</li>
+          </ul>
+        </div>
+        <div class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6">
+          <h3 class="text-lg font-bold">Monthly: grow consistently</h3>
+          <ul class="mt-3 text-sm text-white/80 space-y-2 list-disc list-inside">
+            <li>Ongoing optimization and updates</li>
+            <li>Priority scheduling + momentum</li>
+            <li>Compounding results with creator flywheel</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOGOS STRIP (replace src with your logos) -->
+  <section class="py-10">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center text-sm text-white/60 mb-4">Brands & partners work with 1 Coast Media</div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 items-center opacity-80 [filter:grayscale(100%)] hover:[filter:grayscale(0%)] transition">
+        <img src="/logos/logo1.svg" alt="Logo 1" class="h-10 mx-auto object-contain"/>
+        <img src="/logos/logo2.svg" alt="Logo 2" class="h-10 mx-auto object-contain"/>
+        <img src="/logos/logo3.svg" alt="Logo 3" class="h-10 mx-auto object-contain"/>
+        <img src="/logos/logo4.svg" alt="Logo 4" class="h-10 mx-auto object-contain"/>
+        <img src="/logos/logo5.svg" alt="Logo 5" class="h-10 mx-auto object-contain"/>
+        <img src="/logos/logo6.svg" alt="Logo 6" class="h-10 mx-auto object-contain"/>
       </div>
     </div>
   </section>
@@ -334,6 +432,10 @@
         serviceKey: 'web',
         query: '',
         selectedAddons: [],
+        selectedByService: { web: [], video: [], events: [], ugc: [] },
+        reviewOpen: false,
+        accepted: true,
+        customer: { name:'', company:'', email:'', phone:'', notes:'' },
 
         // DATA
         services: {
@@ -408,27 +510,31 @@
         get filteredAddons(){ const q=this.query.toLowerCase().trim(); if(!q) return this.currentAddons; return this.currentAddons.filter(a=>a.label.toLowerCase().includes(q)||a.desc.toLowerCase().includes(q)); },
 
         // METHODS
-        toggleAddon(id){ const i=this.selectedAddons.indexOf(id); if(i>-1) this.selectedAddons.splice(i,1); else this.selectedAddons.push(id); },
-        reset(){ this.selectedAddons=[]; this.recommendedIds = this.getBundle('essentials'); this.query=''; },
-        onServiceChange(){ this.reset(); },
-        init(){ this.reset(); },
+        toggleAddon(id){ const i=this.selectedAddons.indexOf(id); if(i>-1) this.selectedAddons.splice(i,1); else this.selectedAddons.push(id); this.selectedByService[this.serviceKey]=this.selectedAddons.slice(); },
+        reset(){ this.selectedAddons=[]; this.selectedByService[this.serviceKey]=[]; this.recommendedIds=this.getBundle('essentials'); this.query=''; },
+        init(){ this.selectedAddons=this.selectedByService[this.serviceKey]||[]; this.recommendedIds=this.getBundle('essentials'); },
         formatPrice(v){ return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v); },
         isSelected(id){ return this.selectedAddons.includes(id); },
         recommendedIds: [],
-        selectBundle(kind){ const ids = this.getBundle(kind); this.selectedAddons = ids.filter(id => this.currentAddons.find(a=>a.id===id)); },
+        selectBundle(kind){ const ids = this.getBundle(kind); this.selectedAddons = ids.filter(id => this.currentAddons.find(a=>a.id===id)); this.selectedByService[this.serviceKey]=this.selectedAddons.slice(); },
         getBundle(kind){ const map = {
             web: { oneTime: { essentials:['web-seo','web-auto'], premium:['web-mvp','web-api','web-shop'] }, monthly: { essentials:['web-seo','web-auto'], premium:['web-adv','web-dash','web-mvp'] } },
             video: { oneTime: { essentials:['vid-audio','vid-edit'], premium:['vid-adv','vid-drone-p'] }, monthly: { essentials:['vid-audio','vid-edit'], premium:['vid-adv','vid-drone-pro'] } },
             events: { oneTime: { essentials:['ev-digital','ev-media'], premium:['ev-ven','ev-hybrid'] }, monthly: { essentials:['ev-digital','ev-media'], premium:['ev-ven','ev-hybrid'] } },
             ugc: { oneTime: { essentials:['ugc-captions','ugc-enhance'], premium:['ugc-repurpose','ugc-leads'] }, monthly: { essentials:['ugc-captions','ugc-enhance'], premium:['ugc-repurpose','ugc-leads'] } }
           }; const bundle = map[this.serviceKey]?.[this.plan]?.[kind] || []; this.recommendedIds = bundle; return bundle; },
-        setPlan(newPlan){ if(this.plan===newPlan) return; const prev=this.selectedAddons.slice(); this.plan=newPlan; const valid=new Set(this.currentAddons.map(a=>a.id)); this.selectedAddons = prev.filter(id=>valid.has(id)); this.recommendedIds=this.getBundle('essentials'); },
-        setService(key){ if(this.serviceKey===key) return; this.serviceKey=key; this.reset(); },
+        setPlan(newPlan){ if(this.plan===newPlan) return; const prev=this.selectedAddons.slice(); this.plan=newPlan; const valid=new Set(this.currentAddons.map(a=>a.id)); this.selectedAddons = prev.filter(id=>valid.has(id)); this.selectedByService[this.serviceKey]=this.selectedAddons.slice(); this.recommendedIds=this.getBundle('essentials'); },
+        setService(key){ if(this.serviceKey===key) return; // Persist per-service selections
+          this.selectedByService[this.serviceKey] = this.selectedAddons.slice();
+          this.serviceKey = key;
+          this.selectedAddons = (this.selectedByService[key] || []).slice();
+          this.recommendedIds=this.getBundle('essentials'); },
 
-        // STRIPE CHECKOUT
+        // STRIPE CHECKOUT (opens from review modal)
         async checkout(){
           try{
-            const payload = { serviceKey: this.serviceKey, plan: this.plan, addons: this.selectedAddons };
+            if(!this.accepted){ alert('Please accept the notice before continuing.'); return; }
+            const payload = { serviceKey: this.serviceKey, plan: this.plan, addons: this.selectedAddons, customer: this.customer };
             const res = await fetch('/api/checkout', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
             if(!res.ok){ const t = await res.text(); throw new Error(t || 'Failed to create checkout session'); }
             const { id } = await res.json();
@@ -453,14 +559,20 @@
         p.toggleAddon('web-seo'); p.toggleAddon('web-auto');
         results.push({name:'T2 addons sum', pass: p.total === 300+150+100, got:p.total, expect:550});
         // T3: monthly ugc + captions
-        p.serviceKey='ugc'; p.plan='monthly'; p.reset(); p.toggleAddon('ugc-captions');
+        p.serviceKey='ugc'; p.plan='monthly'; p.init(); p.toggleAddon('ugc-captions');
         results.push({name:'T3 monthly ugc total', pass: p.total === 600+100, got:p.total, expect:700});
         // T4: plan switch preserves overlapping add-on (web-seo)
-        p.serviceKey='web'; p.plan='oneTime'; p.reset(); p.toggleAddon('web-seo'); p.setPlan('monthly');
+        p.serviceKey='web'; p.plan='oneTime'; p.init(); p.toggleAddon('web-seo'); p.setPlan('monthly');
         results.push({name:'T4 preserve on plan switch', pass: p.selectedAddons.includes('web-seo') && p.total===500+150, got:{addons:p.selectedAddons,total:p.total}, expect:{addons:['web-seo'], total:650}});
-        // T5: service switch clears incompatible add-ons
-        p.toggleAddon('web-auto'); p.setService('video');
-        results.push({name:'T5 clear on service switch', pass: p.selectedAddons.length===0, got:p.selectedAddons});
+        // T5: service switch PERSISTS selections per service
+        p.setService('web'); p.selectedAddons=[]; p.toggleAddon('web-auto'); p.setService('video'); // different service
+        const afterVideo = p.selectedAddons.slice();
+        p.setService('web');
+        results.push({name:'T5 persist per-service', pass: p.selectedAddons.includes('web-auto') && afterVideo.length===0});
+        // T6: bundle quick-pick selects recommended ids
+        p.setService('ugc'); p.setPlan('monthly'); p.selectBundle('essentials');
+        results.push({name:'T6 bundle selects', pass: Array.isArray(p.selectedAddons) && p.selectedAddons.length>0});
+
         const failed = results.filter(r=>!r.pass);
         if(failed.length){ console.error('Pricing tests failed:', failed); }
         else { console.log('Pricing tests passed'); }
@@ -488,7 +600,7 @@
   module.exports = async (req, res) => {
     try{
       if(req.method !== 'POST') return res.status(405).send('Method Not Allowed');
-      const { serviceKey, plan, addons } = req.body || {};
+      const { serviceKey, plan, addons, customer } = req.body || {};
       if(!['web','video','events','ugc'].includes(serviceKey)) return res.status(400).send('Invalid service');
       if(!['oneTime','monthly'].includes(plan)) return res.status(400).send('Invalid plan');
       const t = PRICE_TABLE[serviceKey];
@@ -512,7 +624,8 @@
         success_url: `${req.headers.origin || 'https://yourdomain.com'}/#contact`,
         cancel_url: `${req.headers.origin || 'https://yourdomain.com'}/#pricing`,
         allow_promotion_codes: true,
-        metadata: { serviceKey, plan }
+        metadata: { serviceKey, plan, ...(customer||{}) },
+        customer_email: customer?.email || undefined
       });
 
       res.status(200).json({ id: session.id });
