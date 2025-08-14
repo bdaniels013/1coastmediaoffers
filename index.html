@@ -120,13 +120,13 @@
     </div>
   </section>
 
-  <!-- PRICING / CONFIGURATOR + CHECKOUT (GENIUS-LEVEL UI) -->
+  <!-- PRICING / CONFIGURATOR + CHECKOUT (ENHANCED UI) -->
   <section id="pricing" class="py-20">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
         <div>
           <h2 class="text-3xl font-extrabold tracking-tight">Build your package</h2>
-          <p class="mt-2 text-white/70 max-w-prose">Choose a service, pick one‑time or monthly, then add upgrades. Live totals, suggested bundles, and a clean breakdown make checkout effortless.</p>
+          <p class="mt-2 text-white/70 max-w-prose">Choose a service, pick one‑time or monthly, then add upgrades. Live totals, friendly chips, quick bundles, and a clean breakdown make checkout effortless.</p>
         </div>
         <div class="flex gap-3">
           <a href="#contact" class="inline-flex items-center gap-2 rounded-xl bg-white text-slate-900 px-4 py-3 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition self-start">Lock in my quote</a>
@@ -176,42 +176,63 @@
             </ul>
           </div>
 
-          <!-- Add‑ons: Filters + Grid -->
+          <!-- Add‑ons: Controls + Chips + Grid -->
           <div class="rounded-2xl ring-1 ring-white/10 bg-white/5 p-6">
             <div class="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h3 class="font-semibold">Add‑ons</h3>
                 <p class="mt-1 text-xs text-white/60">Tap cards to add/remove. Use Quick Picks for a best‑practice setup.</p>
               </div>
-              <div class="hidden sm:flex gap-2">
+              <div class="hidden sm:flex items-center gap-2">
                 <button @click="selectBundle('essentials')" class="text-xs rounded-lg px-3 py-1 ring-1 ring-white/15 hover:bg-white/10">Essentials</button>
                 <button @click="selectBundle('premium')" class="text-xs rounded-lg px-3 py-1 ring-1 ring-white/15 hover:bg-white/10">Premium</button>
-                <button @click="selectedAddons=[]" class="text-xs rounded-lg px-3 py-1 ring-1 ring-white/15 hover:bg-white/10">Clear</button>
+                <button @click="selectedAddons=[]; selectedByService[serviceKey]=[]" class="text-xs rounded-lg px-3 py-1 ring-1 ring-white/15 hover:bg-white/10">Clear</button>
               </div>
             </div>
 
-            <div class="mt-3 flex items-center gap-2">
-              <div class="relative flex-1">
+            <div class="mt-3 flex flex-wrap items-center gap-2">
+              <div class="relative flex-1 min-w-[220px]">
                 <input x-model.trim="query" placeholder="Search add‑ons (e.g., SEO, drone, captions)" class="w-full rounded-xl bg-slate-900/50 ring-1 ring-white/15 px-3 py-2 text-sm placeholder:text-white/40" />
                 <span class="pointer-events-none absolute right-3 top-2.5 text-white/40">
                   <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-3-3"/></svg>
                 </span>
               </div>
-              <div class="sm:hidden text-[11px] grid grid-cols-3 gap-2">
-                <button @click="selectBundle('essentials')" class="rounded-lg px-2 py-1 ring-1 ring-white/15 hover:bg-white/10">Essentials</button>
-                <button @click="selectBundle('premium')" class="rounded-lg px-2 py-1 ring-1 ring-white/15 hover:bg-white/10">Premium</button>
-                <button @click="selectedAddons=[]" class="rounded-lg px-2 py-1 ring-1 ring-white/15 hover:bg-white/10">Clear</button>
+              <div class="flex items-center gap-2 text-[11px]">
+                <label class="inline-flex items-center gap-2 px-2 py-1 rounded-lg ring-1 ring-white/15 hover:bg-white/10">
+                  <input type="checkbox" x-model="recommendedFirst">
+                  <span>Show recommended first</span>
+                </label>
+                <div class="relative">
+                  <select x-model="sortBy" class="rounded-lg bg-slate-900/50 ring-1 ring-white/15 px-2 py-1 text-[11px]">
+                    <option value="popular">Sort: Popular</option>
+                    <option value="price-asc">Sort: Price ↑</option>
+                    <option value="price-desc">Sort: Price ↓</option>
+                    <option value="alpha">Sort: A–Z</option>
+                  </select>
+                </div>
               </div>
             </div>
 
+            <!-- Selected chips -->
+            <div x-show="selectedAddonsDetailed.length" class="mt-4 flex flex-wrap gap-2">
+              <template x-for="ad in selectedAddonsDetailed" :key="'chip-'+ad.id">
+                <button @click="toggleAddon(ad.id)" class="group inline-flex items-center gap-2 rounded-full bg-white/10 ring-1 ring-white/15 pl-3 pr-2 py-1 text-xs hover:bg-white/20">
+                  <span x-text="ad.label"></span>
+                  <span class="rounded-full grid place-items-center h-5 w-5 bg-white/20 group-hover:bg-white/30">
+                    <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M6 18L18 6"/></svg>
+                  </span>
+                </button>
+              </template>
+              <span class="text-xs text-white/50">(<span x-text="selectedAddons.length"></span> selected)</span>
+            </div>
+
+            <!-- Add‑on cards -->
             <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[32rem] overflow-auto pr-1">
-              <template x-for="ad in filteredAddons" :key="ad.id">
-                <button type="button" @click="toggleAddon(ad.id)" :aria-pressed="isSelected(ad.id)" class="group text-left rounded-xl p-4 ring-1 ring-white/10 bg-white/5 hover:bg-white/10 hover:ring-white/20 transition relative">
+              <template x-for="ad in visibleAddons" :key="ad.id">
+                <button type="button" role="switch" :aria-checked="isSelected(ad.id)" @click="toggleAddon(ad.id)" :aria-pressed="isSelected(ad.id)" class="group text-left rounded-xl p-4 ring-1 ring-white/10 bg-white/5 hover:bg-white/10 hover:ring-white/20 transition relative">
                   <input type="checkbox" class="sr-only" :value="ad.id" x-model="selectedAddons">
                   <div class="flex items-start gap-3">
-                    <div class="mt-0.5 h-4 w-4 rounded-md ring-1 ring-white/20 grid place-items-center" :class="isSelected(ad.id) ? 'bg-blue-500' : 'bg-transparent'">
-                      <svg x-show="isSelected(ad.id)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>
-                    </div>
+                    <div class="mt-0.5 h-9 w-9 rounded-lg grid place-items-center ring-1 ring-white/15" :class="isSelected(ad.id) ? 'bg-blue-500 text-white ring-0' : 'bg-slate-900/40'" x-html="addonIcon(ad.id)"></div>
                     <div class="flex-1">
                       <div class="flex items-center gap-2">
                         <span class="font-medium" x-text="ad.label"></span>
@@ -224,7 +245,10 @@
                 </button>
               </template>
             </div>
-            <div class="mt-3 text-xs text-white/60">Tip: Start with <span class="font-semibold">Essentials</span> for quick wins. Use <span class="font-semibold">Premium</span> for maximum impact.</div>
+            <div class="mt-3 text-xs text-white/60 flex items-center justify-between">
+              <div>Tip: Start with <span class="font-semibold">Essentials</span> for quick wins. Use <span class="font-semibold">Premium</span> for maximum impact.</div>
+              <button class="text-xs underline decoration-dotted" @click="if(selectedAddons.length){ selectedAddons.pop(); selectedByService[serviceKey]=selectedAddons.slice(); }">Undo last</button>
+            </div>
           </div>
         </div>
 
@@ -269,7 +293,7 @@
                 Review & Checkout
               </button>
               <a href="#contact" class="inline-flex items-center justify-center gap-2 rounded-xl bg-white text-slate-900 px-4 py-3 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition">Request Formal Quote</a>
-              <button @click="selectedAddons=[]" class="inline-flex items-center justify-center gap-2 rounded-xl ring-1 ring-white/20 px-4 py-3 font-semibold hover:bg-white/10 transition">Clear Add‑ons</button>
+              <button @click="selectedAddons=[]; selectedByService[serviceKey]=[]" class="inline-flex items-center justify-center gap-2 rounded-xl ring-1 ring-white/20 px-4 py-3 font-semibold hover:bg-white/10 transition">Clear Add‑ons</button>
               <div class="text-[11px] text-white/60 flex items-center gap-1"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span> Secure Stripe Checkout • Email support: <span class="underline">1coastmedia@gmail.com</span></div>
             </div>
           </div>
@@ -436,6 +460,8 @@
         reviewOpen: false,
         accepted: true,
         customer: { name:'', company:'', email:'', phone:'', notes:'' },
+        sortBy: 'popular',
+        recommendedFirst: true,
 
         // DATA
         services: {
@@ -508,6 +534,19 @@
         get selectedAddonsDetailed(){ const idx=Object.fromEntries(this.currentAddons.map(a=>[a.id,a])); return this.selectedAddons.map(id=>idx[id]).filter(Boolean); },
         get total(){ return this.basePrice + this.selectedAddonsDetailed.reduce((s,a)=>s+(a?.price||0),0); },
         get filteredAddons(){ const q=this.query.toLowerCase().trim(); if(!q) return this.currentAddons; return this.currentAddons.filter(a=>a.label.toLowerCase().includes(q)||a.desc.toLowerCase().includes(q)); },
+        get visibleAddons(){
+          let items = this.filteredAddons.slice();
+          // Recommended first
+          if(this.recommendedFirst && this.recommendedIds?.length){
+            const set = new Set(this.recommendedIds);
+            items.sort((a,b)=> (set.has(a.id)?-1:0) - (set.has(b.id)?-1:0));
+          }
+          // Sort mode
+          if(this.sortBy==='price-asc') items.sort((a,b)=>a.price-b.price);
+          else if(this.sortBy==='price-desc') items.sort((a,b)=>b.price-a.price);
+          else if(this.sortBy==='alpha') items.sort((a,b)=>a.label.localeCompare(b.label));
+          return items;
+        },
 
         // METHODS
         toggleAddon(id){ const i=this.selectedAddons.indexOf(id); if(i>-1) this.selectedAddons.splice(i,1); else this.selectedAddons.push(id); this.selectedByService[this.serviceKey]=this.selectedAddons.slice(); },
@@ -529,6 +568,34 @@
           this.serviceKey = key;
           this.selectedAddons = (this.selectedByService[key] || []).slice();
           this.recommendedIds=this.getBundle('essentials'); },
+        addonIcon(id){
+          const simple = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 7h10v10H7z"/></svg>';
+          const map = {
+            'web-mvp':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16v12H4z"/><path d="M4 10h16"/></svg>',
+            'web-seo':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-3-3"/></svg>',
+            'web-auto':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12h16"/><path d="M12 4v16"/></svg>',
+            'web-api':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="18" cy="12" r="2"/></svg>',
+            'web-shop':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 7h12l-1 10H7z"/><path d="M7 7l2-3h6l2 3"/></svg>',
+            'web-adv':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12h16"/><path d="M12 4v16"/></svg>',
+            'web-dash':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16"/><path d="M4 12h10"/><path d="M4 18h7"/></svg>',
+            'vid-audio':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 10v4a4 4 0 004 4h8"/><path d="M12 6v7"/></svg>',
+            'vid-adv':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="7" width="14" height="10" rx="2"/><path d="M17 12l4-2v4z"/></svg>',
+            'vid-drone-p':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M3 12h6M15 12h6M12 3v6M12 15v6"/></svg>',
+            'vid-drone-pro':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7h6l3 3 3-3h6M3 17h6l3-3 3 3h6"/></svg>',
+            'vid-edit':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 17l6-6 3 3 7-7"/></svg>',
+            'ev-ven':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7h18v10H3z"/><path d="M7 7V3M17 7V3"/></svg>',
+            'ev-digital':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="6" width="16" height="12" rx="2"/></svg>',
+            'ev-media':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 17l4-4 4 4 4-4 4 4"/></svg>',
+            'ev-auto':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12h16"/><path d="M12 4v16"/></svg>',
+            'ev-hybrid':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="16" r="3"/></svg>',
+            'ugc-repurpose':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 6v12"/><path d="M6 12h12"/></svg>',
+            'ugc-leads':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16v12H4z"/><path d="M8 10h8M8 14h6"/></svg>',
+            'ugc-enhance':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2v20"/><path d="M2 12h20"/></svg>',
+            'ugc-captions':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="7" width="16" height="10" rx="2"/><path d="M7 12h5M7 15h7"/></svg>',
+            'ugc-brand':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="4"/></svg>'
+          };
+          return map[id] || simple;
+        },
 
         // STRIPE CHECKOUT (opens from review modal)
         async checkout(){
@@ -572,6 +639,9 @@
         // T6: bundle quick-pick selects recommended ids
         p.setService('ugc'); p.setPlan('monthly'); p.selectBundle('essentials');
         results.push({name:'T6 bundle selects', pass: Array.isArray(p.selectedAddons) && p.selectedAddons.length>0});
+        // T7: sort & recommendedFirst do not break selection
+        p.sortBy='price-desc'; const before = p.selectedAddons.slice(); p.recommendedFirst=false; const after = p.visibleAddons.length>0; 
+        results.push({name:'T7 sorting keeps selection', pass: JSON.stringify(before)===JSON.stringify(p.selectedAddons) && after});
 
         const failed = results.filter(r=>!r.pass);
         if(failed.length){ console.error('Pricing tests failed:', failed); }
