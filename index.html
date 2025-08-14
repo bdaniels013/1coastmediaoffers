@@ -3,28 +3,27 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>1 Coast Media — Premium Digital, Media & Event Services</title>
-  <meta name="description" content="Premium Web & App, Video/Audio Production, Event Planning, and UGC Campaigns for Mississippi Gulf Coast creators and brands. Transparent pricing. Fast turnarounds. Results-driven."/>
+  <title>1 Coast Media — Packages & Checkout</title>
+  <meta name="description" content="Premium Web & App, Video/Audio, Events, and UGC services with transparent pricing and smooth checkout." />
 
-  <!-- Where to POST the checkout payload (default: /api/checkout) -->
+  <!-- Where to POST (we'll create/fix in Step 2) -->
   <meta name="checkout-endpoint" content="/api/checkout" />
 
-  <!-- Fonts / UI libs -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Safe to expose publishable key (used only for Stripe.js fallback) -->
+  <meta name="stripe-publishable-key" content="pk_live_51O4Qh0KoF1Q8iKteAbGsSkEj65fg0tSGOG6dcJCcLyvz0PHC5y8jEAkMDfDFfCTdEeRyPcOtZ7O13MBNZkDhBMR900NqzTN4LN" />
+
+  <!-- TEMPORARY: Tailwind CDN (we'll replace with CLI build in Step 3) -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { theme:{ extend:{} } };</script>
+
+  <!-- Alpine.js -->
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-  <!-- Stripe.js for sessionId fallback (not strictly required, but nice to have) -->
+  <!-- Stripe.js (for sessionId fallback; not strictly required) -->
   <script src="https://js.stripe.com/v3/"></script>
-  <script>
-    // Your publishable key (safe to expose)
-    window.STRIPE_PUBLISHABLE_KEY = "pk_live_51O4Qh0KoF1Q8iKteAbGsSkEj65fg0tSGOG6dcJCcLyvz0PHC5y8jEAkMDfDFfCTdEeRyPcOtZ7O13MBNZkDhBMR900NqzTN4LN";
-  </script>
 
   <style>
-    :root{ --ink:#0b1220; --indigo:#4f46e5; --cyan:#06b6d4; --emerald:#10b981; }
+    :root{--ink:#0b1220;--indigo:#4f46e5;--cyan:#06b6d4;--emerald:#10b981}
     html{scroll-behavior:smooth}
     body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
     .mesh{background-image:
@@ -40,10 +39,7 @@
     .btn{transition:transform .2s ease, box-shadow .2s ease}
     .btn:hover{transform:translateY(-1px)}
     .tap:active{transform:scale(.98)}
-    .chev{transition: transform .2s ease}
     .f-ring:focus-visible{outline:none;box-shadow:0 0 0 4px rgba(79,70,229,.18)}
-    .toast-enter{transform:translateY(8px);opacity:0}
-    .toast-enter-active{transform:translateY(0);opacity:1;transition:.18s ease-out}
     .spinner{border:3px solid #e2e8f0;border-top-color:#0f172a;border-radius:999px;width:18px;height:18px;animation:spin .8s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
     h1,h2,h3{letter-spacing:-0.02em}
@@ -56,7 +52,10 @@
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <a href="#top" class="inline-flex items-center gap-2">
         <span class="inline-grid place-items-center h-9 w-9 rounded-xl bg-white ring-1 ring-slate-200">
-          <svg viewBox="0 0 24 24" class="h-5 w-5 text-slate-700" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3 6 6 .9-4.5 4.4 1 6.3L12 17l-5.5 2.6 1-6.3L3 8.9 9 8z"/></svg>
+          <!-- clean SVG (no duplicate attributes) -->
+          <svg viewBox="0 0 24 24" class="h-5 w-5 text-slate-700" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M12 2l3 6 6 .9-4.5 4.4 1 6.3L12 17l-5.5 2.6 1-6.3L3 8.9 9 8z"/>
+          </svg>
         </span>
         <span class="font-extrabold tracking-tight">1 Coast Media</span>
       </a>
@@ -175,77 +174,15 @@
     </div>
   </section>
 
-  <!-- Toast -->
-  <div x-show="toast.show" x-transition.opacity class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
-    <div class="toast-enter-active rounded-xl bg-slate-900 text-white px-4 py-3 shadow-lg ring-1 ring-black/10">
-      <span x-text="toast.text"></span>
-    </div>
-  </div>
-
-  <!-- FAQ -->
-  <section id="faq" class="py-14 bg-white/60 border-y border-slate-200">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <h3 class="text-2xl font-extrabold">FAQ</h3>
-      <div class="mt-4 grid md:grid-cols-2 gap-3">
-        <div class="card p-4" x-data="{open:false}">
-          <button @click="open=!open" class="w-full flex items-center justify-between text-left f-ring"><span class="font-semibold">How quickly can we start?</span><svg :class="{'rotate-180':open}" class="h-5 w-5 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
-          <div x-show="open" x-transition class="overflow-hidden"><p class="mt-3 text-slate-600">Kick off in ~48 hours. One-time sites in 3–7 days; monthly starts this week.</p></div>
-        </div>
-        <div class="card p-4" x-data="{open:false}">
-          <button @click="open=!open" class="w-full flex items-center justify-between text-left f-ring"><span class="font-semibold">Can I pick add-ons without a base?</span><svg :class="{'rotate-180':open}" class="h-5 w-5 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
-          <div x-show="open" x-transition class="overflow-hidden"><p class="mt-3 text-slate-600">Browse freely; we’ll auto-add the correct base at checkout if needed.</p></div>
-        </div>
-        <div class="card p-4" x-data="{open:false}">
-          <button @click="open=!open" class="w-full flex items-center justify-between text-left f-ring"><span class="font-semibold">Do you travel for shoots?</span><svg :class="{'rotate-180':open}" class="h-5 w-5 transition" viewBox="0 0 24 24  fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
-          <div x-show="open" x-transition class="overflow-hidden"><p class="mt-3 text-slate-600">Yes. We’re Gulf Coast based with travel options for video and events.</p></div>
-        </div>
-        <div class="card p-4" x-data="{open:false}">
-          <button @click="open=!open" class="w-full flex items-center justify-between text-left f-ring"><span class="font-semibold">Is there a contract?</span><svg :class="{'rotate-180':open}" class="h-5 w-5 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
-          <div x-show="open" x-transition class="overflow-hidden"><p class="mt-3 text-slate-600">One-time = clear scope. Monthly = simple 3-month minimum to build momentum.</p></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CONTACT -->
-  <section id="contact" class="py-16">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-10 items-start">
-      <div>
-        <h2 class="text-3xl font-extrabold tracking-tight">Ready to transform your brand?</h2>
-        <p class="mt-3 text-slate-600 max-w-prose">Prefer to chat first? Book a free call or email us anytime.</p>
-        <div class="mt-6 space-x-3 text-sm">
-          <a href="mailto:1coastmedia@gmail.com?subject=1%20Coast%20Media%20Inquiry" class="tap inline-flex items-center gap-2 rounded-xl bg-slate-900 text-white px-4 py-3 font-semibold shadow-sm hover:shadow-lg">Email Us</a>
-          <a href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noreferrer" class="tap inline-flex items-center gap-2 rounded-xl ring-1 ring-slate-200 bg-white px-4 py-3 font-semibold hover:bg-slate-50">Open Calendly</a>
-        </div>
-      </div>
-      <div class="halo p-0.5 w-full">
-        <div class="rounded-3xl glass ring-1 ring-slate-200 p-2 w-full">
-          <iframe title="Calendly" src="https://calendly.com/bdaniels013/30min?hide_event_type_details=1&text_color=0F172A&primary_color=0F172A" class="w-full rounded-2xl" style="min-height:660px"></iframe>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <footer class="py-10 border-t border-slate-200 text-center text-xs text-slate-500">© <span x-text="year"></span> 1 Coast Media • Mississippi Gulf Coast • All rights reserved.</footer>
-
-  <!-- Mobile sticky CTA -->
-  <div class="md:hidden fixed bottom-4 left-4 right-4 z-40" x-show="stickyCta" x-transition>
-    <div class="rounded-2xl bg-slate-900 text-white shadow-xl px-4 py-3 ring-1 ring-black/5 flex items-center justify-between">
-      <div>
-        <div class="text-xs text-white/80">Ready when you are</div>
-        <div class="text-lg font-extrabold">Build your package</div>
-      </div>
-      <button @click="openBuilder()" class="rounded-xl bg-white text-slate-900 px-4 py-2 font-semibold">Start</button>
-    </div>
-  </div>
-
   <!-- Explore Add-Ons -->
   <div x-show="addonsOpen" x-transition.opacity class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
     <div @click="addonsOpen=false" class="absolute inset-0 bg-slate-900/50"></div>
     <div class="relative w-full sm:max-w-6xl rounded-2xl bg-white text-slate-900 shadow-2xl ring-1 ring-slate-200 max-h-[92vh] overflow-hidden">
       <div class="p-5 border-b border-slate-200 flex items-center justify-between">
         <h3 class="text-lg font-bold">Explore Add-Ons</h3>
-        <button @click="addonsOpen=false" class="h-9 w-9 grid place-items-center rounded-md hover:bg-slate-50 f-ring" aria-label="Close"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6l12 12M6 18L18 6"/></svg></button>
+        <button @click="addonsOpen=false" class="h-9 w-9 grid place-items-center rounded-md hover:bg-slate-50 f-ring" aria-label="Close">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 6l12 12M6 18L18 6"/></svg>
+        </button>
       </div>
       <div class="p-5 grid lg:grid-cols-4 gap-4 overflow-auto max-h-[calc(92vh-72px)]">
         <!-- Filters -->
@@ -300,7 +237,10 @@
                     <button @click="toggleAddon(ad.id)" class="tap rounded-md px-2 py-1 text-xs font-semibold f-ring" :class="cartAddons.includes(ad.id)?'bg-emerald-600 text-white':'ring-1 ring-slate-200'" x-text="cartAddons.includes(ad.id)?'Added':'Add'"></button>
                   </div>
                 </div>
-                <button @click="toggleDesc(ad.id)" class="w-full text-left px-3 pb-3 text-xs text-slate-500 flex items-center gap-1 f-ring"><span class="underline">Details</span><svg class="h-3 w-3 chev" :class="{ 'rotate-180': openDescs[ad.id] }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
+                <button @click="toggleDesc(ad.id)" class="w-full text-left px-3 pb-3 text-xs text-slate-500 flex items-center gap-1 f-ring">
+                  <span class="underline">Details</span>
+                  <svg class="h-3 w-3 transition" :class="{ 'rotate-180': openDescs[ad.id] }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
                 <div class="px-3 pb-3 text-sm text-slate-600" x-show="openDescs[ad.id]" x-transition x-text="ad.desc"></div>
               </div>
             </template>
@@ -314,13 +254,15 @@
     </div>
   </div>
 
-  <!-- Builder (Review) -->
+  <!-- Builder (Review & Checkout) -->
   <div x-show="builderOpen" x-transition.opacity class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
     <div @click="builderOpen=false" class="absolute inset-0 bg-slate-900/50"></div>
     <div class="relative w-full sm:max-w-6xl rounded-2xl bg-white text-slate-900 shadow-2xl ring-1 ring-slate-200 max-h-[92vh] overflow-hidden">
       <div class="p-5 border-b border-slate-200 flex items-center justify-between">
         <h3 class="text-lg font-bold">Review & Checkout</h3>
-        <button @click="builderOpen=false" class="h-9 w-9 grid place-items-center rounded-md hover:bg-slate-50 f-ring" aria-label="Close"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6l12 12M6 18L18 6"/></svg></button>
+        <button @click="builderOpen=false" class="h-9 w-9 grid place-items-center rounded-md hover:bg-slate-50 f-ring" aria-label="Close">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 6l12 12M6 18L18 6"/></svg>
+        </button>
       </div>
       <div class="p-5 grid lg:grid-cols-3 gap-6 overflow-auto max-h-[calc(92vh-72px)]">
         <!-- Left: choose bases -->
@@ -361,7 +303,9 @@
                   </div>
                   <div class="text-sm font-semibold whitespace-nowrap" x-text="fmtUSD(ad.price[plan])"></div>
                 </div>
-                <div x-show="cartAddons.includes(ad.id)" class="absolute top-2 right-2 h-6 w-6 rounded-full grid place-items-center bg-white text-indigo-600 ring-1 ring-indigo-200"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l5 5L19 7"/></svg></div>
+                <div x-show="cartAddons.includes(ad.id)" class="absolute top-2 right-2 h-6 w-6 rounded-full grid place-items-center bg-white text-indigo-600 ring-1 ring-indigo-200">
+                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12l5 5L19 7"/></svg>
+                </div>
                 <div class="mt-2 text-xs text-slate-500" x-text="ad.desc"></div>
               </button>
             </template>
@@ -435,9 +379,27 @@
     </div>
   </div>
 
-  <footer class="py-10 text-center text-[11px] text-slate-500">SECURE CHECKOUT WITH STRIPE • NO PUSHY SALES — CLEAR PRICING</footer>
+  <!-- CONTACT -->
+  <section id="contact" class="py-16">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-10 items-start">
+      <div>
+        <h2 class="text-3xl font-extrabold tracking-tight">Ready to transform your brand?</h2>
+        <p class="mt-3 text-slate-600 max-w-prose">Prefer to chat first? Book a free call or email us anytime.</p>
+        <div class="mt-6 space-x-3 text-sm">
+          <a href="mailto:1coastmedia@gmail.com?subject=1%20Coast%20Media%20Inquiry" class="tap inline-flex items-center gap-2 rounded-xl bg-slate-900 text-white px-4 py-3 font-semibold shadow-sm hover:shadow-lg">Email Us</a>
+          <a href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noreferrer" class="tap inline-flex items-center gap-2 rounded-xl ring-1 ring-slate-200 bg-white px-4 py-3 font-semibold hover:bg-slate-50">Open Calendly</a>
+        </div>
+      </div>
+      <div class="halo p-0.5 w-full">
+        <div class="rounded-3xl glass ring-1 ring-slate-200 p-2 w-full">
+          <iframe title="Calendly" src="https://calendly.com/bdaniels013/30min?hide_event_type_details=1&text_color=0F172A&primary_color=0F172A" class="w-full rounded-2xl" style="min-height:660px"></iframe>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  <!-- App -->
+  <footer class="py-10 border-t border-slate-200 text-center text-xs text-slate-500">© <span x-text="year"></span> 1 Coast Media • Mississippi Gulf Coast • All rights reserved.</footer>
+
   <script>
     function landingApp(){
       return {
@@ -445,7 +407,6 @@
         plan: 'oneTime',
         addonQuery: '',
         sortBy: 'popular',
-
         services: [
           { key:'web', name:'Web & App', blurb:'Launch a clean, mobile-first site fast.', base:{oneTime:300, monthly:500}, includes:['Kickoff & setup','Landing page (3–5 sections)','Light copy help'], addOns:[
             { id:'web-seo', label:'SEO Basics', desc:'Titles, speed checks, findable.', short:'Quick search wins', price:{oneTime:150, monthly:150}, badge:'Quick win', popular:true },
@@ -518,7 +479,6 @@
             { id:'ugc-hooks', label:'A/B Hooks Pack', desc:'5 alt hooks to test.', short:'Test faster', price:{oneTime:140, monthly:140}, badge:'Test' },
           ]},
         ],
-
         addonIndex: {},
         openDescs: {},
         cartServices: [],
@@ -531,14 +491,13 @@
         isSubmitting:false,
         contact:{ name:'', email:'', company:'', phone:'', notes:'' },
 
-        // --- Init ---
         init(){
-          // Build add-on index
+          // build add-on index
           this.addonIndex = this.services.reduce((acc, svc) => {
             svc.addOns.forEach(a => acc[a.id] = { ...a, service: svc.key });
             return acc;
           }, {});
-          // Restore cart
+          // restore cart
           try{
             const saved = JSON.parse(localStorage.getItem('coast_cart')||'{}');
             if(saved.services) this.cartServices = saved.services;
@@ -546,12 +505,11 @@
             if(saved.plan) this.plan = saved.plan;
             if(saved.contact) this.contact = {...this.contact, ...saved.contact};
           }catch{}
-          // Sticky CTA
+          // sticky CTA
           const onScroll = () => { this.stickyCta = window.scrollY > 640 };
           onScroll(); window.addEventListener('scroll', onScroll);
         },
 
-        // --- Derived ---
         get total(){
           const baseSum = this.cartServices.reduce((s, key) => s + (this.services.find(x => x.key === key)?.base?.[this.plan] || 0), 0);
           const addonSum = this.cartAddons.reduce((s, id) => s + (this.addonIndex[id]?.price?.[this.plan] || 0), 0);
@@ -568,7 +526,6 @@
           return items;
         },
 
-        // --- Helpers ---
         addonsFor(key){ return (this.services.find(s => s.key === key) || {}).addOns || []; },
         serviceName(key){ return (this.services.find(s => s.key === key) || {}).name || key; },
         serviceBase(key){ return (this.services.find(s => s.key === key) || {}).base?.[this.plan] || 0; },
@@ -576,7 +533,6 @@
         save(){ localStorage.setItem('coast_cart', JSON.stringify({ services:this.cartServices, addons:this.cartAddons, plan:this.plan, contact:this.contact })); },
         emailValid(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e||''); },
 
-        // --- UI Actions ---
         setPlan(p){ this.plan = p; this.save(); },
         toggleService(key){
           const i = this.cartServices.indexOf(key);
@@ -590,7 +546,7 @@
             this.cartAddons.splice(i,1);
             this.flash('Removed add-on');
           } else {
-            // Auto-add base for seamless checkout
+            // auto-add base for seamless checkout
             if(!this.cartServices.includes(svcKey)){
               this.cartServices.push(svcKey);
               this.flash(`Added “${this.serviceName(svcKey)}” base for this add-on.`);
@@ -600,9 +556,7 @@
           }
           this.save();
         },
-        toggleDesc(id){
-          this.openDescs = { ...this.openDescs, [id]: !this.openDescs[id] };
-        },
+        toggleDesc(id){ this.openDescs = { ...this.openDescs, [id]: !this.openDescs[id] }; },
         quickPick(kind){
           const maps = {
             essentials: { web:['web-seo','web-auto'], video:['vid-audio','vid-sizes'], events:['ev-digital','ev-media'], ugc:['ugc-captions','ugc-enhance'] },
@@ -621,54 +575,43 @@
         openAddons(key){ this.activeService = key || 'web'; this.addonsOpen = true; },
         openBuilder(){ this.builderOpen = true; },
         clearAll(){ this.cartServices = []; this.cartAddons = []; this.save(); this.flash('Cleared cart'); },
-        flash(text){ this.toast.text = text; this.toast.show = true; setTimeout(()=> this.toast.show=false, 1400); },
+        flash(text){ this.toast = { text, show:true }; setTimeout(()=> this.toast.show=false, 1400); },
 
-        // --- Checkout ---
         async beginCheckout(){
           try{
             if(this.isSubmitting) return;
+            if(!this.cartServices.length){ this.flash('Add at least one Base Service.'); return; }
+            if(!this.emailValid(this.contact.email)){ this.flash('Enter a valid email.'); return; }
 
-            if(!this.cartServices.length){
-              this.flash('Please add at least one Base Service to continue.');
-              return;
-            }
-            if(!this.emailValid(this.contact.email)){
-              this.flash('Enter a valid email for receipt & updates.');
-              return;
-            }
-
-            // Build cart payload grouped by base service
+            // build payload grouped by base service
             const cart = this.cartServices.map(svcKey => {
               const svc = this.services.find(s => s.key === svcKey);
               const base = svc?.base?.[this.plan] || 0;
-              // Filter out zero-priced MONTHLY add-ons to avoid Stripe subscription errors
               const addons = this.cartAddons
                 .filter(id => this.addonIndex[id]?.service === svcKey)
-                .map(id => ({ id, name: this.addonIndex[id].label, price: this.addonIndex[id].price[this.plan] }))
-                .filter(a => this.plan === 'monthly' ? a.price > 0 : true);
-
-              return { service: svcKey, base, addons, notes: '' };
+                .map(id => ({ id, name: this.addonIndex[id].label, price: this.addonIndex[id].price[this.plan] }));
+              return { service: svcKey, base, addons, /* notes optional */ };
             });
 
+            const endpoint = document.querySelector('meta[name="checkout-endpoint"]')?.content || '/api/checkout';
             this.isSubmitting = true;
 
-            const endpoint = document.querySelector('meta[name="checkout-endpoint"]')?.content || '/api/checkout';
             const res = await fetch(endpoint, {
               method:'POST',
               headers:{ 'Content-Type':'application/json' },
               body: JSON.stringify({ plan: this.plan, cart, contact: { ...this.contact } })
             });
 
-            const out = await res.json().catch(()=>({}));
+            const out = await res.json().catch(()=> ({}));
             if(!res.ok){
-              throw new Error(out.error || 'Checkout could not start');
+              throw new Error(out?.error || `Checkout failed (${res.status})`);
             }
 
-            // Prefer session.url; fallback to sessionId + Stripe.js
-            if(out.url){
-              window.location.assign(out.url);
-            }else if(out.id && window.STRIPE_PUBLISHABLE_KEY && window.Stripe){
-              const stripe = Stripe(window.STRIPE_PUBLISHABLE_KEY);
+            if(out?.url){
+              location.assign(out.url); // Stripe Checkout URL
+            }else if(out?.id && window.Stripe){
+              const pk = document.querySelector('meta[name="stripe-publishable-key"]')?.content;
+              const stripe = Stripe(pk);
               const { error } = await stripe.redirectToCheckout({ sessionId: out.id });
               if(error) throw error;
             }else{
@@ -676,7 +619,7 @@
             }
           }catch(e){
             console.error(e);
-            this.flash(e.message || 'Checkout failed. Email 1coastmedia@gmail.com for help.');
+            this.flash(e.message || 'Checkout failed.');
             this.isSubmitting = false;
           }
         },
