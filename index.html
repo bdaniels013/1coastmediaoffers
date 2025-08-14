@@ -12,39 +12,29 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Alpine.js -->
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <!-- Stripe.js (publishable key used below) -->
-  <script src="https://js.stripe.com/v3/"></script>
   <style>
     :root{
-      --ink:#0b1220;           /* deep ink */
-      --indigo:#4f46e5;        /* accent */
-      --cyan:#06b6d4;          /* accent */
-      --emerald:#10b981;       /* success */
-      --ring: rgba(15, 23, 42, 0.12);
+      --ink:#0b1220; --indigo:#4f46e5; --cyan:#06b6d4; --emerald:#10b981; --ring: rgba(15, 23, 42, 0.12);
     }
     html{scroll-behavior:smooth}
     body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
-    /* Premium mesh + subtle grid */
     .mesh{background-image:
       radial-gradient(70rem 35rem at -10% -10%, rgba(79,70,229,.14), transparent 60%),
       radial-gradient(60rem 30rem at 110% 10%, rgba(6,182,212,.12), transparent 60%),
       radial-gradient(36rem 22rem at 60% 120%, rgba(16,185,129,.10), transparent 60%),
       linear-gradient(#f8fafc, #ffffff 28%, #f1f5f9)}
-    /* Glass + gradient halo ring */
     .glass{backdrop-filter:saturate(170%) blur(14px);background:rgba(255,255,255,.84)}
     .halo{position:relative;border-radius:1.25rem}
     .halo:before{content:"";position:absolute;inset:-1px;border-radius:inherit;background:linear-gradient(120deg, rgba(2,6,23,.08), rgba(79,70,229,.32), rgba(6,182,212,.32), rgba(2,6,23,.08));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;padding:1px;pointer-events:none}
     .btn{transition:transform .2s ease, box-shadow .2s ease}
     .btn:hover{transform:translateY(-1px)}
-    /* Micro-interactions */
     .tap:active{transform:scale(.98)}
-    /* Collapsible chevron */
     .chev{transition: transform .2s ease}
-    /* Focus ring for better a11y */
     .f-ring:focus-visible{outline:none;box-shadow:0 0 0 4px rgba(79,70,229,.18)}
-    /* Toast */
     .toast-enter{transform:translateY(8px);opacity:0}
     .toast-enter-active{transform:translateY(0);opacity:1;transition:.18s ease-out}
+    .spinner{border:3px solid #e2e8f0;border-top-color:#0f172a;border-radius:999px;width:18px;height:18px;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
   </style>
 </head>
 <body class="mesh text-slate-800" x-data="landingApp()" x-init="init()">
@@ -59,7 +49,7 @@
       </a>
       <nav class="hidden md:flex items-center gap-6 text-sm">
         <a href="#services" class="hover:text-slate-900 text-slate-600 f-ring">Base Services</a>
-        <button @click="openAddons('web')" class="hover:text-slate-900 text-slate-600 f-ring">Explore Add‑Ons</button>
+        <button @click="openAddons('web')" class="hover:text-slate-900 text-slate-600 f-ring">Explore Add-Ons</button>
         <a href="#faq" class="hover:text-slate-900 text-slate-600 f-ring">FAQ</a>
         <a href="#contact" class="hover:text-slate-900 text-slate-600 f-ring">Contact</a>
         <button @click="openBuilder()" class="tap btn inline-flex items-center gap-2 rounded-xl bg-slate-900 text-white px-3 py-2 font-semibold shadow-sm hover:shadow-lg">Build Your Package</button>
@@ -73,18 +63,18 @@
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 md:py-20 grid lg:grid-cols-2 gap-12 items-center">
       <div>
         <h1 class="text-5xl font-black leading-tight tracking-tight">Gulf Coast Growth, <span class="bg-gradient-to-r from-slate-900 via-blue-600 to-indigo-500 bg-clip-text text-transparent">On Demand</span></h1>
-        <p class="mt-4 text-slate-600 max-w-prose">Pick a base service, stack add‑ons anywhere, or build from scratch. One‑time for quick wins, monthly for momentum.</p>
+        <p class="mt-4 text-slate-600 max-w-prose">Pick a base service, stack add-ons, or build from scratch. One-time for quick wins, monthly for momentum.</p>
         <div class="mt-8 flex flex-wrap items-center gap-3">
           <a href="#services" class="tap btn inline-flex items-center gap-2 rounded-xl bg-slate-900 text-white px-5 py-3 font-semibold shadow-sm hover:shadow-lg">See Base Services</a>
-          <button @click="openAddons('web')" class="tap btn inline-flex items-center gap-2 rounded-xl ring-1 ring-slate-200 bg-white px-5 py-3 font-semibold hover:bg-slate-50">Explore Add‑Ons</button>
+          <button @click="openAddons('web')" class="tap btn inline-flex items-center gap-2 rounded-xl ring-1 ring-slate-200 bg-white px-5 py-3 font-semibold hover:bg-slate-50">Explore Add-Ons</button>
         </div>
-        <div class="mt-6 text-xs text-slate-500">Email <a class="underline" href="mailto:1coastmedia@gmail.com">1coastmedia@gmail.com</a> • Free 30‑min call <a class="underline" href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noreferrer">here</a>.</div>
+        <div class="mt-6 text-xs text-slate-500">Email <a class="underline" href="mailto:1coastmedia@gmail.com">1coastmedia@gmail.com</a> • Free 30-min call <a class="underline" href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noreferrer">here</a>.</div>
       </div>
       <div class="relative">
         <div class="halo p-0.5">
           <div class="rounded-[1.25rem] bg-white ring-1 ring-slate-200 p-6 shadow-sm">
             <div class="grid sm:grid-cols-3 gap-4 w-full">
-              <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4"><div class="text-3xl font-black text-slate-900">3‑7d</div><div class="text-xs text-slate-500">Website turnarounds</div></div>
+              <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4"><div class="text-3xl font-black text-slate-900">3-7d</div><div class="text-xs text-slate-500">Website turnarounds</div></div>
               <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4"><div class="text-3xl font-black text-slate-900">30k+</div><div class="text-xs text-slate-500">UGC views/campaign</div></div>
               <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4"><div class="text-3xl font-black text-slate-900">100%</div><div class="text-xs text-slate-500">Transparent pricing</div></div>
             </div>
@@ -101,7 +91,7 @@
       <div class="flex items-center justify-between gap-3">
         <div class="text-sm text-slate-600">Plan</div>
         <div class="inline-flex rounded-lg bg-slate-100 p-1">
-          <button @click="setPlan('oneTime')" :class="plan==='oneTime' ? 'bg-white text-slate-900' : 'text-slate-700'" class="px-3 py-1 rounded-md text-sm font-semibold f-ring">One‑time</button>
+          <button @click="setPlan('oneTime')" :class="plan==='oneTime' ? 'bg-white text-slate-900' : 'text-slate-700'" class="px-3 py-1 rounded-md text-sm font-semibold f-ring">One-time</button>
           <button @click="setPlan('monthly')" :class="plan==='monthly' ? 'bg-white text-slate-900' : 'text-slate-700'" class="px-3 py-1 rounded-md text-sm font-semibold f-ring">Monthly</button>
         </div>
       </div>
@@ -114,9 +104,9 @@
       <div class="flex items-end justify-between gap-4">
         <div>
           <h2 class="text-3xl font-extrabold tracking-tight">Base Services</h2>
-          <p class="mt-2 text-slate-600">Start with a base. Add add‑ons anywhere. You can also pick add‑ons without a base.</p>
+          <p class="mt-2 text-slate-600">Start with a base. Add add-ons anywhere. <span class="text-slate-500">(Checkout requires at least one base.)</span></p>
         </div>
-        <button @click="openAddons(activeService)" class="hidden sm:inline-flex tap btn items-center gap-2 rounded-xl bg-slate-900 text-white px-4 py-3 font-semibold shadow-sm hover:shadow-lg">Explore Add‑Ons</button>
+        <button @click="openAddons(activeService)" class="hidden sm:inline-flex tap btn items-center gap-2 rounded-xl bg-slate-900 text-white px-4 py-3 font-semibold shadow-sm hover:shadow-lg">Explore Add-Ons</button>
       </div>
 
       <div class="mt-6 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -124,7 +114,7 @@
           <div class="halo p-0.5">
             <div class="relative rounded-3xl bg-white ring-1 ring-slate-200 p-6 shadow-sm hover:shadow-xl transition">
               <div class="absolute -top-1 left-6 inline-flex gap-2">
-                <span class="text-[11px] uppercase tracking-wide rounded bg-slate-100 ring-1 ring-slate-200 px-2 py-0.5" x-text="plan==='oneTime' ? 'One‑time' : 'Monthly'"></span>
+                <span class="text-[11px] uppercase tracking-wide rounded bg-slate-100 ring-1 ring-slate-200 px-2 py-0.5" x-text="plan==='oneTime' ? 'One-time' : 'Monthly'"></span>
               </div>
               <div class="flex items-start justify-between gap-3 mt-3">
                 <div>
@@ -141,7 +131,7 @@
               </ul>
               <div class="mt-5 grid grid-cols-2 gap-2">
                 <button @click="toggleService(svc.key)" class="tap rounded-lg px-3 py-2 text-sm font-semibold f-ring" :class="cartServices.includes(svc.key) ? 'bg-emerald-600 text-white' : 'bg-slate-900 text-white'" x-text="cartServices.includes(svc.key) ? 'Added' : 'Add Base'"></button>
-                <button @click="activeService=svc.key; openAddons(svc.key)" class="tap rounded-lg ring-1 ring-slate-200 bg-white px-3 py-2 text-sm font-semibold f-ring">Add‑Ons</button>
+                <button @click="activeService=svc.key; openAddons(svc.key)" class="tap rounded-lg ring-1 ring-slate-200 bg-white px-3 py-2 text-sm font-semibold f-ring">Add-Ons</button>
               </div>
             </div>
           </div>
@@ -154,10 +144,10 @@
   <section class="py-6">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="rounded-2xl bg-white ring-1 ring-slate-200 p-4 flex items-center justify-between gap-3">
-        <div class="text-sm text-slate-600">Selected: <strong x-text="cartServices.length"></strong> base • <strong x-text="cartAddons.length"></strong> add‑ons</div>
+        <div class="text-sm text-slate-600">Selected: <strong x-text="cartServices.length"></strong> base • <strong x-text="cartAddons.length"></strong> add-ons</div>
         <div class="text-sm text-slate-600">Est. total: <strong x-text="fmtUSD(total)"></strong><span class="text-slate-500" x-show="plan==='monthly'">/mo</span></div>
         <div class="flex gap-2">
-          <button @click="openAddons(activeService)" class="tap rounded-lg ring-1 ring-slate-200 bg-white px-3 py-2 text-sm font-semibold f-ring">Explore Add‑Ons</button>
+          <button @click="openAddons(activeService)" class="tap rounded-lg ring-1 ring-slate-200 bg-white px-3 py-2 text-sm font-semibold f-ring">Explore Add-Ons</button>
           <button @click="openBuilder()" class="tap rounded-lg bg-slate-900 text-white px-3 py-2 text-sm font-semibold f-ring">Review & Checkout</button>
         </div>
       </div>
@@ -178,11 +168,11 @@
       <div class="mt-4 grid md:grid-cols-2 gap-3">
         <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4" x-data="{open:false}">
           <button @click="open=!open" class="w-full flex items-center justify-between text-left f-ring"><span class="font-semibold">How quickly can we start?</span><svg :class="{'rotate-180':open}" class="h-5 w-5 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
-          <div x-show="open" x-transition class="overflow-hidden"><p class="mt-3 text-slate-600">Kick off in ~48 hours. One‑time sites in 3–7 days; monthly starts this week.</p></div>
+          <div x-show="open" x-transition class="overflow-hidden"><p class="mt-3 text-slate-600">Kick off in ~48 hours. One-time sites in 3–7 days; monthly starts this week.</p></div>
         </div>
         <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4" x-data="{open:false}">
-          <button @click="open=!open" class="w-full flex items-center justify-between text-left f-ring"><span class="font-semibold">Can I pick add‑ons without a base?</span><svg :class="{'rotate-180':open}" class="h-5 w-5 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
-          <div x-show="open" x-transition class="overflow-hidden"><p class="mt-3 text-slate-600">Yes. Choose any add‑on. We’ll scope it cleanly and deliver it standalone or bundle later.</p></div>
+          <button @click="open=!open" class="w-full flex items-center justify-between text-left f-ring"><span class="font-semibold">Can I pick add-ons without a base?</span><svg :class="{'rotate-180':open}" class="h-5 w-5 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
+          <div x-show="open" x-transition class="overflow-hidden"><p class="mt-3 text-slate-600">Yes for browsing; for checkout, add at least one base so Stripe can itemize correctly.</p></div>
         </div>
         <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4" x-data="{open:false}">
           <button @click="open=!open" class="w-full flex items-center justify-between text-left f-ring"><span class="font-semibold">Do you travel for shoots?</span><svg :class="{'rotate-180':open}" class="h-5 w-5 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
@@ -190,7 +180,7 @@
         </div>
         <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4" x-data="{open:false}">
           <button @click="open=!open" class="w-full flex items-center justify-between text-left f-ring"><span class="font-semibold">Is there a contract?</span><svg :class="{'rotate-180':open}" class="h-5 w-5 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
-          <div x-show="open" x-transition class="overflow-hidden"><p class="mt-3 text-slate-600">One‑time = clear scope. Monthly = simple 3‑month minimum to build momentum.</p></div>
+          <div x-show="open" x-transition class="overflow-hidden"><p class="mt-3 text-slate-600">One-time = clear scope. Monthly = simple 3-month minimum to build momentum.</p></div>
         </div>
       </div>
     </div>
@@ -228,12 +218,12 @@
     </div>
   </div>
 
-  <!-- Explore Add‑Ons (global) -->
+  <!-- Explore Add-Ons (global) -->
   <div x-show="addonsOpen" x-transition.opacity class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
     <div @click="addonsOpen=false" class="absolute inset-0 bg-slate-900/50"></div>
     <div class="relative w-full sm:max-w-6xl rounded-2xl bg-white text-slate-900 shadow-2xl ring-1 ring-slate-200 max-h-[92vh] overflow-hidden">
       <div class="p-5 border-b border-slate-200 flex items-center justify-between">
-        <h3 class="text-lg font-bold">Explore Add‑Ons</h3>
+        <h3 class="text-lg font-bold">Explore Add-Ons</h3>
         <button @click="addonsOpen=false" class="h-9 w-9 grid place-items-center rounded-md hover:bg-slate-50 f-ring" aria-label="Close"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6l12 12M6 18L18 6"/></svg></button>
       </div>
       <div class="p-5 grid lg:grid-cols-4 gap-4 overflow-auto max-h-[calc(92vh-72px)]">
@@ -246,7 +236,7 @@
             </select>
           </div>
           <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-3">
-            <label class="text-xs text-slate-500">Search add‑ons</label>
+            <label class="text-xs text-slate-500">Search add-ons</label>
             <input x-model.trim="addonQuery" placeholder="e.g., SEO, drone, captions" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-2 py-2 text-sm f-ring" />
           </div>
           <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-3">
@@ -270,7 +260,7 @@
         <!-- Add-on list -->
         <div class="lg:col-span-3">
           <div class="flex items-center justify-between gap-2 flex-wrap">
-            <div class="text-sm text-slate-600">Selected add‑ons: <strong x-text="cartAddons.length"></strong></div>
+            <div class="text-sm text-slate-600">Selected add-ons: <strong x-text="cartAddons.length"></strong></div>
             <div class="text-sm text-slate-600">Est. total: <strong x-text="fmtUSD(total)"></strong><span class="text-slate-500" x-show="plan==='monthly'">/mo</span></div>
           </div>
           <div class="mt-3 divide-y divide-slate-200 ring-1 ring-slate-200 rounded-xl overflow-hidden max-h-[60vh] overflow-auto pr-1 bg-white">
@@ -314,7 +304,8 @@
       <div class="p-5 grid lg:grid-cols-3 gap-6 overflow-auto max-h-[calc(92vh-72px)]">
         <!-- Left: choose bases -->
         <div class="lg:col-span-1 rounded-2xl bg-white ring-1 ring-slate-200 p-4">
-          <h4 class="font-semibold">1) Base services (optional)</h4>
+          <h4 class="font-semibold">1) Base services</h4>
+          <p class="text-xs text-slate-500 mt-1">Pick at least one base to continue.</p>
           <div class="mt-2 grid grid-cols-2 gap-2">
             <template x-for="s in services" :key="'pick-'+s.key">
               <button @click="toggleService(s.key)" class="tap rounded-xl px-3 py-2 font-semibold ring-1 ring-slate-200 flex items-center justify-center gap-2 f-ring" :class="cartServices.includes(s.key) ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 hover:bg-slate-50'">
@@ -328,12 +319,12 @@
         <!-- Middle: add-ons -->
         <div class="lg:col-span-2 rounded-2xl bg-white ring-1 ring-slate-200 p-4">
           <div class="flex items-center justify-between gap-3 flex-wrap">
-            <h4 class="font-semibold">2) Add‑ons (pick anything)</h4>
+            <h4 class="font-semibold">2) Add-ons (optional)</h4>
             <div class="flex items-center gap-2">
               <select x-model="activeService" class="rounded-lg bg-white ring-1 ring-slate-200 px-2 py-1 text-sm f-ring">
                 <template x-for="s in services" :key="'sel2-'+s.key"><option :value="s.key" x-text="s.name"></option></template>
               </select>
-              <input x-model.trim="addonQuery" placeholder="Search add‑ons" class="rounded-lg bg-white ring-1 ring-slate-200 px-2 py-1 text-sm f-ring" />
+              <input x-model.trim="addonQuery" placeholder="Search add-ons" class="rounded-lg bg-white ring-1 ring-slate-200 px-2 py-1 text-sm f-ring" />
             </div>
           </div>
           <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[28rem] overflow-auto pr-1">
@@ -356,7 +347,7 @@
           </div>
         </div>
 
-        <!-- Summary -->
+        <!-- Summary + Contact -->
         <div class="lg:col-span-3 rounded-2xl bg-white ring-1 ring-slate-200 p-4">
           <h4 class="font-semibold">Summary</h4>
           <div class="mt-3 grid md:grid-cols-2 gap-4">
@@ -371,7 +362,7 @@
               </template>
             </div>
             <div>
-              <div class="text-xs text-slate-500">Add‑ons</div>
+              <div class="text-xs text-slate-500">Add-ons</div>
               <template x-if="cartAddons.length===0"><div class="text-sm text-slate-500">None selected</div></template>
               <template x-for="id in cartAddons" :key="'sum-addon-'+id">
                 <div class="mt-2 flex items-center justify-between rounded-lg bg-slate-50 ring-1 ring-slate-200 p-3">
@@ -381,14 +372,43 @@
               </template>
             </div>
           </div>
+
+          <!-- Contact block -->
+          <div class="mt-5 grid md:grid-cols-5 gap-3">
+            <div class="md:col-span-2">
+              <label class="text-xs text-slate-500">Name</label>
+              <input x-model.trim="contact.name" placeholder="Jane Smith" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-3 py-2 text-sm f-ring"/>
+            </div>
+            <div class="md:col-span-2">
+              <label class="text-xs text-slate-500">Email <span class="text-rose-500">*</span></label>
+              <input x-model.trim="contact.email" type="email" placeholder="you@example.com" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-3 py-2 text-sm f-ring"/>
+            </div>
+            <div class="">
+              <label class="text-xs text-slate-500">Phone</label>
+              <input x-model.trim="contact.phone" placeholder="(555) 555-5555" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-3 py-2 text-sm f-ring"/>
+            </div>
+            <div class="md:col-span-2">
+              <label class="text-xs text-slate-500">Company</label>
+              <input x-model.trim="contact.company" placeholder="Your company" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-3 py-2 text-sm f-ring"/>
+            </div>
+            <div class="md:col-span-3">
+              <label class="text-xs text-slate-500">Notes</label>
+              <input x-model.trim="contact.notes" placeholder="Anything we should know for kickoff?" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-3 py-2 text-sm f-ring"/>
+            </div>
+          </div>
+
           <div class="mt-4 flex items-center justify-between border-t border-slate-200 pt-3">
             <div class="text-sm text-slate-600">Estimated total <span x-show="plan==='monthly'">(per month)</span></div>
             <div class="text-lg font-extrabold" x-text="fmtUSD(total)"></div>
           </div>
           <div class="mt-3 flex flex-wrap justify-end gap-2">
-            <button @click="clearAll()" class="rounded-lg ring-1 ring-slate-200 px-4 py-2 bg-white f-ring">Clear All</button>
-            <button @click="beginCheckout()" class="rounded-lg bg-slate-900 text-white px-4 py-2 font-semibold f-ring">Continue to Stripe</button>
+            <button @click="clearAll()" class="rounded-lg ring-1 ring-slate-200 px-4 py-2 bg-white f-ring" :disabled="isSubmitting">Clear All</button>
+            <button @click="beginCheckout()" class="rounded-lg bg-slate-900 text-white px-4 py-2 font-semibold f-ring inline-flex items-center gap-2" :disabled="isSubmitting">
+              <span x-show="!isSubmitting">Continue to Secure Checkout</span>
+              <span x-show="isSubmitting" class="inline-flex items-center gap-2"><span class="spinner"></span> Processing…</span>
+            </button>
           </div>
+          <p class="mt-2 text-[11px] text-slate-500">By continuing you agree to simple scope for one-time projects or a 3-month minimum for monthly plans.</p>
         </div>
       </div>
     </div>
@@ -400,80 +420,73 @@
   <script>
     function landingApp(){
       return {
-        // --- Stripe ---
-        stripePk: 'pk_live_51O4Qh0KoF1Q8iKteAbGsSkEj65fg0tSGOG6dcJCcLyvz0PHC5y8jEAkMDfDFfCTdEeRyPcOtZ7O13MBNZkDhBMR900NqzTN4LN',
-        stripe: null,
-
         // --- State ---
         year: new Date().getFullYear(),
         plan: 'oneTime',
         addonQuery: '',
         sortBy: 'popular',
         services: [
-          { key:'web', name:'Web & App', blurb:'Launch a clean, mobile‑first site fast.', base:{oneTime:300, monthly:500}, includes:['Kickoff & setup','Landing page (3–5 sections)','Light copy help'], addOns:[
+          { key:'web', name:'Web & App', blurb:'Launch a clean, mobile-first site fast.', base:{oneTime:300, monthly:500}, includes:['Kickoff & setup','Landing page (3–5 sections)','Light copy help'], addOns:[
             { id:'web-seo', label:'SEO Basics', desc:'Titles, speed checks, findable.', short:'Quick search wins', price:{oneTime:150, monthly:150}, badge:'Quick win', popular:true },
-            { id:'web-auto', label:'Lead Automations', desc:'Instant replies to leads.', short:'Never miss a lead', price:{oneTime:100, monthly:100}, badge:'Hands‑off', popular:true },
-            { id:'web-api', label:'Payments & Maps', desc:'Stripe checkout + maps.', short:'High‑impact add', price:{oneTime:250, monthly:250}, badge:'High impact' },
-            { id:'web-mvp', label:'Clickable MVP', desc:'Tap‑through prototype.', short:'Test ideas', price:{oneTime:500, monthly:500}, badge:'Prototype' },
-            { id:'web-copy', label:'Website Copywriting', desc:'We write clear, on‑brand copy.', short:'Words that sell', price:{oneTime:120, monthly:120}, badge:'Done‑for‑you' },
+            { id:'web-auto', label:'Lead Automations', desc:'Instant replies to leads.', short:'Never miss a lead', price:{oneTime:100, monthly:100}, badge:'Hands-off', popular:true },
+            { id:'web-api', label:'Payments & Maps', desc:'Stripe checkout + maps.', short:'High-impact add', price:{oneTime:250, monthly:250}, badge:'High impact' },
+            { id:'web-mvp', label:'Clickable MVP', desc:'Tap-through prototype.', short:'Test ideas', price:{oneTime:500, monthly:500}, badge:'Prototype' },
+            { id:'web-copy', label:'Website Copywriting', desc:'We write clear, on-brand copy.', short:'Words that sell', price:{oneTime:120, monthly:120}, badge:'Done-for-you' },
             { id:'web-speed', label:'Speed & Security', desc:'Performance boosts + hardening.', short:'Faster & safer', price:{oneTime:150, monthly:150}, badge:'Speed' },
             { id:'web-forms', label:'Smart Forms', desc:'Lead routing + spam block.', short:'Higher conversions', price:{oneTime:150, monthly:100}, badge:'Leads' },
             { id:'web-analytics', label:'Analytics Setup', desc:'Simple dashboard + goals.', short:'Know what works', price:{oneTime:100, monthly:120}, badge:'Insight' },
             { id:'web-blog', label:'Blog/CMS Setup', desc:'Easy updates, categories, tags.', short:'Publish fast', price:{oneTime:200, monthly:150}, badge:'Content' },
-            { id:'web-booking', label:'Booking Integration', desc:'Calendly/Square appointments.', short:'Fewer no‑shows', price:{oneTime:150, monthly:120}, badge:'Conversion' },
+            { id:'web-booking', label:'Booking Integration', desc:'Calendly/Square appointments.', short:'Fewer no-shows', price:{oneTime:150, monthly:120}, badge:'Conversion' },
             { id:'web-reviews', label:'Reviews Widget', desc:'Pull Google/FB reviews on site.', short:'Build trust', price:{oneTime:100, monthly:100}, badge:'Trust' },
             { id:'web-a11y', label:'Accessibility Audit', desc:'WCAG quick audit + fixes.', short:'Compliance wins', price:{oneTime:180, monthly:150}, badge:'Compliance' },
-            { id:'web-i18n', label:'Multi‑language', desc:'Key pages in 2nd language.', short:'Expand reach', price:{oneTime:220, monthly:150}, badge:'Reach' },
+            { id:'web-i18n', label:'Multi-language', desc:'Key pages in 2nd language.', short:'Expand reach', price:{oneTime:220, monthly:150}, badge:'Reach' },
             { id:'web-dns', label:'Domain & DNS', desc:'Purchase, connect, SSL.', short:'We handle setup', price:{oneTime:80, monthly:0}, badge:'Setup' },
             { id:'web-section', label:'Custom Section', desc:'1 bespoke section block.', short:'Tailored UI', price:{oneTime:120, monthly:120}, badge:'Custom' },
             { id:'web-photos', label:'Photo Sourcing', desc:'Handpicked stock + edits.', short:'Better visuals', price:{oneTime:90, monthly:90}, badge:'Visuals' },
             { id:'web-brandkit', label:'Brand Kit', desc:'Fonts, colors, components.', short:'Consistent look', price:{oneTime:200, monthly:150}, badge:'Brand' },
           ]},
-
-          { key:'video', name:'Video / Audio', blurb:'Short, on‑brand edits that convert.', base:{oneTime:600, monthly:1200}, includes:['Kickoff & plan','1–2 min edit','Clean edit, coastal vibe'], addOns:[
+          { key:'video', name:'Video / Audio', blurb:'Short, on-brand edits that convert.', base:{oneTime:600, monthly:1200}, includes:['Kickoff & plan','1–2 min edit','Clean edit, coastal vibe'], addOns:[
             { id:'vid-audio', label:'Clean Audio + Captions', desc:'Noise fix + captions.', short:'Watchable anywhere', price:{oneTime:200, monthly:250}, badge:'Accessibility', popular:true },
             { id:'vid-adv', label:'Advanced Edit / Series', desc:'More story, motion, polish.', short:'Flagship content', price:{oneTime:800, monthly:1000}, badge:'Premium', popular:true },
-            { id:'vid-drone-p', label:'Drone B‑roll (Basic)', desc:'Dynamic aerial flavor.', short:'Wow factor', price:{oneTime:300, monthly:300}, badge:'Wow' },
-            { id:'vid-drone-pro', label:'Drone Cinematics (Pro)', desc:'Licensed pilot + pro gear.', short:'Top‑tier aerials', price:{oneTime:1500, monthly:1500}, badge:'Cinematic' },
+            { id:'vid-drone-p', label:'Drone B-roll (Basic)', desc:'Dynamic aerial flavor.', short:'Wow factor', price:{oneTime:300, monthly:300}, badge:'Wow' },
+            { id:'vid-drone-pro', label:'Drone Cinematics (Pro)', desc:'Licensed pilot + pro gear.', short:'Top-tier aerials', price:{oneTime:1500, monthly:1500}, badge:'Cinematic' },
             { id:'vid-extra', label:'Extra Edit Pass', desc:'More refinements + cuts.', short:'Sharper pacing', price:{oneTime:300, monthly:500}, badge:'Polish' },
             { id:'vid-script', label:'Script & Shotlist', desc:'Plan lines + shots.', short:'Shoot with ease', price:{oneTime:150, monthly:150}, badge:'Plan' },
             { id:'vid-color', label:'Pro Color Grade', desc:'Crisp, cinematic look.', short:'Standout look', price:{oneTime:150, monthly:150}, badge:'Look' },
             { id:'vid-sizes', label:'All Social Sizes', desc:'9:16, 1:1, 16:9 outputs.', short:'Every platform', price:{oneTime:120, monthly:120}, badge:'Everywhere' },
-            { id:'vid-thumbs', label:'Thumbnail Pack (x3)', desc:'Scroll‑stopping covers.', short:'Higher CTR', price:{oneTime:100, monthly:100}, badge:'Hook' },
+            { id:'vid-thumbs', label:'Thumbnail Pack (x3)', desc:'Scroll-stopping covers.', short:'Higher CTR', price:{oneTime:100, monthly:100}, badge:'Hook' },
             { id:'vid-raw', label:'Raw Footage Delivery', desc:'We hand you the files.', short:'Own the source', price:{oneTime:60, monthly:60}, badge:'Archive' },
             { id:'vid-voice', label:'Voiceover', desc:'Pro VO talent included.', short:'Narration', price:{oneTime:220, monthly:220}, badge:'Pro' },
-            { id:'vid-tele', label:'Teleprompter', desc:'Confident on‑camera lines.', short:'Confidence', price:{oneTime:90, monthly:90}, badge:'Assist' },
+            { id:'vid-tele', label:'Teleprompter', desc:'Confident on-camera lines.', short:'Confidence', price:{oneTime:90, monthly:90}, badge:'Assist' },
             { id:'vid-studio', label:'Studio Day', desc:'Lighting, backdrops, sound.', short:'Controlled set', price:{oneTime:700, monthly:700}, badge:'Studio' },
-            { id:'vid-multi', label:'Multi‑location Shoot', desc:'Up to 3 locations.', short:'More variety', price:{oneTime:400, monthly:400}, badge:'Scope' },
-            { id:'vid-cast', label:'Talent Casting', desc:'Find on‑brand talent.', short:'Right faces', price:{oneTime:300, monthly:300}, badge:'Talent' },
+            { id:'vid-multi', label:'Multi-location Shoot', desc:'Up to 3 locations.', short:'More variety', price:{oneTime:400, monthly:400}, badge:'Scope' },
+            { id:'vid-cast', label:'Talent Casting', desc:'Find on-brand talent.', short:'Right faces', price:{oneTime:300, monthly:300}, badge:'Talent' },
           ]},
-
-          { key:'events', name:'Events', blurb:'Plan smooth, run tight, look great.', base:{oneTime:1000, monthly:1200}, includes:['Scope & timeline','Basic coordination','Day‑of support'], addOns:[
-            { id:'ev-ven', label:'Vendor/Venue Handling', desc:'We wrangle calls.', short:'Stress‑free', price:{oneTime:500, monthly:600}, badge:'Stress‑free', popular:true },
+          { key:'events', name:'Events', blurb:'Plan smooth, run tight, look great.', base:{oneTime:1000, monthly:1200}, includes:['Scope & timeline','Basic coordination','Day-of support'], addOns:[
+            { id:'ev-ven', label:'Vendor/Venue Handling', desc:'We wrangle calls.', short:'Stress-free', price:{oneTime:500, monthly:600}, badge:'Stress-free', popular:true },
             { id:'ev-digital', label:'RSVP/Tickets Page', desc:'Modern guest flow.', short:'Smooth RSVPs', price:{oneTime:200, monthly:200}, badge:'Modern' },
             { id:'ev-media', label:'Highlight Media', desc:'Recap video + photos.', short:'Shareworthy', price:{oneTime:300, monthly:300}, badge:'Content' },
-            { id:'ev-auto', label:'Guest Automations', desc:'Reminders + check‑in.', short:'No bottlenecks', price:{oneTime:150, monthly:150}, badge:'Smooth' },
+            { id:'ev-auto', label:'Guest Automations', desc:'Reminders + check-in.', short:'No bottlenecks', price:{oneTime:150, monthly:150}, badge:'Smooth' },
             { id:'ev-hybrid', label:'Livestream Setup', desc:'Hybrid reach, simple.', short:'Reach more', price:{oneTime:400, monthly:400}, badge:'Reach' },
             { id:'ev-host', label:'Host / MC', desc:'Energy + timing control.', short:'Keep pace', price:{oneTime:250, monthly:250}, badge:'Energy' },
-            { id:'ev-runshow', label:'Run‑of‑Show', desc:'Minute‑by‑minute plan.', short:'Clarity', price:{oneTime:150, monthly:150}, badge:'Clarity' },
+            { id:'ev-runshow', label:'Run-of-Show', desc:'Minute-by-minute plan.', short:'Clarity', price:{oneTime:150, monthly:150}, badge:'Clarity' },
             { id:'ev-sponsor', label:'Sponsor Kit + Outreach', desc:'Deck + outreach.', short:'New revenue', price:{oneTime:200, monthly:200}, badge:'Revenue' },
             { id:'ev-security', label:'Permits & Security Guide', desc:'Who to call + when.', short:'Safer event', price:{oneTime:120, monthly:120}, badge:'Safety' },
-            { id:'ev-vip', label:'VIP/Backstage Mgmt', desc:'Green room + access.', short:'White‑glove', price:{oneTime:200, monthly:200}, badge:'VIP' },
+            { id:'ev-vip', label:'VIP/Backstage Mgmt', desc:'Green room + access.', short:'White-glove', price:{oneTime:200, monthly:200}, badge:'VIP' },
             { id:'ev-photobooth', label:'Photo Booth', desc:'Branded photos on site.', short:'Fun moments', price:{oneTime:350, monthly:350}, badge:'Fun' },
             { id:'ev-ticketing', label:'Ticketing Integration', desc:'Stripe/Square, QR.', short:'Faster gates', price:{oneTime:220, monthly:220}, badge:'Revenue' },
           ]},
-
           { key:'ugc', name:'UGC', blurb:'Creators + clips that actually get seen.', base:{oneTime:450, monthly:600}, includes:['Kickoff & setup','30k verified views','Simple report'], addOns:[
-            { id:'ugc-repurpose', label:'Ads‑Ready Pack', desc:'Cut‑downs + hooks.', short:'Convert more', price:{oneTime:200, monthly:200}, badge:'Ads‑ready', popular:true },
+            { id:'ugc-repurpose', label:'Ads-Ready Pack', desc:'Cut-downs + hooks.', short:'Convert more', price:{oneTime:200, monthly:200}, badge:'Ads-ready', popular:true },
             { id:'ugc-leads', label:'Lead Capture Page', desc:'Turn views to contacts.', short:'Capture demand', price:{oneTime:250, monthly:250}, badge:'Leads' },
-            { id:'ugc-enhance', label:'Eye‑Candy Overlays', desc:'On‑brand text, beats.', short:'More watch time', price:{oneTime:150, monthly:150}, badge:'Engaging' },
+            { id:'ugc-enhance', label:'Eye-Candy Overlays', desc:'On-brand text, beats.', short:'More watch time', price:{oneTime:150, monthly:150}, badge:'Engaging' },
             { id:'ugc-captions', label:'SEO Captions', desc:'Be found & tapped.', short:'Search hits', price:{oneTime:100, monthly:100}, badge:'Search' },
-            { id:'ugc-brand', label:'Branding Pack', desc:'Logos, end‑slates.', short:'Brand recall', price:{oneTime:150, monthly:150}, badge:'Brand' },
+            { id:'ugc-brand', label:'Branding Pack', desc:'Logos, end-slates.', short:'Brand recall', price:{oneTime:150, monthly:150}, badge:'Brand' },
             { id:'ugc-views-10k', label:'+10k Views', desc:'~10,000 verified views.', short:'+10k reach', price:{oneTime:150, monthly:150}, badge:'+10k' },
             { id:'ugc-views-20k', label:'+20k Views', desc:'~20,000 verified views.', short:'+20k reach', price:{oneTime:300, monthly:300}, badge:'+20k' },
             { id:'ugc-views-70k', label:'+70k Views', desc:'~70,000 verified views.', short:'+70k reach', price:{oneTime:1050, monthly:1050}, badge:'+70k' },
             { id:'ugc-creator', label:'Creator Matching', desc:'Shortlist best locals.', short:'Best fit', price:{oneTime:100, monthly:100}, badge:'Match' },
-            { id:'ugc-studio', label:'Studio Polish', desc:'Re‑cut with pro touch.', short:'Pro finish', price:{oneTime:150, monthly:150}, badge:'Pro' },
+            { id:'ugc-studio', label:'Studio Polish', desc:'Re-cut with pro touch.', short:'Pro finish', price:{oneTime:150, monthly:150}, badge:'Pro' },
             { id:'ugc-comment', label:'Comment Reply Pack', desc:'Smart replies to boost.', short:'Engage more', price:{oneTime:100, monthly:100}, badge:'Engage' },
             { id:'ugc-tracking', label:'Tracking Upgrade', desc:'Deeper insights.', short:'Better decisions', price:{oneTime:120, monthly:120}, badge:'Insight' },
             { id:'ugc-white', label:'Whitelisting Rights', desc:'Run creator posts as ads.', short:'Run as ads', price:{oneTime:220, monthly:220}, badge:'Rights' },
@@ -490,6 +503,8 @@
         activeService: 'web',
         stickyCta: false,
         toast: { show:false, text:'' },
+        isSubmitting:false,
+        contact:{ name:'', email:'', company:'', phone:'', notes:'' },
 
         // --- Init ---
         init(){
@@ -501,13 +516,14 @@
           // Restore cart from localStorage
           try{
             const saved = JSON.parse(localStorage.getItem('coast_cart')||'{}');
-            if(saved.services) this.cartServices = saved.services; if(saved.addons) this.cartAddons = saved.addons; if(saved.plan) this.plan = saved.plan;
+            if(saved.services) this.cartServices = saved.services;
+            if(saved.addons) this.cartAddons = saved.addons;
+            if(saved.plan) this.plan = saved.plan;
+            if(saved.contact) this.contact = {...this.contact, ...saved.contact};
           }catch{}
           // Sticky CTA
           const onScroll = () => { this.stickyCta = window.scrollY > 640 };
           onScroll(); window.addEventListener('scroll', onScroll);
-          // Stripe
-          this.stripe = Stripe(this.stripePk);
         },
 
         // --- Computeds ---
@@ -532,12 +548,23 @@
         serviceName(key){ return (this.services.find(s => s.key === key) || {}).name || key; },
         serviceBase(key){ return (this.services.find(s => s.key === key) || {}).base?.[this.plan] || 0; },
         fmtUSD(v){ return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v); },
-        save(){ localStorage.setItem('coast_cart', JSON.stringify({ services:this.cartServices, addons:this.cartAddons, plan:this.plan })); },
+        save(){ localStorage.setItem('coast_cart', JSON.stringify({ services:this.cartServices, addons:this.cartAddons, plan:this.plan, contact:this.contact })); },
+        emailValid(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e||''); },
 
         // --- UI Actions ---
         setPlan(p){ this.plan = p; this.save(); },
         toggleService(key){ const i = this.cartServices.indexOf(key); if(i>-1) this.cartServices.splice(i,1); else this.cartServices.push(key); this.save(); this.flash('Updated base services'); },
-        toggleAddon(id){ const i = this.cartAddons.indexOf(id); if(i>-1) { this.cartAddons.splice(i,1); this.flash('Removed add‑on'); } else { this.cartAddons.push(id); this.flash('Added add‑on'); } this.save(); },
+        toggleAddon(id){
+          // If adding an add-on for a service that has no base selected, nudge user
+          const svcKey = this.addonIndex[id]?.service;
+          if(!this.cartServices.includes(svcKey)){
+            this.flash(`Add the “${this.serviceName(svcKey)}” base to include this add-on.`);
+          }
+          const i = this.cartAddons.indexOf(id);
+          if(i>-1) { this.cartAddons.splice(i,1); this.flash('Removed add-on'); }
+          else { this.cartAddons.push(id); this.flash('Added add-on'); }
+          this.save();
+        },
         toggleDesc(id){ this.$set(this.openDescs, id, !this.openDescs[id]); },
         quickPick(kind){
           const maps = {
@@ -551,111 +578,67 @@
         openAddons(key){ this.activeService = key || 'web'; this.addonsOpen = true; },
         openBuilder(){ this.builderOpen = true; },
         clearAll(){ this.cartServices = []; this.cartAddons = []; this.save(); this.flash('Cleared cart'); },
-        flash(text){ this.toast.text = text; this.toast.show = true; setTimeout(()=> this.toast.show=false, 1200); },
+        flash(text){ this.toast.text = text; this.toast.show = true; setTimeout(()=> this.toast.show=false, 1400); },
 
-        // --- Checkout ---
+        // --- Checkout (server returns { url }) ---
         async beginCheckout(){
           try{
-            if(!this.cartServices.length && !this.cartAddons.length){ alert('Please add at least one base service or add‑on.'); return; }
-            const cart = [];
-            // Base line items
-            for(const key of this.cartServices){ cart.push({ serviceKey:key, plan:this.plan, addons:[] }); }
-            // Add-ons only line group
-            if(this.cartAddons.length){ cart.push({ serviceKey:'_addons_only_', plan:this.plan, addons:this.cartAddons }); }
+            if(this.isSubmitting) return;
+            // Require at least one base
+            if(!this.cartServices.length){ this.flash('Please add at least one Base Service to continue.'); return; }
+            // Email required
+            if(!this.emailValid(this.contact.email)){ this.flash('Enter a valid email for receipt & updates.'); return; }
 
-            const res = await fetch('/api/checkout', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ cart }) });
-            if(!res.ok){ const t = await res.text(); throw new Error(t || 'Failed to create checkout session'); }
-            const { id } = await res.json();
-            const { error } = await this.stripe.redirectToCheckout({ sessionId:id });
-            if(error){ alert(error.message); }
-          }catch(e){ console.error(e); alert('Checkout could not start. Email 1coastmedia@gmail.com for help.'); }
+            // Ensure no orphan add-ons (add-ons for services without base)
+            const orphan = this.cartAddons.find(id => !this.cartServices.includes(this.addonIndex[id]?.service));
+            if(orphan){
+              const svcName = this.serviceName(this.addonIndex[orphan].service);
+              this.flash(`Add the “${svcName}” base to include its add-ons, or remove those add-ons.`);
+              return;
+            }
+
+            // Build cart for API: one entry per selected base service
+            const cart = this.cartServices.map(svcKey => {
+              const svc = this.services.find(s => s.key === svcKey);
+              const base = svc?.base?.[this.plan] || 0;
+              const addons = this.cartAddons
+                .filter(id => this.addonIndex[id]?.service === svcKey)
+                .map(id => ({ id, name: this.addonIndex[id].label, price: this.addonIndex[id].price[this.plan] }));
+              return {
+                service: svcKey,
+                base,
+                addons,
+                notes: '' // you can pipe this.contact.notes per-service if you want
+              };
+            });
+
+            this.isSubmitting = true;
+
+            const res = await fetch('/api/checkout', {
+              method:'POST',
+              headers:{ 'Content-Type':'application/json' },
+              body: JSON.stringify({
+                plan: this.plan,
+                cart,
+                contact: { ...this.contact }
+              })
+            });
+
+            if(!res.ok){
+              const out = await res.json().catch(()=>({}));
+              throw new Error(out.error || 'Checkout could not start');
+            }
+            const { url } = await res.json();
+            if(!url) throw new Error('No checkout URL returned');
+            window.location = url; // Stripe-hosted checkout
+          }catch(e){
+            console.error(e);
+            this.flash(e.message || 'Checkout failed. Email 1coastmedia@gmail.com for help.');
+            this.isSubmitting = false;
+          }
         },
       }
     }
   </script>
-
-  <!--
-  =====================
-  SERVERLESS API (create /api/checkout)
-  =====================
-  IMPORTANT: Never expose your secret key in client-side code. Use an environment
-  variable named STRIPE_SECRET_KEY with your secret key (sk_live_...).
-
-  Example (Vercel): create file at /api/checkout.js
-
-  const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-
-  // Price table in cents (keep in sync with the UI above)
-  const PRICE_TABLE = {
-    web: {
-      oneTimeBase: 30000, monthlyBase: 50000,
-      addons: {
-        'web-seo':{ot:15000,mo:15000}, 'web-auto':{ot:10000,mo:10000}, 'web-api':{ot:25000,mo:25000}, 'web-mvp':{ot:50000,mo:50000}, 'web-copy':{ot:12000,mo:12000}, 'web-speed':{ot:15000,mo:15000}, 'web-forms':{ot:15000,mo:10000}, 'web-analytics':{ot:10000,mo:12000}, 'web-blog':{ot:20000,mo:15000}, 'web-booking':{ot:15000,mo:12000}, 'web-reviews':{ot:10000,mo:10000}, 'web-a11y':{ot:18000,mo:15000}, 'web-i18n':{ot:22000,mo:15000}, 'web-dns':{ot:8000,mo:null}, 'web-section':{ot:12000,mo:12000}, 'web-photos':{ot:9000,mo:9000}, 'web-brandkit':{ot:20000,mo:15000}
-      }
-    },
-    video:{
-      oneTimeBase: 60000, monthlyBase:120000,
-      addons: {
-        'vid-audio':{ot:20000,mo:25000}, 'vid-adv':{ot:80000,mo:100000}, 'vid-drone-p':{ot:30000,mo:30000}, 'vid-drone-pro':{ot:150000,mo:150000}, 'vid-extra':{ot:30000,mo:50000}, 'vid-script':{ot:15000,mo:15000}, 'vid-color':{ot:15000,mo:15000}, 'vid-sizes':{ot:12000,mo:12000}, 'vid-thumbs':{ot:10000,mo:10000}, 'vid-raw':{ot:6000,mo:6000}, 'vid-voice':{ot:22000,mo:22000}, 'vid-tele':{ot:9000,mo:9000}, 'vid-studio':{ot:70000,mo:70000}, 'vid-multi':{ot:40000,mo:40000}, 'vid-cast':{ot:30000,mo:30000}
-      }
-    },
-    events:{
-      oneTimeBase:100000, monthlyBase:120000,
-      addons: {
-        'ev-ven':{ot:50000,mo:60000}, 'ev-digital':{ot:20000,mo:20000}, 'ev-media':{ot:30000,mo:30000}, 'ev-auto':{ot:15000,mo:15000}, 'ev-hybrid':{ot:40000,mo:40000}, 'ev-host':{ot:25000,mo:25000}, 'ev-runshow':{ot:15000,mo:15000}, 'ev-sponsor':{ot:20000,mo:20000}, 'ev-security':{ot:12000,mo:12000}, 'ev-vip':{ot:20000,mo:20000}, 'ev-photobooth':{ot:35000,mo:35000}, 'ev-ticketing':{ot:22000,mo:22000}
-      }
-    },
-    ugc:  {
-      oneTimeBase: 45000, monthlyBase: 60000,
-      addons: {
-        'ugc-repurpose':{ot:20000,mo:20000}, 'ugc-leads':{ot:25000,mo:25000}, 'ugc-enhance':{ot:15000,mo:15000}, 'ugc-captions':{ot:10000,mo:10000}, 'ugc-brand':{ot:15000,mo:15000}, 'ugc-views-10k':{ot:15000,mo:15000}, 'ugc-views-20k':{ot:30000,mo:30000}, 'ugc-views-70k':{ot:105000,mo:105000}, 'ugc-creator':{ot:10000,mo:10000}, 'ugc-studio':{ot:15000,mo:15000}, 'ugc-comment':{ot:10000,mo:10000}, 'ugc-tracking':{ot:12000,mo:12000}, 'ugc-white':{ot:22000,mo:22000}, 'ugc-usage':{ot:18000,mo:18000}, 'ugc-hooks':{ot:14000,mo:14000}
-      }
-    }
-  };
-
-  module.exports = async (req, res) => {
-    try{
-      if(req.method !== 'POST') return res.status(405).send('Method Not Allowed');
-      const { cart } = req.body || {};
-      if(!Array.isArray(cart) || !cart.length) return res.status(400).send('Cart required');
-
-      const line_items = [];
-      for(const item of cart){
-        const { serviceKey, plan, addons } = item;
-        const isMonthly = plan==='monthly';
-
-        if(serviceKey && ['web','video','events','ugc'].includes(serviceKey)){
-          const t = PRICE_TABLE[serviceKey];
-          line_items.push({ price_data: { currency:'usd', product_data:{ name:`${serviceKey.toUpperCase()} — ${isMonthly?'Monthly':'One‑time'} Base`, metadata:{service:serviceKey,type:'base',plan} }, unit_amount: isMonthly? t.monthlyBase : t.oneTimeBase, ...(isMonthly? {recurring:{interval:'month'}} : {}) }, quantity:1 });
-        }
-
-        // _addons_only_ entry or per-service addons
-        const src = ['web','video','events','ugc'].includes(serviceKey) ? serviceKey : null;
-        for(const id of Array.isArray(addons)?addons:[]){
-          const owner = src || (Object.entries(PRICE_TABLE).find(([k,v]) => v.addons[id])||[])[0];
-          if(!owner) continue;
-          const amt = isMonthly? PRICE_TABLE[owner].addons[id].mo : PRICE_TABLE[owner].addons[id].ot;
-          if(amt==null) continue;
-          line_items.push({ price_data: { currency:'usd', product_data:{ name:`Add‑on: ${id}`, metadata:{service:owner,type:'addon',id,plan} }, unit_amount: amt, ...(isMonthly? {recurring:{interval:'month'}} : {}) }, quantity:1 });
-        }
-      }
-
-      if(!line_items.length) return res.status(400).send('No billable items');
-
-      const session = await stripe.checkout.sessions.create({
-        mode: cart.some(c=>c.plan==='monthly') ? 'subscription' : 'payment',
-        line_items,
-        success_url: `${req.headers.origin || 'https://yourdomain.com'}/#contact`,
-        cancel_url: `${req.headers.origin || 'https://yourdomain.com'}/#services`,
-        allow_promotion_codes: true,
-      });
-
-      res.status(200).json({ id: session.id });
-    }catch(err){
-      console.error(err);
-      res.status(500).send(err.message || 'Server error');
-    }
-  }
-  -->
 </body>
 </html>
