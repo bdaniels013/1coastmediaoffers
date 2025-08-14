@@ -2,106 +2,267 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>1Coast Media — Premium Digital, Media & Event Services</title>
-  <meta name="description" content="Premium Web, Video, Events & UGC services for Gulf Coast creators and brands. Build your package, pick add-ons, and check out securely." />
-
-  <!-- Tailwind (no runtime config used) -->
+  <meta name="description" content="Web & App, Video, Events, and UGC campaigns for Gulf Coast creators and brands. Build your package and check out securely." />
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Alpine.js -->
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-  <!-- Fonts & Base Glass Styles -->
+  <script src="https://js.stripe.com/v3/"></script>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
   <style>
     :root{
-      --bg:#f6f7fb;               /* clean light mode base */
-      --ink:#0f172a;              /* slate-900 */
-      --muted:#475569;            /* slate-600 */
-      --brand:#2563eb;            /* blue-600 */
-      --brand-2:#22c55e;          /* green-500 */
-      --brand-3:#a855f7;          /* violet-500 */
-      --glass: rgba(255,255,255,0.65);
-      --stroke: rgba(255,255,255,0.7);
-      --ring: rgba(37,99,235,.25);
+      --bg:#f6f7fb; --ink:#0f172a; --muted:#475569;
+      --brand:#2563eb; --brand2:#a855f7; --brand3:#22c55e;
+      --glass:rgba(255,255,255,.68); --glass-2:rgba(255,255,255,.82);
+      --stroke:rgba(255,255,255,.75); --ring:rgba(37,99,235,.28);
     }
-    html,body{background:var(--bg); color:var(--ink); font-family:Inter,system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";}
-    /* Liquid glass card */
-    .glass{
-      background: var(--glass);
-      -webkit-backdrop-filter: saturate(180%) blur(18px);
-      backdrop-filter: saturate(180%) blur(18px);
-      border: 1px solid var(--stroke);
-      box-shadow:
-        0 1px 0 rgba(255,255,255,.8) inset,
-        0 10px 30px rgba(15,23,42,.08),
-        0 2px 6px rgba(15,23,42,.04);
-    }
-    .glass-strong{
-      background: rgba(255,255,255,.75);
-      -webkit-backdrop-filter: saturate(200%) blur(22px);
-      backdrop-filter: saturate(200%) blur(22px);
-      border: 1px solid rgba(255,255,255,.8);
-      box-shadow:
-        0 1px 0 rgba(255,255,255,.9) inset,
-        0 16px 44px rgba(15,23,42,.10),
-        0 2px 10px rgba(15,23,42,.06);
-    }
-    /* Subtle “neumorphic” buttons */
-    .soft-btn{
-      box-shadow: 0 8px 20px rgba(2,6,23,.08), 0 2px 6px rgba(2,6,23,.04);
-      transition: transform .1s ease, box-shadow .2s ease;
-    }
-    .soft-btn:hover{ transform: translateY(-1px); box-shadow: 0 12px 26px rgba(2,6,23,.12), 0 4px 8px rgba(2,6,23,.06); }
-    .soft-btn:active{ transform: translateY(0); box-shadow: 0 8px 16px rgba(2,6,23,.10), 0 2px 6px rgba(2,6,23,.05); }
-    /* Aurora background */
+    html,body{background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
     .aurora{
       background:
-        radial-gradient(600px 240px at 80% 10%, rgba(56,189,248,.30), transparent 55%),
-        radial-gradient(480px 220px at 0% 20%, rgba(99,102,241,.25), transparent 50%),
-        radial-gradient(560px 240px at 100% 60%, rgba(34,197,94,.20), transparent 55%),
-        linear-gradient(180deg, #ffffff 0%, #f7f8fc 70%, #f0f2f9 100%);
+        radial-gradient(60rem 28rem at 80% -10%, rgba(56,189,248,.28), transparent 60%),
+        radial-gradient(55rem 26rem at -10% 10%, rgba(168,85,247,.22), transparent 60%),
+        radial-gradient(65rem 28rem at 110% 80%, rgba(34,197,94,.22), transparent 60%),
+        linear-gradient(#ffffff,#f4f6fb 60%,#eef1f9);
     }
-    /* Add-on tile selected glow */
-    .tile-selected{
-      box-shadow: 0 0 0 2px var(--ring), 0 10px 30px rgba(37,99,235,.18);
-      background: rgba(255,255,255,.92);
-    }
-    .icon-ink{ stroke: #1e293b; }
-    .icon-brand{ stroke: #2563eb; }
+    .glass{background:var(--glass);backdrop-filter:saturate(180%) blur(18px);-webkit-backdrop-filter:saturate(180%) blur(18px);border:1px solid var(--stroke);box-shadow:0 1px 0 rgba(255,255,255,.85) inset,0 12px 30px rgba(2,6,23,.08);}
+    .glass-strong{background:var(--glass-2);backdrop-filter:saturate(200%) blur(22px);-webkit-backdrop-filter:saturate(200%) blur(22px);border:1px solid rgba(255,255,255,.86);box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 18px 46px rgba(2,6,23,.12);}
+    .halo{position:relative;border-radius:1.25rem;}
+    .halo:before{content:"";position:absolute;inset:-1px;border-radius:inherit;background:conic-gradient(from 180deg,rgba(37,99,235,.35),rgba(168,85,247,.35),rgba(34,197,94,.35),rgba(37,99,235,.35));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;padding:1px;pointer-events:none;opacity:.8;}
+    .soft{box-shadow:0 10px 26px rgba(2,6,23,.08),0 2px 6px rgba(2,6,23,.04);transition:transform .12s ease, box-shadow .2s ease;}
+    .soft:hover{transform:translateY(-1px);box-shadow:0 14px 32px rgba(2,6,23,.12),0 4px 8px rgba(2,6,23,.06);}
+    .shine{position:relative;overflow:hidden;}
+    .shine:after{content:"";position:absolute;inset:-200% -50%;background:linear-gradient(105deg,transparent 45%,rgba(255,255,255,.5) 50%,transparent 55%);animation:shine 5.4s linear infinite;}
+    @keyframes shine{to{transform:translateX(100%);}}
+    .tile-selected{box-shadow:0 0 0 2px var(--ring),0 12px 32px rgba(37,99,235,.18);background:rgba(255,255,255,.95);}
+    .blur-blob{filter:blur(40px);opacity:.65;}
   </style>
 </head>
 
-<body class="antialiased aurora">
+<body class="antialiased aurora" x-data>
+  <!-- GLOBAL BUILDER STORE -->
+  <script>
+    /* ---------- Builder Store (single source of truth) ---------- */
+    function builderStore(){
+      return {
+        /* UI */
+        open:false, review:false, plan:'oneTime',
+        query:'', sortBy:'recommended',
+        contact:{name:'',email:'',company:'',phone:'',notes:'',agree:false},
+
+        /* Catalog */
+        services:{
+          web:{ key:'web', name:'Web & App Development', icon:'globe',
+            base:{oneTime:300, monthly:500},
+            why:'Launch a clean, responsive site or lightweight app that turns visitors into leads.',
+            addons:[
+              {id:'seo_basics', icon:'search', name:'Be Found on Google (SEO Basics)', desc:'Keyword setup + on-page tune-up for local discovery.', tag:'Quick Win', price:{oneTime:150, monthly:150}},
+              {id:'app_proto', icon:'phone', name:'Basic App Prototype', desc:'Clickable MVP (chatbot/simple tool) for iOS/Android.', price:{oneTime:500, monthly:500}},
+              {id:'automations', icon:'robot', name:'Auto Follow-Ups & Workflows', desc:'Emails/leads/social tasks fire automatically.', price:{oneTime:100, monthly:100}},
+              {id:'api_integrations', icon:'plug', name:'Payments, Maps & APIs', desc:'Connect Stripe, Google Maps, or analytics.', price:{oneTime:250, monthly:250}},
+              {id:'ecommerce', icon:'cart', name:'Simple Shop Setup', desc:'Catalog, cart, and checkout for a basic store.', price:{oneTime:300, monthly:300}},
+              {id:'copy_1p', icon:'pen', name:'Copywriting (1 Page)', desc:'Persuasive text written to convert.', price:{oneTime:120, monthly:120}},
+              {id:'speed_security', icon:'shield', name:'Speed & Security Tune-Up', desc:'Caching, compression, & basic security.', price:{oneTime:120, monthly:120}},
+              {id:'dashboard', icon:'chart', name:'Custom Dashboard', desc:'See traffic & engagement in one place.', price:{oneTime:250, monthly:250}},
+              {id:'ai_features', icon:'sparkle', name:'Smart Personalization', desc:'Recommendations or simple AI features.', price:{oneTime:200, monthly:200}},
+            ]
+          },
+          video:{ key:'video', name:'Video & Audio Production', icon:'video',
+            base:{oneTime:600, monthly:1200},
+            why:'Tell your story with content people actually watch—music videos, promos, & scroll-stopping reels.',
+            addons:[
+              {id:'audio_polish', icon:'audio', name:'Audio Polish', desc:'Noise reduction, subtitles, better mixes.', tag:'Popular', price:{oneTime:200, monthly:250}},
+              {id:'adv_video', icon:'layers', name:'Advanced Video Upgrade', desc:'Longer length or multi-scene, cinematic edits.', price:{oneTime:800, monthly:1000}},
+              {id:'drone_personal', icon:'drone', name:'Drone Shoots — Personal', desc:'Dynamic aerials, licensed pilot.', price:{oneTime:300, monthly:300}},
+              {id:'drone_pro', icon:'drone', name:'Drone Shoots — Pro', desc:'High-end aerials with certified operator.', price:{oneTime:1500, monthly:1500}},
+              {id:'extended_edit', icon:'scissors', name:'Extended Editing', desc:'Series setup or extra polish passes.', price:{oneTime:300, monthly:300}},
+              {id:'script_shotlist', icon:'doc', name:'Script & Shotlist', desc:'We plan the beats so filming is smooth.', price:{oneTime:150, monthly:150}},
+              {id:'color_grade', icon:'palette', name:'Color Grade', desc:'Crisp, consistent colors.', price:{oneTime:150, monthly:150}},
+              {id:'social_cuts', icon:'grid', name:'Vertical & Social Cuts (x3)', desc:'TikTok/Shorts/IG-ready edits.', price:{oneTime:180, monthly:350}},
+              {id:'voiceover', icon:'mic', name:'Voiceover / Talent Sourcing', desc:'Find the right voice or on-camera talent.', price:{oneTime:200, monthly:200}},
+            ]
+          },
+          events:{ key:'events', name:'Event Planning & Coordination', icon:'calendar',
+            base:{oneTime:1000, monthly:1200},
+            why:'Relax and show up—timelines, vendors, and on-site flow handled with Gulf Coast know-how.',
+            addons:[
+              {id:'vendor_coord', icon:'people', name:'Venue & Vendor Coordination', desc:'We handle quotes, schedules, confirmations.', tag:'Popular', price:{oneTime:500, monthly:600}},
+              {id:'event_page', icon:'globe', name:'RSVP Page & Tickets', desc:'Clean event page with guest tools.', price:{oneTime:200, monthly:200}},
+              {id:'media_event', icon:'camera', name:'Media Coverage', desc:'Photo/video team for highlights.', price:{oneTime:300, monthly:300}},
+              {id:'event_automations', icon:'robot', name:'Reminders & Guest Automations', desc:'Confirmations, reminders, follow-ups.', price:{oneTime:150, monthly:150}},
+              {id:'hybrid_stream', icon:'broadcast', name:'Hybrid / Live Stream Setup', desc:'Reach remote attendees.', price:{oneTime:400, monthly:400}},
+              {id:'run_show', icon:'doc', name:'Run-of-Show & Staffing Plan', desc:'Minute-by-minute plan and staffing.', price:{oneTime:200, monthly:300}},
+              {id:'host_mc', icon:'megaphone', name:'On-site Host / MC', desc:'Keep energy high and timeline tight.', price:{oneTime:250, monthly:250}},
+              {id:'sponsor_kit', icon:'star', name:'Sponsor Kit & Outreach', desc:'Deck + outreach to attract sponsors.', price:{oneTime:250, monthly:300}},
+            ]
+          },
+          ugc:{ key:'ugc', name:'UGC & Local Clipping Campaigns', icon:'sparkle',
+            base:{oneTime:450, monthly:600},
+            why:'Real creators, real audiences. Authentic content that earns trust and clicks.',
+            addons:[
+              {id:'repurpose', icon:'grid', name:'Repurposed Asset Pack', desc:'Turn clips into ads, posts, and email graphics.', tag:'Quick Win', price:{oneTime:200, monthly:200}},
+              {id:'lead_funnel', icon:'target', name:'Lead Capture Funnel', desc:'Simple page to turn views into contacts.', price:{oneTime:250, monthly:250}},
+              {id:'content_enh', icon:'sparkle', name:'Content Enhancement', desc:'Overlays, music, CTAs for higher watch-time.', price:{oneTime:150, monthly:150}},
+              {id:'captions_pack', icon:'cc', name:'Captions & Descriptions', desc:'Optimized copy for discovery.', price:{oneTime:100, monthly:100}},
+              {id:'brand_kit', icon:'badge', name:'Branded Watermarks & End-slates', desc:'Your brand on every clip.', price:{oneTime:150, monthly:150}},
+              {id:'extra_10k', icon:'eye', name:'Extra 10k Verified Views', desc:'+10,000 views to boost reach.', price:{oneTime:150, monthly:150}},
+              {id:'extra_20k', icon:'eye', name:'Extra 20k Verified Views', desc:'+20,000 additional views.', price:{oneTime:300, monthly:300}},
+              {id:'extra_70k', icon:'eye', name:'Extra 70k Verified Views', desc:'+70,000 additional views.', price:{oneTime:1050, monthly:1050}},
+              {id:'creator_match', icon:'people', name:'Creator Matching', desc:'We match 2–3 on-brand local creators.', price:{oneTime:200, monthly:200}},
+              {id:'tracking_setup', icon:'chart', name:'Performance Tracking', desc:'Dashboard for views & conversions.', price:{oneTime:150, monthly:150}},
+            ]
+          }
+        },
+
+        /* Selection state (multi-service) */
+        selected:{
+          web:{included:false, addons:[], notes:''},
+          video:{included:false, addons:[], notes:''},
+          events:{included:false, addons:[], notes:''},
+          ugc:{included:false, addons:[], notes:''},
+        },
+
+        /* Icons (every tile gets a visual) */
+        icons:{
+          globe:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18M12 3a9 9 0 1 0 0 18"/></svg>',
+          search:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>',
+          phone:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>',
+          robot:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><rect x="3" y="7" width="18" height="10" rx="2"/><path d="M12 7V4"/><circle cx="8" cy="12" r="1"/><circle cx="16" cy="12" r="1"/></svg>',
+          plug:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M9 7V3m6 4V3M7 13h10a4 4 0 0 1-4 4v4"/></svg>',
+          cart:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>',
+          pen:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
+          shield:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M12 3l7 4v5a7 7 0 0 1-7 7 7 7 0 0 1-7-7V7z"/></svg>',
+          chart:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="7" width="3" height="11"/><rect x="17" y="9" width="3" height="9"/></svg>',
+          sparkle:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5z"/></svg>',
+          video:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><rect x="3" y="5" width="14" height="14" rx="2"/><path d="m17 9 4-3v12l-4-3z"/></svg>',
+          audio:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M12 17v5M8 12v2a4 4 0 0 0 8 0v-2"/></svg>',
+          layers:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="m12 2 9 5-9 5-9-5 9-5z"/><path d="m3 12 9 5 9-5"/></svg>',
+          drone:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="18" r="3"/><path d="M6 9v6M18 9v6M9 6h6M9 18h6"/></svg>',
+          scissors:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M20 4L8 16M8 8l12 12"/></svg>',
+          doc:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16l4-3h10a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>',
+          palette:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M12 3a9 9 0 1 0 0 18h1a2 2 0 0 0 2-2 2 2 0 0 1 2-2h1a2 2 0 0 0 2-2 9 9 0 0 0-8-9z"/></svg>',
+          grid:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>',
+          mic:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M12 17v5M8 12v2a4 4 0 0 0 8 0v-2"/></svg>',
+          calendar:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M8 2v4M16 2v4M4 11h16M5 6h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/></svg>',
+          people:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+          camera:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M4 7h4l2-3h4l2 3h4v12H4z"/><circle cx="12" cy="13" r="4"/></svg>',
+          broadcast:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><circle cx="12" cy="12" r="2"/><path d="M5 12a7 7 0 0 1 14 0M2 12a10 10 0 0 1 20 0"/></svg>',
+          megaphone:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M3 10v4l13-2v-0l-13-2z"/><path d="M16 8v8"/></svg>',
+          star:'<svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b"><path d="m12 17.3-5.6 3 1.1-6.5-4.7-4.6 6.5-.9L12 2l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5z"/></svg>',
+          badge:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M5 22l7-5 7 5"/></svg>',
+          target:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/></svg>',
+          cc:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M3 5h18v14H3z"/><path d="M7 12h3M14 12h3"/></svg>',
+          eye:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+        },
+
+        /* Derived */
+        get included(){ return Object.keys(this.selected).filter(k=>this.selected[k].included); },
+
+        /* Helpers */
+        price(n){ return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n||0); },
+        priceLabel(p){ return this.plan==='oneTime' ? `+$${p.toFixed(0)}` : `+$${p.toFixed(0)}/mo`; },
+        addon(key,id){ return this.services[key].addons.find(a=>a.id===id); },
+        visibleAddons(key){
+          let list=[...this.services[key].addons];
+          // filter
+          const q=this.query.trim().toLowerCase();
+          if(q) list=list.filter(a=>(a.name+a.desc).toLowerCase().includes(q));
+          // sort
+          if(this.sortBy==='price'){ list.sort((a,b)=>a.price[this.plan]-b.price[this.plan]); }
+          else if(this.sortBy==='az'){ list.sort((a,b)=>a.name.localeCompare(b.name)); }
+          else { list.sort((a,b)=>(b.tag?1:0)-(a.tag?1:0)); }
+          return list;
+        },
+
+        toggleService(key, force){
+          this.selected[key].included = (typeof force==='boolean') ? force : !this.selected[key].included;
+          this.persist();
+        },
+        isSel(key,id){ return this.selected[key].addons.includes(id); },
+        toggleAddon(key,id){
+          const arr=this.selected[key].addons; const i=arr.indexOf(id);
+          if(i>-1) arr.splice(i,1); else arr.push(id);
+          this.persist();
+        },
+        ensure(key,id){ if(!this.isSel(key,id)) this.selected[key].addons.push(id); },
+        clearAll(){
+          Object.keys(this.selected).forEach(k=>this.selected[k]={included:false,addons:[],notes:''});
+          this.persist();
+        },
+        total(){
+          return this.included.reduce((sum,key)=>{
+            const base=this.services[key].base[this.plan];
+            const adds=this.selected[key].addons.reduce((s,id)=>s+this.addon(key,id).price[this.plan],0);
+            return sum+base+adds;
+          },0);
+        },
+
+        /* Featured bundle “From $” based on live catalog */
+        bundlePrice(which){
+          const t=this.plan; let sum=0;
+          const add=(k,id)=>{ sum+=this.addon(k,id).price[t]; };
+          if(which==='launch'){ sum+=this.services.web.base[t]+this.services.ugc.base[t]; add('web','seo_basics'); add('web','copy_1p'); add('ugc','repurpose'); add('ugc','brand_kit'); return sum; }
+          if(which==='event'){ sum+=this.services.events.base[t]+this.services.video.base[t]; add('events','vendor_coord'); add('events','event_page'); add('events','run_show'); add('video','audio_polish'); add('video','script_shotlist'); return sum; }
+          if(which==='growth'){ sum+=this.services.web.base[t]+this.services.video.base[t]+this.services.ugc.base[t]; add('web','seo_basics'); add('web','dashboard'); add('web','automations'); add('video','social_cuts'); add('video','extended_edit'); add('ugc','repurpose'); add('ugc','lead_funnel'); return sum; }
+          return 0;
+        },
+
+        /* Presets */
+        applyPreset(which){
+          this.clearAll();
+          if(which==='launch'){ this.toggleService('web',true); this.toggleService('ugc',true); this.ensure('web','seo_basics'); this.ensure('web','copy_1p'); this.ensure('ugc','repurpose'); this.ensure('ugc','brand_kit'); }
+          if(which==='event'){ this.toggleService('events',true); this.toggleService('video',true); this.ensure('events','vendor_coord'); this.ensure('events','event_page'); this.ensure('events','run_show'); this.ensure('video','audio_polish'); this.ensure('video','script_shotlist'); }
+          if(which==='growth'){ this.plan='monthly'; ['web','video','ugc'].forEach(k=>this.toggleService(k,true)); this.ensure('web','seo_basics'); this.ensure('web','dashboard'); this.ensure('web','automations'); this.ensure('video','social_cuts'); this.ensure('video','extended_edit'); this.ensure('ugc','repurpose'); this.ensure('ugc','lead_funnel'); }
+          this.persist();
+        },
+
+        /* Persistence */
+        load(){ try{ const s=JSON.parse(localStorage.getItem('builder_v2')||'null'); if(s){ Object.assign(this,s); } }catch(e){} },
+        persist(){ localStorage.setItem('builder_v2', JSON.stringify({plan:this.plan,selected:this.selected})); },
+
+        /* Modal controls */
+        openBuilder(){ this.open=true; },
+        openReview(){ if(!this.included.length){ alert('Select at least one service.'); return; } this.review=true; },
+
+        /* Checkout via server */
+        async checkout(){
+          const cart=this.included.map(key=>({
+            service:key, plan:this.plan, base:this.services[key].base[this.plan],
+            addons:this.selected[key].addons.map(id=>({ id, name:this.addon(key,id).name, price:this.addon(key,id).price[this.plan] })),
+            notes:this.selected[key].notes||''
+          }));
+          const payload={ plan:this.plan, contact:this.contact, cart, source:'site-v2' };
+          const res=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+          if(!res.ok){ alert('Checkout error. Please email 1coastmedia@gmail.com'); return; }
+          const data=await res.json();
+          if(data.url){ window.location=data.url; } else { alert('Unable to start checkout.'); }
+        }
+      }
+    }
+    document.addEventListener('alpine:init',()=>{ Alpine.store('builder', builderStore()); Alpine.store('builder').load(); });
+  </script>
+
   <!-- NAV -->
   <header class="sticky top-0 z-40">
     <div class="glass">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div class="h-9 w-9 rounded-xl bg-white/70 border border-white shadow-sm grid place-items-center">
-            <!-- Placeholder logo circle; replace later -->
-            <span class="text-sm font-extrabold tracking-wider">1C</span>
+          <div class="h-9 w-9 rounded-xl bg-white/80 border border-white grid place-items-center shadow-sm">
+            <span class="text-sm font-extrabold">1C</span>
           </div>
           <div class="leading-tight">
             <div class="font-extrabold text-lg">1Coast Media</div>
-            <div class="text-xs text-slate-500">Gulf Coast • Web • Video • Events • UGC</div>
+            <div class="text-[11px] text-slate-500">Gulf Coast • Web • Video • Events • UGC</div>
           </div>
         </div>
         <nav class="hidden md:flex items-center gap-6 text-sm">
-          <a href="#bundles" class="text-slate-700 hover:text-slate-900">Featured Bundles</a>
+          <a href="#bundles" class="text-slate-700 hover:text-slate-900">Featured</a>
           <a href="#why" class="text-slate-700 hover:text-slate-900">Why Monthly</a>
           <a href="#contact" class="text-slate-700 hover:text-slate-900">Contact</a>
         </nav>
         <div class="flex items-center gap-3">
-          <a href="https://calendly.com/bdaniels013/30min" target="_blank" class="hidden sm:inline-flex items-center gap-2 soft-btn px-4 py-2 rounded-xl bg-white text-slate-900 border">
-            <svg width="18" height="18" viewBox="0 0 24 24" class="icon-ink"><path d="M8 2v4M16 2v4M4 11h16M7 19h1m4 0h5M5 6h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Book 30-min Call
-          </a>
-          <button id="openBuilderTop" class="inline-flex items-center gap-2 soft-btn px-4 py-2 rounded-xl bg-blue-600 text-white">
-            <svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" class="icon" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
-            Build My Package
-          </button>
+          <a href="https://calendly.com/bdaniels013/30min" target="_blank" class="hidden sm:inline-flex items-center gap-2 soft px-4 py-2 rounded-xl bg-white border">Book 30-min Call</a>
+          <button class="soft px-4 py-2 rounded-xl bg-blue-600 text-white" @click="$store.builder.openBuilder()">Build My Package</button>
         </div>
       </div>
     </div>
@@ -109,42 +270,32 @@
 
   <!-- HERO -->
   <section class="relative overflow-hidden">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 pb-10">
-      <div class="grid md:grid-cols-2 gap-8 items-center">
-        <div>
-          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full glass text-xs font-semibold text-slate-700">
-            <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Done-for-you results • Transparent pricing
-          </span>
-          <h1 class="mt-4 text-4xl sm:text-5xl font-extrabold leading-[1.05]">Premium Digital, Media & Event Services<br><span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-violet-500 to-emerald-500">built for Gulf Coast growth</span></h1>
-          <p class="mt-4 text-slate-600 text-lg">Launch fast, look pro, and convert more—with sleek websites, captivating video, stress-free events, and authentic UGC. Start with a bundle, or build exactly what you need.</p>
-          <div class="mt-6 flex flex-wrap gap-3">
-            <button class="soft-btn px-5 py-3 rounded-xl bg-blue-600 text-white font-semibold" id="openBuilderHero">Create My Own</button>
-            <a href="#bundles" class="soft-btn px-5 py-3 rounded-xl bg-white text-slate-900 border font-semibold">See Featured Bundles</a>
-            <a href="mailto:1coastmedia@gmail.com" class="text-slate-600 hover:text-slate-900 px-3 py-3">Email us →</a>
-          </div>
-          <div class="mt-6 flex flex-wrap items-center gap-6 text-sm text-slate-600">
-            <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500"></span> Fast turnarounds</div>
-            <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> No-surprise pricing</div>
-            <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-violet-500"></span> Local expertise</div>
-          </div>
+    <div class="absolute -top-24 right-10 w-[520px] h-[520px] rounded-full bg-gradient-to-br from-blue-300 via-violet-300 to-emerald-300 blur-blob"></div>
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 pb-12 grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full glass text-xs font-semibold text-slate-700">
+          <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Done-for-you • Transparent pricing
+        </span>
+        <h1 class="mt-4 text-4xl sm:text-5xl font-extrabold leading-[1.05]">
+          Premium Digital, Media & Events<br>
+          <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-violet-500 to-emerald-500">built for Gulf Coast growth</span>
+        </h1>
+        <p class="mt-4 text-slate-600 text-lg">Launch fast, look pro, and convert more — with sleek websites, captivating video, stress-free events, and authentic UGC.</p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <button class="shine soft px-5 py-3 rounded-xl bg-blue-600 text-white font-semibold" @click="$store.builder.openBuilder()">Create My Own</button>
+          <a href="#bundles" class="soft px-5 py-3 rounded-xl bg-white text-slate-900 border font-semibold">See Featured Bundles</a>
+          <a href="mailto:1coastmedia@gmail.com" class="px-3 py-3 text-slate-600 hover:text-slate-900">Email us →</a>
         </div>
-        <div class="relative">
-          <div class="absolute inset-0 blur-2xl opacity-70 bg-gradient-to-br from-blue-200 via-emerald-200 to-violet-200 rounded-3xl"></div>
-          <div class="relative glass-strong rounded-3xl p-6 border">
-            <img src="https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?q=80&w=1400&auto=format&fit=crop" alt="Gulf Coast creative work" class="rounded-2xl object-cover w-full h-72">
+      </div>
+      <div class="relative">
+        <div class="halo p-0.5">
+          <div class="glass-strong rounded-2xl p-6 border">
+            <img alt="Digital creative" class="rounded-2xl w-full h-72 object-cover"
+                 src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1400&auto=format&fit=crop" />
             <div class="grid sm:grid-cols-3 gap-4 mt-4 text-sm">
-              <div class="glass rounded-xl p-3">
-                <div class="text-xs text-slate-500">Web & Apps</div>
-                <div class="font-semibold">Launch in days</div>
-              </div>
-              <div class="glass rounded-xl p-3">
-                <div class="text-xs text-slate-500">Video & Audio</div>
-                <div class="font-semibold">Standout visuals</div>
-              </div>
-              <div class="glass rounded-xl p-3">
-                <div class="text-xs text-slate-500">Events & UGC</div>
-                <div class="font-semibold">Real engagement</div>
-              </div>
+              <div class="glass rounded-xl p-3"><div class="text-xs text-slate-500">Web & Apps</div><div class="font-semibold">Launch in days</div></div>
+              <div class="glass rounded-xl p-3"><div class="text-xs text-slate-500">Video</div><div class="font-semibold">Standout visuals</div></div>
+              <div class="glass rounded-xl p-3"><div class="text-xs text-slate-500">UGC & Events</div><div class="font-semibold">Real engagement</div></div>
             </div>
           </div>
         </div>
@@ -152,104 +303,104 @@
     </div>
   </section>
 
-  <!-- FEATURED BUNDLES (anchoring) -->
-  <section id="bundles" x-data="builder()" class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-6">
-    <div class="flex items-center justify-between mt-4 mb-2">
+  <!-- FEATURED BUNDLES -->
+  <section id="bundles" class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-12" x-data>
+    <div class="flex items-center justify-between mb-3">
       <h2 class="text-2xl font-extrabold">Featured Bundles</h2>
-      <!-- plan toggle controls pricing anchors -->
       <div class="glass rounded-full p-1 inline-flex">
-        <button @click="plan='oneTime'" :class="plan==='oneTime' ? 'bg-white text-slate-900' : 'text-slate-600'" class="px-3 py-1.5 rounded-full text-sm font-semibold">One-time</button>
-        <button @click="plan='monthly'" :class="plan==='monthly' ? 'bg-white text-slate-900' : 'text-slate-600'" class="px-3 py-1.5 rounded-full text-sm font-semibold">Monthly</button>
+        <button @click="$store.builder.plan='oneTime'; $store.builder.persist()" :class="$store.builder.plan==='oneTime' ? 'bg-white text-slate-900':'text-slate-600'" class="px-3 py-1.5 rounded-full text-sm font-semibold">One-time</button>
+        <button @click="$store.builder.plan='monthly'; $store.builder.persist()" :class="$store.builder.plan==='monthly' ? 'bg-white text-slate-900':'text-slate-600'" class="px-3 py-1.5 rounded-full text-sm font-semibold">Monthly</button>
       </div>
     </div>
 
     <div class="grid md:grid-cols-3 gap-6">
       <!-- Launch Kit -->
-      <div class="glass rounded-2xl p-5 border hover:shadow-xl transition">
-        <div class="flex items-center justify-between">
-          <h3 class="text-xl font-bold">Launch Kit</h3>
-          <span class="text-xs font-semibold px-2 py-1 rounded-full bg-blue-600 text-white">Fastest</span>
-        </div>
-        <p class="mt-1 text-sm text-slate-600">Perfect for new offers: a clean landing page + UGC burst to spark awareness.</p>
-        <ul class="mt-3 text-sm text-slate-700 list-disc list-inside space-y-1">
-          <li>Web: Landing page foundation</li>
-          <li>UGC: 30k-view campaign</li>
-          <li>SEO basics + Branded end-slates</li>
-        </ul>
-        <div class="mt-5 flex items-end justify-between">
-          <div>
-            <div class="text-xs text-slate-500">From</div>
-            <div class="text-2xl font-extrabold" x-text="formatCurrency(bundlePrice('launch'))"></div>
+      <div class="halo p-0.5">
+        <div class="glass rounded-2xl p-5 border hover:shadow-xl transition">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xl font-bold">Launch Kit</h3>
+            <span class="text-xs font-semibold px-2 py-1 rounded-full bg-blue-600 text-white">Fastest</span>
           </div>
-          <div class="flex gap-2">
-            <button class="soft-btn px-4 py-2 rounded-xl bg-white border" @click="applyPreset('launch'); openBuilder=true">Customize</button>
-            <button class="soft-btn px-4 py-2 rounded-xl bg-blue-600 text-white" @click="applyPreset('launch'); openReview()">Select & Review</button>
+          <p class="mt-1 text-sm text-slate-600">Perfect for new offers: a conversion landing page + UGC burst.</p>
+          <ul class="mt-3 text-sm text-slate-700 list-disc list-inside space-y-1">
+            <li>Web: Landing page foundation</li>
+            <li>UGC: 30k-view campaign</li>
+            <li>SEO basics + Branded end-slates</li>
+          </ul>
+          <div class="mt-5 flex items-end justify-between">
+            <div>
+              <div class="text-xs text-slate-500">From</div>
+              <div class="text-2xl font-extrabold" x-text="$store.builder.price($store.builder.bundlePrice('launch'))"></div>
+            </div>
+            <div class="flex gap-2">
+              <button class="soft px-4 py-2 rounded-xl bg-white border" @click="$store.builder.applyPreset('launch'); $store.builder.openBuilder()">Customize</button>
+              <button class="soft px-4 py-2 rounded-xl bg-blue-600 text-white" @click="$store.builder.applyPreset('launch'); $store.builder.openReview()">Select & Review</button>
+            </div>
           </div>
         </div>
       </div>
       <!-- Event Spotlight -->
-      <div class="glass rounded-2xl p-5 border hover:shadow-xl transition">
-        <div class="flex items-center justify-between">
-          <h3 class="text-xl font-bold">Event Spotlight</h3>
-          <span class="text-xs font-semibold px-2 py-1 rounded-full bg-emerald-500 text-white">Most Popular</span>
-        </div>
-        <p class="mt-1 text-sm text-slate-600">Make your event a hit with pro coordination + highlight video + RSVP page.</p>
-        <ul class="mt-3 text-sm text-slate-700 list-disc list-inside space-y-1">
-          <li>Events: Coordination & run-of-show</li>
-          <li>Video: Highlight reel</li>
-          <li>Event page with RSVPs</li>
-        </ul>
-        <div class="mt-5 flex items-end justify-between">
-          <div>
-            <div class="text-xs text-slate-500">From</div>
-            <div class="text-2xl font-extrabold" x-text="formatCurrency(bundlePrice('event'))"></div>
+      <div class="halo p-0.5">
+        <div class="glass rounded-2xl p-5 border hover:shadow-xl transition">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xl font-bold">Event Spotlight</h3>
+            <span class="text-xs font-semibold px-2 py-1 rounded-full bg-emerald-500 text-white">Most Popular</span>
           </div>
-          <div class="flex gap-2">
-            <button class="soft-btn px-4 py-2 rounded-xl bg-white border" @click="applyPreset('event'); openBuilder=true">Customize</button>
-            <button class="soft-btn px-4 py-2 rounded-xl bg-blue-600 text-white" @click="applyPreset('event'); openReview()">Select & Review</button>
+          <p class="mt-1 text-sm text-slate-600">Make your event a hit with coordination, RSVP page, and a highlight reel.</p>
+          <ul class="mt-3 text-sm text-slate-700 list-disc list-inside space-y-1">
+            <li>Events: Coordination & run-of-show</li>
+            <li>Video: Highlight reel</li>
+            <li>Event page with RSVPs</li>
+          </ul>
+          <div class="mt-5 flex items-end justify-between">
+            <div>
+              <div class="text-xs text-slate-500">From</div>
+              <div class="text-2xl font-extrabold" x-text="$store.builder.price($store.builder.bundlePrice('event'))"></div>
+            </div>
+            <div class="flex gap-2">
+              <button class="soft px-4 py-2 rounded-xl bg-white border" @click="$store.builder.applyPreset('event'); $store.builder.openBuilder()">Customize</button>
+              <button class="soft px-4 py-2 rounded-xl bg-blue-600 text-white" @click="$store.builder.applyPreset('event'); $store.builder.openReview()">Select & Review</button>
+            </div>
           </div>
         </div>
       </div>
       <!-- Growth Retainer -->
-      <div class="glass rounded-2xl p-5 border hover:shadow-xl transition">
-        <div class="flex items-center justify-between">
-          <h3 class="text-xl font-bold">Growth Retainer</h3>
-          <span class="text-xs font-semibold px-2 py-1 rounded-full bg-violet-500 text-white">Best Value</span>
-        </div>
-        <p class="mt-1 text-sm text-slate-600">All-around monthly support: keep content rolling and your site improving.</p>
-        <ul class="mt-3 text-sm text-slate-700 list-disc list-inside space-y-1">
-          <li>Web maintenance & SEO boosts</li>
-          <li>3 videos per month</li>
-          <li>Recurring UGC campaigns</li>
-        </ul>
-        <div class="mt-5 flex items-end justify-between">
-          <div>
-            <div class="text-xs text-slate-500">From</div>
-            <div class="text-2xl font-extrabold" x-text="formatCurrency(bundlePrice('growth'))"></div>
+      <div class="halo p-0.5">
+        <div class="glass rounded-2xl p-5 border hover:shadow-xl transition">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xl font-bold">Growth Retainer</h3>
+            <span class="text-xs font-semibold px-2 py-1 rounded-full bg-violet-500 text-white">Best Value</span>
           </div>
-          <div class="flex gap-2">
-            <button class="soft-btn px-4 py-2 rounded-xl bg-white border" @click="applyPreset('growth'); openBuilder=true">Customize</button>
-            <button class="soft-btn px-4 py-2 rounded-xl bg-blue-600 text-white" @click="applyPreset('growth'); openReview()">Select & Review</button>
+          <p class="mt-1 text-sm text-slate-600">Monthly support: keep content rolling and your site improving.</p>
+          <ul class="mt-3 text-sm text-slate-700 list-disc list-inside space-y-1">
+            <li>Web maintenance & SEO boosts</li>
+            <li>3 videos / month</li>
+            <li>Recurring UGC campaigns</li>
+          </ul>
+          <div class="mt-5 flex items-end justify-between">
+            <div>
+              <div class="text-xs text-slate-500">From</div>
+              <div class="text-2xl font-extrabold" x-text="$store.builder.price($store.builder.bundlePrice('growth'))"></div>
+            </div>
+            <div class="flex gap-2">
+              <button class="soft px-4 py-2 rounded-xl bg-white border" @click="$store.builder.applyPreset('growth'); $store.builder.openBuilder()">Customize</button>
+              <button class="soft px-4 py-2 rounded-xl bg-blue-600 text-white" @click="$store.builder.applyPreset('growth'); $store.builder.openReview()">Select & Review</button>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Bundle Compare -->
+    <!-- Quick Compare -->
     <div class="mt-10 glass rounded-2xl p-5 border">
       <div class="flex items-center justify-between">
         <h3 class="text-xl font-bold">Compare Bundles</h3>
-        <button class="soft-btn px-4 py-2 rounded-xl bg-white border" id="openBuilderCompare">Create My Own</button>
+        <button class="soft px-4 py-2 rounded-xl bg-white border" @click="$store.builder.openBuilder()">Create My Own</button>
       </div>
       <div class="mt-4 overflow-x-auto">
         <table class="min-w-full text-sm">
           <thead class="text-slate-500">
-            <tr>
-              <th class="text-left py-3 pr-6">What you get</th>
-              <th class="text-left py-3 pr-6">Launch Kit</th>
-              <th class="text-left py-3 pr-6">Event Spotlight</th>
-              <th class="text-left py-3 pr-6">Growth Retainer</th>
-            </tr>
+            <tr><th class="text-left py-3 pr-6">What you get</th><th class="text-left py-3 pr-6">Launch Kit</th><th class="text-left py-3 pr-6">Event Spotlight</th><th class="text-left py-3 pr-6">Growth Retainer</th></tr>
           </thead>
           <tbody class="divide-y">
             <tr><td class="py-3 pr-6">Website / Page</td><td>Landing page</td><td>Event page & RSVPs</td><td>Ongoing updates</td></tr>
@@ -257,9 +408,9 @@
             <tr><td class="py-3 pr-6">UGC</td><td>30k-view burst</td><td>Optional</td><td>30k / month</td></tr>
             <tr><td class="py-3 pr-6">Events</td><td>—</td><td>Coordination + run-of-show</td><td>As needed</td></tr>
             <tr><td class="py-3 pr-6 font-semibold">From price</td>
-              <td class="font-semibold" x-text="formatCurrency(bundlePrice('launch'))"></td>
-              <td class="font-semibold" x-text="formatCurrency(bundlePrice('event'))"></td>
-              <td class="font-semibold" x-text="formatCurrency(bundlePrice('growth'))"></td>
+              <td class="font-semibold" x-text="$store.builder.price($store.builder.bundlePrice('launch'))"></td>
+              <td class="font-semibold" x-text="$store.builder.price($store.builder.bundlePrice('event'))"></td>
+              <td class="font-semibold" x-text="$store.builder.price($store.builder.bundlePrice('growth'))"></td>
             </tr>
           </tbody>
         </table>
@@ -270,21 +421,9 @@
   <!-- WHY MONTHLY -->
   <section id="why" class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14">
     <div class="grid md:grid-cols-3 gap-6">
-      <div class="glass rounded-2xl p-6 border">
-        <div class="text-sm text-slate-500">Reason 1</div>
-        <div class="text-xl font-bold">Stay Relevant</div>
-        <p class="mt-2 text-slate-600">Algorithms and trends change weekly. A monthly plan keeps your content fresh and your site optimized—without you lifting a finger.</p>
-      </div>
-      <div class="glass rounded-2xl p-6 border">
-        <div class="text-sm text-slate-500">Reason 2</div>
-        <div class="text-xl font-bold">Compounding Wins</div>
-        <p class="mt-2 text-slate-600">Small improvements stack into big growth: SEO tweaks, steady content, and consistent UGC add up to more leads and sales.</p>
-      </div>
-      <div class="glass rounded-2xl p-6 border">
-        <div class="text-sm text-slate-500">Reason 3</div>
-        <div class="text-xl font-bold">Hands-Off Control</div>
-        <p class="mt-2 text-slate-600">We handle the heavy lifting. You get reports and quick approvals while your brand keeps moving forward.</p>
-      </div>
+      <div class="glass rounded-2xl p-6 border"><div class="text-sm text-slate-500">Reason 1</div><div class="text-xl font-bold">Stay Relevant</div><p class="mt-2 text-slate-600">Trends shift weekly. Monthly plans keep your content fresh & your site optimized.</p></div>
+      <div class="glass rounded-2xl p-6 border"><div class="text-sm text-slate-500">Reason 2</div><div class="text-xl font-bold">Compounding Wins</div><p class="mt-2 text-slate-600">Small improvements stack into big growth: SEO, video, UGC, and events.</p></div>
+      <div class="glass rounded-2xl p-6 border"><div class="text-sm text-slate-500">Reason 3</div><div class="text-xl font-bold">Hands-Off Control</div><p class="mt-2 text-slate-600">We handle the heavy lifting. You approve; momentum continues.</p></div>
     </div>
   </section>
 
@@ -297,541 +436,212 @@
           <p class="text-slate-600">Email <a class="underline" href="mailto:1coastmedia@gmail.com">1coastmedia@gmail.com</a> or book a quick call.</p>
         </div>
         <div class="flex gap-3">
-          <a href="https://calendly.com/bdaniels013/30min" target="_blank" class="soft-btn px-4 py-2 rounded-xl bg-white border">Book 30-min Call</a>
-          <button class="soft-btn px-4 py-2 rounded-xl bg-blue-600 text-white" id="openBuilderFooter">Build My Package</button>
+          <a href="https://calendly.com/bdaniels013/30min" target="_blank" class="soft px-4 py-2 rounded-xl bg-white border">Book 30-min Call</a>
+          <button class="soft px-4 py-2 rounded-xl bg-blue-600 text-white" @click="$store.builder.openBuilder()">Build My Package</button>
         </div>
       </div>
     </div>
   </section>
 
   <!-- BUILDER MODAL -->
-  <div x-data="builder()" x-init="initFromLocal()" x-cloak>
-    <div x-show="openBuilder" class="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-      <div class="absolute inset-0 bg-slate-900/40" @click="openBuilder=false"></div>
-      <div class="relative w-full md:max-w-6xl md:h-[85vh] glass-strong rounded-t-2xl md:rounded-2xl border overflow-hidden">
-        <div class="flex flex-col h-full">
-          <!-- Modal header -->
-          <div class="px-5 py-4 border-b bg-white/60 backdrop-blur">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <h3 class="text-lg sm:text-xl font-extrabold">Build Your Package</h3>
-                <div class="hidden sm:flex glass rounded-full p-1">
-                  <button @click="plan='oneTime'; persistPlan()" :class="plan==='oneTime' ? 'bg-white text-slate-900' : 'text-slate-600'" class="px-3 py-1.5 rounded-full text-sm font-semibold">One-time</button>
-                  <button @click="plan='monthly'; persistPlan()" :class="plan==='monthly' ? 'bg-white text-slate-900' : 'text-slate-600'" class="px-3 py-1.5 rounded-full text-sm font-semibold">Monthly</button>
-                </div>
-              </div>
-              <button class="p-2 hover:bg-white rounded-lg" @click="openBuilder=false" aria-label="Close">
-                <svg width="20" height="20" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/></svg>
-              </button>
-            </div>
-            <div class="mt-3 sm:hidden">
-              <div class="glass rounded-full p-1 inline-flex">
-                <button @click="plan='oneTime'; persistPlan()" :class="plan==='oneTime' ? 'bg-white text-slate-900' : 'text-slate-600'" class="px-3 py-1.5 rounded-full text-sm font-semibold">One-time</button>
-                <button @click="plan='monthly'; persistPlan()" :class="plan==='monthly' ? 'bg-white text-slate-900' : 'text-slate-600'" class="px-3 py-1.5 rounded-full text-sm font-semibold">Monthly</button>
-              </div>
+  <div x-data x-cloak x-show="$store.builder.open" class="fixed inset-0 z-50 flex items-end md:items-center justify-center">
+    <div class="absolute inset-0 bg-slate-900/45" @click="$store.builder.open=false"></div>
+    <div class="relative w-full md:max-w-6xl md:h-[85vh] glass-strong rounded-t-2xl md:rounded-2xl border overflow-hidden">
+      <div class="flex flex-col h-full">
+        <div class="px-5 py-4 border-b bg-white/70 backdrop-blur flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <h3 class="text-lg sm:text-xl font-extrabold">Build Your Package</h3>
+            <div class="glass rounded-full p-1 hidden sm:inline-flex">
+              <button @click="$store.builder.plan='oneTime'; $store.builder.persist()" :class="$store.builder.plan==='oneTime' ? 'bg-white text-slate-900':'text-slate-600'" class="px-3 py-1.5 rounded-full text-sm font-semibold">One-time</button>
+              <button @click="$store.builder.plan='monthly'; $store.builder.persist()" :class="$store.builder.plan==='monthly' ? 'bg-white text-slate-900':'text-slate-600'" class="px-3 py-1.5 rounded-full text-sm font-semibold">Monthly</button>
             </div>
           </div>
+          <button class="p-2 hover:bg-white rounded-lg" @click="$store.builder.open=false" aria-label="Close">
+            <svg width="20" height="20" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+        </div>
 
-          <!-- Modal content -->
-          <div class="flex-1 overflow-hidden">
-            <div class="grid md:grid-cols-[1.25fr_.9fr] gap-4 h-full">
-              <!-- Left: controls -->
-              <div class="overflow-y-auto px-5 py-4">
-                <!-- Service selectors -->
-                <div class="flex flex-wrap gap-2">
-                  <template x-for="svc in serviceList" :key="svc.key">
-                    <button
-                      class="soft-btn px-3 py-2 rounded-xl border bg-white text-sm flex items-center gap-2"
-                      :class="selected[svc.key]?.included ? 'ring-2 ring-blue-500/30' : ''"
-                      @click="toggleService(svc.key)"
-                    >
-                      <span x-html="icons[svc.icon]"></span>
-                      <span class="font-semibold" x-text="svc.name"></span>
-                      <span class="text-xs px-1.5 py-0.5 rounded bg-slate-100" x-text="formatCurrency(svc.base[plan])"></span>
-                    </button>
-                  </template>
-                </div>
+        <div class="grid md:grid-cols-[1.25fr_.95fr] gap-4 h-full">
+          <!-- LEFT -->
+          <div class="overflow-y-auto px-5 py-4">
+            <!-- Service chips -->
+            <div class="flex flex-wrap gap-2">
+              <template x-for="svc in Object.values($store.builder.services)" :key="svc.key">
+                <button class="soft px-3 py-2 rounded-xl border bg-white text-sm flex items-center gap-2"
+                        :class="$store.builder.selected[svc.key].included ? 'ring-2 ring-blue-400/30' : ''"
+                        @click="$store.builder.toggleService(svc.key)">
+                  <span x-html="$store.builder.icons[svc.icon]"></span>
+                  <span class="font-semibold" x-text="svc.name"></span>
+                  <span class="text-xs px-1.5 py-0.5 rounded bg-slate-100" x-text="$store.builder.price(svc.base[$store.builder.plan])"></span>
+                </button>
+              </template>
+            </div>
 
-                <!-- Chips of included services -->
-                <div class="mt-3 flex flex-wrap gap-2" x-show="includedKeys.length">
-                  <template x-for="key in includedKeys" :key="key">
-                    <span class="glass px-2.5 py-1 rounded-full text-xs flex items-center gap-2">
-                      <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                      <span x-text="services[key].name"></span>
-                      <button class="p-1 hover:bg-white rounded" @click="toggleService(key)" aria-label="Remove">
-                        <svg width="14" height="14" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke="#64748b" stroke-width="2" stroke-linecap="round"/></svg>
-                      </button>
-                    </span>
-                  </template>
-                </div>
-
-                <!-- Search + sort -->
-                <div class="mt-5 flex flex-wrap gap-3 items-center">
-                  <div class="flex-1 min-w-[200px] glass rounded-xl px-3 py-2 border flex items-center gap-2">
-                    <svg width="18" height="18" viewBox="0 0 24 24"><path d="M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z" stroke="#64748b" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
-                    <input x-model="query" class="w-full bg-transparent outline-none placeholder-slate-400 text-sm" placeholder="Search add-ons (e.g., “SEO”, “drone”, “RSVP”)" />
-                  </div>
-                  <select x-model="sortBy" class="glass rounded-xl px-3 py-2 border text-sm">
-                    <option value="recommended">Recommended first</option>
-                    <option value="price">Price</option>
-                    <option value="az">A–Z</option>
-                  </select>
-                </div>
-
-                <!-- Editor: one section per included service -->
-                <div class="mt-6 space-y-8">
-                  <template x-for="key in includedKeys" :key="key">
-                    <section>
-                      <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-2">
-                          <h4 class="text-lg font-extrabold" x-text="services[key].name"></h4>
-                          <span class="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700" x-text="plan==='oneTime' ? 'One-time' : 'Monthly'"></span>
-                        </div>
-                        <div class="text-sm text-slate-600">
-                          Base: <span class="font-semibold" x-text="formatCurrency(services[key].base[plan])"></span>
-                        </div>
-                      </div>
-                      <p class="text-sm text-slate-600" x-text="services[key].why"></p>
-
-                      <!-- Add-on grid -->
-                      <div class="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        <template x-for="item in visibleAddons(key)" :key="item.id">
-                          <button
-                            role="switch"
-                            :aria-checked="isSelected(key, item.id)"
-                            class="text-left rounded-2xl border bg-white p-3 soft-btn hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                            :class="isSelected(key, item.id) ? 'tile-selected' : 'glass'"
-                            @click="toggleAddon(key, item.id)"
-                          >
-                            <div class="flex items-start gap-3">
-                              <div class="shrink-0">
-                                <div class="w-9 h-9 rounded-xl border grid place-items-center"
-                                     :class="isSelected(key,item.id) ? 'bg-blue-600 border-blue-600' : 'bg-white/80'">
-                                  <span x-html="icons[item.icon]" :class="isSelected(key,item.id) ? '' : ''"></span>
-                                </div>
-                              </div>
-                              <div class="min-w-0">
-                                <div class="flex items-center gap-2">
-                                  <div class="font-semibold leading-tight" x-text="item.name"></div>
-                                  <span x-show="item.tag" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700" x-text="item.tag"></span>
-                                </div>
-                                <div class="text-xs text-slate-600 leading-snug mt-0.5" x-text="item.desc"></div>
-                                <div class="mt-2 text-sm font-semibold" x-text="priceLabel(item.price)"></div>
-                              </div>
-                            </div>
-                          </button>
-                        </template>
-                      </div>
-
-                      <!-- Notes -->
-                      <div class="mt-3">
-                        <label class="text-xs text-slate-500">Notes for this service (optional)</label>
-                        <textarea x-model="selected[key].notes" rows="2" class="mt-1 w-full glass rounded-xl px-3 py-2 border text-sm" placeholder="Anything specific you want here? (We’ll send this to Stripe with your order)"></textarea>
-                      </div>
-                    </section>
-                  </template>
-
-                  <div x-show="!includedKeys.length" class="text-sm text-slate-600">
-                    Select one or more services above to start adding options.
-                  </div>
-                </div>
+            <!-- Search / sort -->
+            <div class="mt-4 flex flex-wrap gap-3 items-center">
+              <div class="flex-1 min-w-[200px] glass rounded-xl px-3 py-2 border flex items-center gap-2">
+                <svg width="18" height="18" viewBox="0 0 24 24"><path d="M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z" stroke="#64748b" stroke-width="2" fill="none"/></svg>
+                <input x-model="$store.builder.query" class="w-full bg-transparent outline-none placeholder-slate-400 text-sm" placeholder="Search add-ons (e.g., “SEO”, “drone”, “RSVP”)" />
               </div>
+              <select x-model="$store.builder.sortBy" class="glass rounded-xl px-3 py-2 border text-sm">
+                <option value="recommended">Recommended first</option>
+                <option value="price">Price</option>
+                <option value="az">A–Z</option>
+              </select>
+            </div>
 
-              <!-- Right: summary -->
-              <aside class="border-l bg-white/60 backdrop-blur px-5 py-4 flex flex-col">
-                <div class="flex items-center justify-between">
-                  <h4 class="text-lg font-extrabold">Order Summary</h4>
-                  <button class="text-sm text-slate-600 underline" @click="clearAll()">Reset</button>
-                </div>
-                <div class="mt-3 space-y-3 flex-1 overflow-auto">
-                  <template x-for="key in includedKeys" :key="'sum-'+key">
-                    <div class="glass rounded-xl p-3 border">
-                      <div class="flex items-center justify-between">
-                        <div class="font-semibold" x-text="services[key].name"></div>
-                        <div class="font-semibold" x-text="formatCurrency(services[key].base[plan])"></div>
-                      </div>
-                      <ul class="mt-1 text-sm text-slate-700 space-y-0.5">
-                        <template x-for="id in selected[key].addons" :key="'li-'+id">
-                          <li class="flex items-center justify-between">
-                            <span x-text="addonById(key,id).name"></span>
-                            <span x-text="formatCurrency(addonById(key,id).price[plan])"></span>
-                          </li>
-                        </template>
-                      </ul>
-                      <div class="mt-2 text-sm text-slate-600" x-show="selected[key].notes">
-                        <span class="font-medium">Notes:</span> <span x-text="selected[key].notes"></span>
-                      </div>
+            <!-- Sections for each included service -->
+            <div class="mt-6 space-y-8">
+              <template x-for="key in $store.builder.included" :key="'sec-'+key">
+                <section>
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                      <h4 class="text-lg font-extrabold" x-text="$store.builder.services[key].name"></h4>
+                      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700" x-text="$store.builder.plan==='oneTime' ? 'One-time':'Monthly'"></span>
                     </div>
-                  </template>
-                </div>
-                <div class="mt-2 border-t pt-3">
+                    <div class="text-sm text-slate-600">Base: <span class="font-semibold" x-text="$store.builder.price($store.builder.services[key].base[$store.builder.plan])"></span></div>
+                  </div>
+                  <p class="text-sm text-slate-600" x-text="$store.builder.services[key].why"></p>
+
+                  <div class="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <template x-for="item in $store.builder.visibleAddons(key)" :key="item.id">
+                      <button role="switch" :aria-checked="$store.builder.isSel(key,item.id)"
+                              class="text-left rounded-2xl border bg-white p-3 soft hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                              :class="$store.builder.isSel(key,item.id) ? 'tile-selected' : 'glass'"
+                              @click="$store.builder.toggleAddon(key,item.id)">
+                        <div class="flex items-start gap-3">
+                          <div class="shrink-0">
+                            <div class="w-9 h-9 rounded-xl border grid place-items-center" :class="$store.builder.isSel(key,item.id)?'bg-blue-600 border-blue-600 text-white':''">
+                              <span x-html="$store.builder.icons[item.icon]"></span>
+                            </div>
+                          </div>
+                          <div class="min-w-0">
+                            <div class="flex items-center gap-2">
+                              <div class="font-semibold leading-tight" x-text="item.name"></div>
+                              <span x-show="item.tag" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700" x-text="item.tag"></span>
+                            </div>
+                            <div class="text-xs text-slate-600 leading-snug mt-0.5" x-text="item.desc"></div>
+                            <div class="mt-2 text-sm font-semibold" x-text="$store.builder.priceLabel(item.price[$store.builder.plan])"></div>
+                          </div>
+                        </div>
+                      </button>
+                    </template>
+                  </div>
+
+                  <div class="mt-3">
+                    <label class="text-xs text-slate-500">Notes for this service (optional)</label>
+                    <textarea x-model="$store.builder.selected[key].notes" rows="2" class="mt-1 w-full glass rounded-xl px-3 py-2 border text-sm" placeholder="Goals, timing, examples… (sent as Stripe metadata)"></textarea>
+                  </div>
+                </section>
+              </template>
+              <div x-show="!$store.builder.included.length" class="text-sm text-slate-600">Select one or more services above to start adding options.</div>
+            </div>
+          </div>
+
+          <!-- RIGHT: Summary -->
+          <aside class="border-l bg-white/70 backdrop-blur px-5 py-4 flex flex-col">
+            <div class="flex items-center justify-between">
+              <h4 class="text-lg font-extrabold">Order Summary</h4>
+              <button class="text-sm text-slate-600 underline" @click="$store.builder.clearAll()">Reset</button>
+            </div>
+            <div class="mt-3 space-y-3 flex-1 overflow-auto">
+              <template x-for="key in $store.builder.included" :key="'sum-'+key">
+                <div class="glass rounded-xl p-3 border">
                   <div class="flex items-center justify-between">
-                    <div class="text-sm text-slate-600">Total (<span x-text="plan==='oneTime' ? 'one-time' : 'per month'"></span>)</div>
-                    <div class="text-2xl font-extrabold" x-text="formatCurrency(total())"></div>
+                    <div class="font-semibold" x-text="$store.builder.services[key].name"></div>
+                    <div class="font-semibold" x-text="$store.builder.price($store.builder.services[key].base[$store.builder.plan])"></div>
                   </div>
-                  <div class="mt-3 grid grid-cols-2 gap-3">
-                    <button class="soft-btn px-4 py-2 rounded-xl bg-white border" @click="openBuilder=false">Keep Browsing</button>
-                    <button class="soft-btn px-4 py-2 rounded-xl bg-blue-600 text-white" @click="openReview()">Review & Checkout</button>
+                  <ul class="mt-1 text-sm text-slate-700 space-y-0.5">
+                    <template x-for="id in $store.builder.selected[key].addons" :key="'a-'+id">
+                      <li class="flex items-center justify-between">
+                        <span x-text="$store.builder.addon(key,id).name"></span>
+                        <span x-text="$store.builder.price($store.builder.addon(key,id).price[$store.builder.plan])"></span>
+                      </li>
+                    </template>
+                  </ul>
+                  <div class="mt-2 text-sm text-slate-600" x-show="$store.builder.selected[key].notes">
+                    <span class="font-medium">Notes:</span> <span x-text="$store.builder.selected[key].notes"></span>
                   </div>
                 </div>
-              </aside>
+              </template>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Mobile sticky bar -->
-      <div class="fixed bottom-3 left-0 right-0 mx-auto max-w-2xl px-3" x-show="openBuilder">
-        <div class="glass rounded-2xl border p-3 shadow-lg md:hidden">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="text-xs text-slate-500" x-text="plan==='oneTime' ? 'Total (one-time)' : 'Total (monthly)'"></div>
-              <div class="text-xl font-extrabold" x-text="formatCurrency(total())"></div>
-            </div>
-            <button class="soft-btn px-4 py-2 rounded-xl bg-blue-600 text-white" @click="openReview()">Review</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Review & Checkout Drawer -->
-      <div x-show="openReviewPanel" class="fixed inset-0 z-[60] flex items-end md:items-center justify-center">
-        <div class="absolute inset-0 bg-slate-900/50" @click="openReviewPanel=false"></div>
-        <div class="relative w-full md:max-w-3xl glass-strong rounded-t-2xl md:rounded-2xl border overflow-hidden">
-          <div class="px-5 py-4 border-b bg-white/60 backdrop-blur flex items-center justify-between">
-            <h3 class="text-lg font-extrabold">Review & Checkout</h3>
-            <button class="p-2 hover:bg-white rounded-lg" @click="openReviewPanel=false" aria-label="Close">
-              <svg width="20" height="20" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/></svg>
-            </button>
-          </div>
-          <div class="p-5 grid md:grid-cols-2 gap-5">
-            <div>
-              <label class="text-xs text-slate-500">Your name</label>
-              <input x-model="contact.name" class="w-full glass rounded-xl px-3 py-2 border" placeholder="First & last name" />
-            </div>
-            <div>
-              <label class="text-xs text-slate-500">Email (for receipt)</label>
-              <input x-model="contact.email" class="w-full glass rounded-xl px-3 py-2 border" placeholder="you@email.com" />
-            </div>
-            <div>
-              <label class="text-xs text-slate-500">Company (optional)</label>
-              <input x-model="contact.company" class="w-full glass rounded-xl px-3 py-2 border" placeholder="Company / brand" />
-            </div>
-            <div>
-              <label class="text-xs text-slate-500">Phone (optional)</label>
-              <input x-model="contact.phone" class="w-full glass rounded-xl px-3 py-2 border" placeholder="(###) ###-####" />
-            </div>
-            <div class="md:col-span-2">
-              <label class="text-xs text-slate-500">Project notes (optional)</label>
-              <textarea x-model="contact.notes" rows="3" class="w-full glass rounded-xl px-3 py-2 border" placeholder="Anything we should know? Timelines, goals, style references…"></textarea>
-            </div>
-            <div class="md:col-span-2 flex items-center gap-2 text-sm">
-              <input type="checkbox" x-model="contact.agree" id="agree" class="h-4 w-4 rounded border-slate-300">
-              <label for="agree" class="text-slate-600">I agree to be contacted and understand 1Coast Media will confirm scope before work begins.</label>
-            </div>
-            <div class="md:col-span-2 flex items-center justify-between">
-              <div>
-                <div class="text-xs text-slate-500" x-text="plan==='oneTime' ? 'Total (one-time)' : 'Total (monthly)'"></div>
-                <div class="text-2xl font-extrabold" x-text="formatCurrency(total())"></div>
+            <div class="mt-2 border-t pt-3">
+              <div class="flex items-center justify-between">
+                <div class="text-sm text-slate-600">Total (<span x-text="$store.builder.plan==='oneTime'?'one-time':'per month'"></span>)</div>
+                <div class="text-2xl font-extrabold" x-text="$store.builder.price($store.builder.total())"></div>
               </div>
-              <button class="soft-btn px-5 py-2.5 rounded-xl bg-blue-600 text-white disabled:opacity-50"
-                      :disabled="!contact.agree || !includedKeys.length"
-                      @click="checkout()">
-                Checkout with Stripe
-              </button>
+              <div class="mt-3 grid grid-cols-2 gap-3">
+                <button class="soft px-4 py-2 rounded-xl bg-white border" @click="$store.builder.open=false">Keep Browsing</button>
+                <button class="soft px-4 py-2 rounded-xl bg-blue-600 text-white" @click="$store.builder.openReview()">Review & Checkout</button>
+              </div>
             </div>
-          </div>
+          </aside>
         </div>
       </div>
     </div>
 
-    <!-- Wire top buttons to open the same modal state -->
-    <script>
-      ['openBuilderTop','openBuilderHero','openBuilderFooter','openBuilderCompare'].forEach(id=>{
-        document.addEventListener('alpine:init',()=>{
-          document.getElementById(id)?.addEventListener('click', ()=> {
-            const root = document.querySelectorAll('[x-data^="builder"]')[0].__x.$data;
-            root.openBuilder = true;
-          });
-        });
-      });
-    </script>
+    <!-- Mobile sticky total -->
+    <div class="fixed bottom-3 left-0 right-0 mx-auto max-w-2xl px-3 md:hidden" x-show="$store.builder.open">
+      <div class="glass rounded-2xl border p-3 shadow-lg">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-xs text-slate-500" x-text="$store.builder.plan==='oneTime' ? 'Total (one-time)' : 'Total (monthly)'"></div>
+            <div class="text-xl font-extrabold" x-text="$store.builder.price($store.builder.total())"></div>
+          </div>
+          <button class="soft px-4 py-2 rounded-xl bg-blue-600 text-white" @click="$store.builder.openReview()">Review</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    <!-- PRICING / STATE LOGIC -->
-    <script>
-      function builder(){
-        return {
-          // UI state
-          openBuilder:false,
-          openReviewPanel:false,
-          plan:'oneTime',
-          query:'',
-          sortBy:'recommended',
-          contact:{name:'',email:'',company:'',phone:'',notes:'',agree:false},
-
-          // Catalog
-          services:{
-            web:{ key:'web', icon:'globe', name:'Web & App Development',
-              why:'Launch a clean, responsive site or lightweight app that loads fast and turns visitors into leads.',
-              base:{oneTime:300, monthly:500},
-              addons:[
-                // One-time & Monthly mapped in price object
-                {id:'seo_basics', icon:'search', name:'Be Found on Google (SEO Basics)', desc:'Keyword setup + on-page tune-up for better rankings.', tag:'Quick Win', price:{oneTime:150, monthly:150}},
-                {id:'app_proto', icon:'phone', name:'Basic App Prototype', desc:'Clickable MVP for iOS/Android (chatbot or simple tool).', price:{oneTime:500, monthly:500}},
-                {id:'automations', icon:'robot', name:'Auto Follow-Ups & Workflows', desc:'Emails/leads/social tasks fire automatically.', price:{oneTime:100, monthly:100}},
-                {id:'api_integrations', icon:'plug', name:'Payments, Maps & APIs', desc:'Connect Stripe, Google Maps, or analytics dashboards.', price:{oneTime:250, monthly:250}},
-                {id:'ecommerce', icon:'cart', name:'Simple Shop Setup', desc:'Catalog, cart, and checkout for a basic store.', price:{oneTime:300, monthly:300}},
-                {id:'copy_1p', icon:'pen', name:'Copywriting (1 Page)', desc:'Persuasive text written for conversions.', price:{oneTime:120, monthly:120}},
-                {id:'speed_security', icon:'shield', name:'Speed & Security Tune-Up', desc:'Caching, compression, and security basics.', price:{oneTime:120, monthly:120}},
-                {id:'dashboard', icon:'chart', name:'Custom Dashboard', desc:'See traffic & engagement in one place.', price:{oneTime:250, monthly:250}},
-                {id:'ai_features', icon:'sparkle', name:'Smart Personalization', desc:'Recommendations or simple AI features.', price:{oneTime:200, monthly:200}}
-              ]
-            },
-            video:{ key:'video', icon:'video', name:'Video & Audio Production',
-              why:'Tell your story with content people actually watch—music videos, promos, and scroll-stopping reels.',
-              base:{oneTime:600, monthly:1200},
-              addons:[
-                {id:'audio_polish', icon:'audio', name:'Audio Polish', desc:'Noise reduction, subtitles, and better mixes.', tag:'Popular', price:{oneTime:200, monthly:250}},
-                {id:'adv_video', icon:'layers', name:'Advanced Video Upgrade', desc:'Longer length or multi-scene, cinematic edits.', price:{oneTime:800, monthly:1000}},
-                {id:'drone_personal', icon:'drone', name:'Drone Shoots – Personal', desc:'Dynamic aerials, licensed pilot.', price:{oneTime:300, monthly:300}},
-                {id:'drone_pro', icon:'drone', name:'Drone Shoots – Pro', desc:'High-end aerials with certified operator.', price:{oneTime:1500, monthly:1500}},
-                {id:'extended_edit', icon:'scissors', name:'Extended Editing', desc:'Series setup or extra polish passes.', price:{oneTime:300, monthly:300}},
-                {id:'script_shotlist', icon:'doc', name:'Script & Shotlist', desc:'We plan the story beats so filming is smooth.', price:{oneTime:150, monthly:150}},
-                {id:'color_grade', icon:'palette', name:'Color Grade', desc:'Crisp, consistent colors across scenes.', price:{oneTime:150, monthly:150}},
-                {id:'social_cuts', icon:'grid', name:'Vertical & Social Cuts (x3)', desc:'TikTok/Shorts/IG-ready edits.', price:{oneTime:180, monthly:350}},
-                {id:'voiceover', icon:'mic', name:'Voiceover / Talent Sourcing', desc:'Find the right voice or on-camera talent.', price:{oneTime:200, monthly:200}}
-              ]
-            },
-            events:{ key:'events', icon:'calendar', name:'Event Planning & Coordination',
-              why:'Relax and show up—timelines, vendors, and on-site flow handled with Gulf Coast know-how.',
-              base:{oneTime:1000, monthly:1200},
-              addons:[
-                {id:'vendor_coord', icon:'people', name:'Venue & Vendor Coordination', desc:'We handle quotes, schedules, and confirmations.', tag:'Popular', price:{oneTime:500, monthly:600}},
-                {id:'event_page', icon:'globe', name:'RSVP Page & Tickets', desc:'A clean page for details, signups, and tickets.', price:{oneTime:200, monthly:200}},
-                {id:'media_event', icon:'camera', name:'Media Coverage', desc:'Photo/video team for highlights.', price:{oneTime:300, monthly:300}},
-                {id:'event_automations', icon:'robot', name:'Reminders & Guest Automations', desc:'Confirmations, reminders, and follow-ups.', price:{oneTime:150, monthly:150}},
-                {id:'hybrid_stream', icon:'broadcast', name:'Hybrid / Live Stream Setup', desc:'Reach people who can’t attend in person.', price:{oneTime:400, monthly:400}},
-                {id:'run_show', icon:'doc', name:'Run-of-Show & Staffing Plan', desc:'Minute-by-minute plan and staffing.', price:{oneTime:200, monthly:300}},
-                {id:'host_mc', icon:'megaphone', name:'On-site Host / MC', desc:'Engaging host to keep energy high.', price:{oneTime:250, monthly:250}},
-                {id:'sponsor_kit', icon:'star', name:'Sponsor Kit & Outreach', desc:'Deck + outreach to attract sponsors.', price:{oneTime:250, monthly:300}}
-              ]
-            },
-            ugc:{ key:'ugc', icon:'sparkle', name:'UGC & Local Clipping Campaigns',
-              why:'Real creators, real audiences. Authentic content that earns trust and clicks.',
-              base:{oneTime:450, monthly:600},
-              addons:[
-                {id:'repurpose', icon:'grid', name:'Repurposed Asset Pack', desc:'Turn clips into ads, posts, and email graphics.', tag:'Quick Win', price:{oneTime:200, monthly:200}},
-                {id:'lead_funnel', icon:'target', name:'Lead Capture Funnel', desc:'Simple page to turn views into contacts.', price:{oneTime:250, monthly:250}},
-                {id:'content_enh', icon:'sparkle', name:'Content Enhancement', desc:'Overlays, music, CTAs for higher watch-time.', price:{oneTime:150, monthly:150}},
-                {id:'captions_pack', icon:'cc', name:'Captions & Descriptions', desc:'Optimized copy for better discovery.', price:{oneTime:100, monthly:100}},
-                {id:'brand_kit', icon:'badge', name:'Branded Watermarks & End-slates', desc:'Keep your brand on every clip.', price:{oneTime:150, monthly:150}},
-                {id:'extra_10k', icon:'eye', name:'Extra 10k Verified Views', desc:'Boost reach with +10,000 views.', price:{oneTime:150, monthly:150}},
-                {id:'extra_20k', icon:'eye', name:'Extra 20k Verified Views', desc:'+20,000 additional views.', price:{oneTime:300, monthly:300}},
-                {id:'extra_70k', icon:'eye', name:'Extra 70k Verified Views', desc:'+70,000 additional views.', price:{oneTime:1050, monthly:1050}},
-                {id:'creator_match', icon:'people', name:'Creator Matching', desc:'We match 2–3 on-brand local creators.', price:{oneTime:200, monthly:200}},
-                {id:'tracking_setup', icon:'chart', name:'Performance Tracking', desc:'Dashboard for views & conversions.', price:{oneTime:150, monthly:150}}
-              ]
-            }
-          },
-
-          // Presets (smarter combos)
-          presets:{
-            launch:{ label:'Launch Kit', planAware:true, apply:(ctx)=>{
-              ctx.resetSelection();
-              ctx.toggleService('web', true);
-              ctx.toggleService('ugc', true);
-              // web
-              ctx.ensure('web','seo_basics'); ctx.ensure('web','copy_1p');
-              // ugc
-              ctx.ensure('ugc','repurpose'); ctx.ensure('ugc','brand_kit');
-            }},
-            event:{ label:'Event Spotlight', planAware:true, apply:(ctx)=>{
-              ctx.resetSelection();
-              ctx.toggleService('events', true);
-              ctx.toggleService('video', true);
-              ctx.ensure('events','vendor_coord'); ctx.ensure('events','event_page'); ctx.ensure('events','run_show');
-              ctx.ensure('video','audio_polish'); ctx.ensure('video','script_shotlist');
-            }},
-            growth:{ label:'Growth Retainer', planAware:true, apply:(ctx)=>{
-              ctx.resetSelection();
-              ctx.plan = 'monthly';
-              ['web','video','ugc'].forEach(s=>ctx.toggleService(s,true));
-              ctx.ensure('web','seo_basics'); ctx.ensure('web','dashboard'); ctx.ensure('web','automations');
-              ctx.ensure('video','social_cuts'); ctx.ensure('video','extended_edit');
-              ctx.ensure('ugc','repurpose'); ctx.ensure('ugc','lead_funnel');
-            }},
-          },
-
-          // Internal state (selected per service)
-          selected:{
-            web:{included:false, addons:[], notes:''},
-            video:{included:false, addons:[], notes:''},
-            events:{included:false, addons:[], notes:''},
-            ugc:{included:false, addons:[], notes:''},
-          },
-
-          // Icons (all tiles have a visual)
-          icons:{
-            globe:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18M12 3a9 9 0 1 0 0 18"/></svg>`,
-            phone:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>`,
-            search:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>`,
-            robot:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="10" rx="2"/><path d="M12 7V4"/><circle cx="8" cy="12" r="1"/><circle cx="16" cy="12" r="1"/></svg>`,
-            plug:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 7V3m6 4V3M7 13h10a4 4 0 0 1-4 4v4"/></svg>`,
-            cart:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>`,
-            pen:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>`,
-            shield:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l7 4v5a7 7 0 0 1-7 7 7 7 0 0 1-7-7V7z"/></svg>`,
-            chart:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="7" width="3" height="11"/><rect x="17" y="9" width="3" height="9"/></svg>`,
-            sparkle:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5z"/></svg>`,
-            video:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="14" height="14" rx="2"/><path d="m17 9 4-3v12l-4-3z"/></svg>`,
-            audio:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/></svg>`,
-            layers:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 2 9 5-9 5-9-5 9-5z"/><path d="m3 12 9 5 9-5"/></svg>`,
-            drone:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="18" r="3"/><path d="M6 9v6M18 9v6M9 6h6M9 18h6"/></svg>`,
-            scissors:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M20 4L8 16M8 8l12 12"/></svg>`,
-            doc:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16l4-3h10a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>`,
-            palette:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a9 9 0 1 0 0 18h1a2 2 0 0 0 2-2 2 2 0 0 1 2-2h1a2 2 0 0 0 2-2 9 9 0 0 0-8-9z"/></svg>`,
-            grid:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>`,
-            mic:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M12 17v5M8 12v2a4 4 0 0 0 8 0v-2"/></svg>`,
-            calendar:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 2v4M16 2v4M4 11h16M5 6h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/></svg>`,
-            people:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
-            camera:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h4l2-3h4l2 3h4v12H4z"/><circle cx="12" cy="13" r="4"/></svg>`,
-            broadcast:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="2"/><path d="M5 12a7 7 0 0 1 14 0M2 12a10 10 0 0 1 20 0"/></svg>`,
-            megaphone:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10v4l13-2v-0l-13-2z"/><path d="M16 8v8"/></svg>`,
-            star:`<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="m12 17.3-5.6 3 1.1-6.5-4.7-4.6 6.5-.9L12 2l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5z"/></svg>`,
-            badge:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M5 22l7-5 7 5"/></svg>`,
-            target:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/></svg>`,
-            cc:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 5h18v14H3z"/><path d="M7 12h3M14 12h3"/></svg>`,
-            eye:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>`,
-          },
-
-          get serviceList(){ return Object.values(this.services); },
-          includedKeys(){ return Object.keys(this.selected).filter(k=>this.selected[k].included); },
-
-          initFromLocal(){
-            const saved = localStorage.getItem('builder_state');
-            if(saved){
-              try{ Object.assign(this, JSON.parse(saved)); }catch(e){}
-            }
-          },
-          persist(){ localStorage.setItem('builder_state', JSON.stringify({plan:this.plan, selected:this.selected})); },
-          persistPlan(){ this.persist(); },
-
-          toggleService(key, force){
-            const curr = this.selected[key].included;
-            this.selected[key].included = (typeof force==='boolean') ? force : !curr;
-            this.persist();
-          },
-
-          isSelected(key,id){ return this.selected[key].addons.includes(id); },
-          ensure(key,id){ if(!this.isSelected(key,id)) this.selected[key].addons.push(id); this.persist(); },
-          toggleAddon(key,id){
-            const arr = this.selected[key].addons;
-            const i = arr.indexOf(id);
-            if(i>-1) arr.splice(i,1); else arr.push(id);
-            this.persist();
-          },
-
-          addonById(key,id){ return this.services[key].addons.find(a=>a.id===id); },
-          visibleAddons(key){
-            const list = this.services[key].addons.map(a=>({
-              ...a, price:{
-                oneTime:a.price.oneTime, monthly:a.price.monthly
-              }
-            }));
-            // filter by query
-            const q = this.query.trim().toLowerCase();
-            let filtered = q ? list.filter(a=> (a.name+a.desc).toLowerCase().includes(q)) : list;
-            // sort
-            if(this.sortBy==='price'){
-              filtered.sort((a,b)=>a.price[this.plan]-b.price[this.plan]);
-            }else if(this.sortBy==='az'){
-              filtered.sort((a,b)=>a.name.localeCompare(b.name));
-            }else{ // recommended first -> tag present
-              filtered.sort((a,b)=> (b.tag?1:0) - (a.tag?1:0));
-            }
-            return filtered;
-          },
-
-          resetSelection(){
-            Object.keys(this.selected).forEach(k=>{ this.selected[k]={included:false, addons:[], notes:''}; });
-            this.persist();
-          },
-          clearAll(){ this.resetSelection(); },
-
-          priceLabel(p){ return this.plan==='oneTime' ? `+$${p.toFixed(0)}` : `+$/mo ${p.toFixed(0)}`.replace('$/mo','$') + '/mo'; },
-          formatCurrency(n){ return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n||0); },
-
-          total(){
-            return this.includedKeys.reduce((sum,key)=>{
-              const base = this.services[key].base[this.plan];
-              const adds = this.selected[key].addons.reduce((s,id)=> s + this.addonById(key,id).price[this.plan], 0);
-              return sum + base + adds;
-            },0);
-          },
-
-          // Bundles “From $” pricing (uses live catalog)
-          bundlePrice(which){
-            const t = this.plan;
-            const sim = { web:[], video:[], events:[], ugc:[] };
-            const add = (k,id)=> sim[k].push(this.services[k].addons.find(a=>a.id===id));
-            if(which==='launch'){
-              // web + ugc basics
-              var price = this.services.web.base[t] + this.services.ugc.base[t];
-              add('web','seo_basics'); add('web','copy_1p');
-              add('ugc','repurpose'); add('ugc','brand_kit');
-              return price + sim.web.reduce((s,a)=>s+a.price[t],0) + sim.ugc.reduce((s,a)=>s+a.price[t],0);
-            }
-            if(which==='event'){
-              var price = this.services.events.base[t] + this.services.video.base[t];
-              add('events','vendor_coord'); add('events','event_page'); add('events','run_show');
-              add('video','audio_polish'); add('video','script_shotlist');
-              return price + sim.events.reduce((s,a)=>s+a.price[t],0) + sim.video.reduce((s,a)=>s+a.price[t],0);
-            }
-            if(which==='growth'){
-              const base = this.services.web.base[t] + this.services.video.base[t] + this.services.ugc.base[t];
-              add('web','seo_basics'); add('web','dashboard'); add('web','automations');
-              add('video','social_cuts'); add('video','extended_edit');
-              add('ugc','repurpose'); add('ugc','lead_funnel');
-              return base + [...sim.web,...sim.video,...sim.ugc].reduce((s,a)=>s+a.price[t],0);
-            }
-            return 0;
-          },
-
-          applyPreset(which){
-            const fn = this.presets[which]?.apply;
-            if(fn) fn(this);
-            this.persist();
-          },
-
-          openReview(){ this.openReviewPanel = true; },
-
-          // Checkout (serverless endpoint should create Session from cart)
-          async checkout(){
-            const cart = this.includedKeys.map(key=>{
-              return {
-                service:key,
-                plan:this.plan,
-                base:this.services[key].base[this.plan],
-                addons:this.selected[key].addons.map(id=>{
-                  const a = this.addonById(key,id);
-                  return { id:a.id, name:a.name, price:a.price[this.plan] }
-                }),
-                notes:this.selected[key].notes||''
-              }
-            });
-            const payload = {
-              plan:this.plan,
-              contact:this.contact,
-              cart,
-              source:'site-v1'
-            };
-            const res = await fetch('/api/checkout',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
-            if(!res.ok){ alert('Checkout error. Please email 1coastmedia@gmail.com.'); return; }
-            const data = await res.json();
-            if(data.url){ window.location = data.url; }
-            else { alert('Unable to start checkout.'); }
-          }
-        }
-      }
-    </script>
+  <!-- REVIEW / CHECKOUT -->
+  <div x-data x-cloak x-show="$store.builder.review" class="fixed inset-0 z-[60] flex items-end md:items-center justify-center">
+    <div class="absolute inset-0 bg-slate-900/55" @click="$store.builder.review=false"></div>
+    <div class="relative w-full md:max-w-3xl glass-strong rounded-t-2xl md:rounded-2xl border overflow-hidden">
+      <div class="px-5 py-4 border-b bg-white/70 backdrop-blur flex items-center justify-between">
+        <h3 class="text-lg font-extrabold">Review & Checkout</h3>
+        <button class="p-2 hover:bg-white rounded-lg" @click="$store.builder.review=false" aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="p-5 grid md:grid-cols-2 gap-5">
+        <div>
+          <label class="text-xs text-slate-500">Your name</label>
+          <input x-model="$store.builder.contact.name" class="w-full glass rounded-xl px-3 py-2 border" placeholder="First & last name" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-500">Email (for receipt)</label>
+          <input x-model="$store.builder.contact.email" class="w-full glass rounded-xl px-3 py-2 border" placeholder="you@email.com" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-500">Company (optional)</label>
+          <input x-model="$store.builder.contact.company" class="w-full glass rounded-xl px-3 py-2 border" placeholder="Company / brand" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-500">Phone (optional)</label>
+          <input x-model="$store.builder.contact.phone" class="w-full glass rounded-xl px-3 py-2 border" placeholder="(###) ###-####" />
+        </div>
+        <div class="md:col-span-2">
+          <label class="text-xs text-slate-500">Project notes (optional)</label>
+          <textarea x-model="$store.builder.contact.notes" rows="3" class="w-full glass rounded-xl px-3 py-2 border" placeholder="Anything we should know? Timelines, goals, style references…"></textarea>
+        </div>
+        <div class="md:col-span-2 flex items-center gap-2 text-sm">
+          <input type="checkbox" x-model="$store.builder.contact.agree" id="agree" class="h-4 w-4 rounded border-slate-300">
+          <label for="agree" class="text-slate-600">I agree to be contacted. Payment is processed securely by Stripe.</label>
+        </div>
+        <div class="md:col-span-2 flex items-center justify-between">
+          <div>
+            <div class="text-xs text-slate-500" x-text="$store.builder.plan==='oneTime' ? 'Total (one-time)' : 'Total (monthly)'"></div>
+            <div class="text-2xl font-extrabold" x-text="$store.builder.price($store.builder.total())"></div>
+          </div>
+          <button class="soft px-5 py-2.5 rounded-xl bg-blue-600 text-white disabled:opacity-50"
+                  :disabled="!$store.builder.contact.agree || !$store.builder.included.length"
+                  @click="$store.builder.checkout()">
+            Checkout with Stripe
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- FOOTER -->
@@ -841,76 +651,10 @@
       <div class="flex items-center gap-4">
         <a class="hover:underline" href="mailto:1coastmedia@gmail.com">1coastmedia@gmail.com</a>
         <a class="hover:underline" href="https://calendly.com/bdaniels013/30min" target="_blank">Book a call</a>
+        <button class="soft px-3 py-1.5 rounded-lg bg-white border" @click="$store.builder.openBuilder()">Build My Package</button>
       </div>
     </div>
-    <script>document.getElementById('y').textContent = new Date().getFullYear()</script>
+    <script>document.getElementById('y').textContent=new Date().getFullYear()</script>
   </footer>
-
-  <!-- ======================
-       (Optional) SERVERLESS: /api/checkout
-       ======================
-       Example Vercel function to support multi-service carts.
-       - Keep your STRIPE SECRET KEY in env: STRIPE_SECRET_KEY
-       - Set success/cancel URLs to your deployed domain
-  -->
-  <!--
-  // /api/checkout.js (Vercel)
-  const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-
-  module.exports = async (req, res) => {
-    if (req.method !== 'POST') return res.status(405).json({error:'Method not allowed'});
-    const { plan, cart, contact } = req.body || {};
-    if(!Array.isArray(cart) || cart.length===0) return res.status(400).json({error:'Cart empty'});
-
-    // Build line items
-    const line_items = [];
-    cart.forEach(item=>{
-      // Base
-      line_items.push({
-        quantity: 1,
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: `${item.service.toUpperCase()} — Base (${plan==='oneTime'?'One-time':'Monthly'})`,
-            description: item.notes?.slice(0, 400) || '',
-            metadata: { service:item.service, type:'base', plan }
-          },
-          unit_amount: Math.round(item.base * 100)
-        }
-      });
-      // Add-ons
-      item.addons.forEach(a=>{
-        line_items.push({
-          quantity: 1,
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: `${item.service.toUpperCase()} — ${a.name}`,
-              metadata: { service:item.service, type:'addon', plan, addon_id:a.id }
-            },
-            unit_amount: Math.round(a.price * 100)
-          }
-        });
-      });
-    });
-
-    const session = await stripe.checkout.sessions.create({
-      mode: plan==='oneTime' ? 'payment' : 'subscription',
-      line_items,
-      success_url: 'https://yourdomain.com/?status=success',
-      cancel_url: 'https://yourdomain.com/?status=cancelled',
-      customer_email: contact?.email || undefined,
-      metadata: {
-        plan,
-        customer_name: contact?.name || '',
-        customer_company: contact?.company || '',
-        customer_phone: contact?.phone || '',
-        notes: contact?.notes || ''
-      }
-    });
-    return res.status(200).json({ url: session.url });
-  };
-  -->
-
 </body>
 </html>
