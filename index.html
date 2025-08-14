@@ -2,785 +2,419 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>1Coast Media — Premium Digital, Media & Event Services</title>
-  <meta name="description" content="Web & App, Video, Events, and UGC campaigns for Gulf Coast creators and brands. Build your package and check out securely." />
-
-  <!-- Tailwind + Alpine (no runtime tailwind config needed) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>1 Coast Media — Premium Digital, Media & Event Services</title>
+  <meta name="description" content="Premium Web & App, Video/Audio Production, Event Planning, and UGC Campaigns for Mississippi Gulf Coast creators and brands. Transparent pricing. Fast turnarounds. Results-driven."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Alpine.js -->
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-  <!-- Stripe.js (client only; secret stays server-side) -->
-  <script src="https://js.stripe.com/v3/"></script>
-
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet" />
-
   <style>
     :root{
-      --bg:#f6f7fb; --ink:#0f172a; --muted:#475569;
-      --brand:#2563eb; --brand2:#8b5cf6; --brand3:#22c55e;
-      --glass:rgba(255,255,255,.68); --glass2:rgba(255,255,255,.82);
-      --stroke:rgba(255,255,255,.75); --ring:rgba(37,99,235,.3);
+      --ink:#0f172a;
     }
-    html,body{background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
-    .aurora{
-      background:
-        radial-gradient(62rem 28rem at 80% -10%, rgba(56,189,248,.26), transparent 60%),
-        radial-gradient(55rem 26rem at -10% 10%, rgba(139,92,246,.22), transparent 60%),
-        radial-gradient(65rem 28rem at 110% 80%, rgba(34,197,94,.2), transparent 60%),
-        linear-gradient(#ffffff,#f4f6fb 60%,#eef1f9);
-    }
-    .glass{background:var(--glass);backdrop-filter:saturate(180%) blur(18px);-webkit-backdrop-filter:saturate(180%) blur(18px);border:1px solid var(--stroke);box-shadow:0 1px 0 rgba(255,255,255,.85) inset,0 12px 30px rgba(2,6,23,.08);}
-    .glass-strong{background:var(--glass2);backdrop-filter:saturate(200%) blur(22px);-webkit-backdrop-filter:saturate(200%) blur(22px);border:1px solid rgba(255,255,255,.86);box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 18px 46px rgba(2,6,23,.12);}
-    .halo{position:relative;border-radius:1.25rem;}
-    .halo:before{content:"";position:absolute;inset:-1px;border-radius:inherit;background:conic-gradient(from 180deg,rgba(37,99,235,.35),rgba(139,92,246,.35),rgba(34,197,94,.35),rgba(37,99,235,.35));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;padding:1px;pointer-events:none;opacity:.85;}
-    .soft{box-shadow:0 10px 26px rgba(2,6,23,.08),0 2px 6px rgba(2,6,23,.04);transition:transform .12s ease, box-shadow .2s ease;}
-    .soft:hover{transform:translateY(-1px);box-shadow:0 14px 32px rgba(2,6,23,.12),0 4px 8px rgba(2,6,23,.06);}
-    .shine{position:relative;overflow:hidden;}
-    .shine:after{content:"";position:absolute;inset:-200% -50%;background:linear-gradient(105deg,transparent 45%,rgba(255,255,255,.5) 50%,transparent 55%);animation:shine 5.4s linear infinite;}
-    @keyframes shine{to{transform:translateX(100%);}}
-    .tile-selected{box-shadow:0 0 0 2px var(--ring),0 12px 32px rgba(37,99,235,.18);background:rgba(255,255,255,.96);}
-    .blur-blob{filter:blur(44px);opacity:.7;}
-    .bento{display:grid;grid-template-columns:repeat(12,1fr);gap:1rem;}
-    @media (min-width: 768px){
-      .bento .span-7{grid-column:span 7/span 7;}
-      .bento .span-5{grid-column:span 5/span 5;}
-      .bento .span-4{grid-column:span 4/span 4;}
-      .bento .span-3{grid-column:span 3/span 3;}
-      .bento .span-6{grid-column:span 6/span 6;}
-    }
+    html{scroll-behavior:smooth}
+    body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+    .mesh{background-image:radial-gradient(70rem 35rem at -10% -10%, rgba(79,70,229,.12), transparent 60%),radial-gradient(50rem 30rem at 110% 10%, rgba(6,182,212,.10), transparent 60%),linear-gradient(#f8fafc,#ffffff 28%,#f1f5f9)}
+    .glass{backdrop-filter:saturate(160%) blur(12px);background:rgba(255,255,255,.80)}
   </style>
 </head>
-
-<body class="antialiased aurora" x-data>
-
-  <!-- =========================
-       GLOBAL BUILDER STORE
-       ========================= -->
-  <script>
-    function builderStore(){
-      return {
-        /* UI */
-        open:false, review:false, plan:'oneTime',
-        query:'', sortBy:'recommended',
-        contact:{name:'',email:'',company:'',phone:'',notes:'',agree:false},
-
-        /* Catalog */
-        services:{
-          web:{ key:'web', name:'Web & App Development', icon:'globe',
-            base:{oneTime:300, monthly:500},
-            why:'Launch a clean, responsive site or lightweight app that turns visitors into leads.',
-            addons:[
-              {id:'seo_basics', icon:'search', name:'Be Found on Google (SEO Basics)', desc:'Keyword setup + on-page tune-up for local discovery.', tag:'Quick Win', price:{oneTime:150, monthly:150}},
-              {id:'app_proto', icon:'phone', name:'Basic App Prototype', desc:'Clickable MVP (chatbot or simple tool) for iOS/Android.', price:{oneTime:500, monthly:500}},
-              {id:'automations', icon:'robot', name:'Auto Follow-Ups & Workflows', desc:'Emails/leads/social tasks fire automatically.', price:{oneTime:100, monthly:100}},
-              {id:'api_integrations', icon:'plug', name:'Payments, Maps & APIs', desc:'Connect Stripe, Google Maps, or analytics.', price:{oneTime:250, monthly:250}},
-              {id:'ecommerce', icon:'cart', name:'Simple Shop Setup', desc:'Catalog, cart, and checkout for a basic store.', price:{oneTime:300, monthly:300}},
-              {id:'copy_1p', icon:'pen', name:'Copywriting (1 Page)', desc:'Persuasive text written to convert.', price:{oneTime:120, monthly:120}},
-              {id:'speed_security', icon:'shield', name:'Speed & Security Tune-Up', desc:'Caching, compression, & basic security.', price:{oneTime:120, monthly:120}},
-              {id:'dashboard', icon:'chart', name:'Custom Dashboard', desc:'See traffic & engagement in one place.', price:{oneTime:250, monthly:250}},
-              {id:'ai_features', icon:'sparkle', name:'Smart Personalization', desc:'Recommendations or simple AI features.', price:{oneTime:200, monthly:200}},
-            ]
-          },
-          video:{ key:'video', name:'Video & Audio Production', icon:'video',
-            base:{oneTime:600, monthly:1200},
-            why:'Tell your story with content people actually watch—music videos, promos, and scroll-stopping reels.',
-            addons:[
-              {id:'audio_polish', icon:'audio', name:'Audio Polish', desc:'Noise reduction, subtitles, better mixes.', tag:'Popular', price:{oneTime:200, monthly:250}},
-              {id:'adv_video', icon:'layers', name:'Advanced Video Upgrade', desc:'Longer length or multi-scene, cinematic edits.', price:{oneTime:800, monthly:1000}},
-              {id:'drone_personal', icon:'drone', name:'Drone Shoots — Personal', desc:'Dynamic aerials, licensed pilot.', price:{oneTime:300, monthly:300}},
-              {id:'drone_pro', icon:'drone', name:'Drone Shoots — Pro', desc:'High-end aerials with certified operator.', price:{oneTime:1500, monthly:1500}},
-              {id:'extended_edit', icon:'scissors', name:'Extended Editing', desc:'Series setup or extra polish passes.', price:{oneTime:300, monthly:300}},
-              {id:'script_shotlist', icon:'doc', name:'Script & Shotlist', desc:'We plan the beats so filming is smooth.', price:{oneTime:150, monthly:150}},
-              {id:'color_grade', icon:'palette', name:'Color Grade', desc:'Crisp, consistent colors.', price:{oneTime:150, monthly:150}},
-              {id:'social_cuts', icon:'grid', name:'Vertical & Social Cuts (x3)', desc:'TikTok/Shorts/IG-ready edits.', price:{oneTime:180, monthly:350}},
-              {id:'voiceover', icon:'mic', name:'Voiceover / Talent Sourcing', desc:'Find the right voice or on-camera talent.', price:{oneTime:200, monthly:200}},
-            ]
-          },
-          events:{ key:'events', name:'Event Planning & Coordination', icon:'calendar',
-            base:{oneTime:1000, monthly:1200},
-            why:'Relax and show up—timelines, vendors, and on-site flow handled with Gulf Coast know-how.',
-            addons:[
-              {id:'vendor_coord', icon:'people', name:'Venue & Vendor Coordination', desc:'We handle quotes, schedules, confirmations.', tag:'Popular', price:{oneTime:500, monthly:600}},
-              {id:'event_page', icon:'globe', name:'RSVP Page & Tickets', desc:'Clean event page with guest tools.', price:{oneTime:200, monthly:200}},
-              {id:'media_event', icon:'camera', name:'Media Coverage', desc:'Photo/video team for highlights.', price:{oneTime:300, monthly:300}},
-              {id:'event_automations', icon:'robot', name:'Reminders & Guest Automations', desc:'Confirmations, reminders, follow-ups.', price:{oneTime:150, monthly:150}},
-              {id:'hybrid_stream', icon:'broadcast', name:'Hybrid / Live Stream Setup', desc:'Reach remote attendees.', price:{oneTime:400, monthly:400}},
-              {id:'run_show', icon:'doc', name:'Run-of-Show & Staffing Plan', desc:'Minute-by-minute plan and staffing.', price:{oneTime:200, monthly:300}},
-              {id:'host_mc', icon:'megaphone', name:'On-site Host / MC', desc:'Keep energy high and timeline tight.', price:{oneTime:250, monthly:250}},
-              {id:'sponsor_kit', icon:'star', name:'Sponsor Kit & Outreach', desc:'Deck + outreach to attract sponsors.', price:{oneTime:250, monthly:300}},
-            ]
-          },
-          ugc:{ key:'ugc', name:'UGC & Local Clipping Campaigns', icon:'sparkle',
-            base:{oneTime:450, monthly:600},
-            why:'Real creators, real audiences. Authentic content that earns trust and clicks.',
-            addons:[
-              {id:'repurpose', icon:'grid', name:'Repurposed Asset Pack', desc:'Turn clips into ads, posts, and email graphics.', tag:'Quick Win', price:{oneTime:200, monthly:200}},
-              {id:'lead_funnel', icon:'target', name:'Lead Capture Funnel', desc:'Simple page to turn views into contacts.', price:{oneTime:250, monthly:250}},
-              {id:'content_enh', icon:'sparkle', name:'Content Enhancement', desc:'Overlays, music, CTAs for higher watch-time.', price:{oneTime:150, monthly:150}},
-              {id:'captions_pack', icon:'cc', name:'Captions & Descriptions', desc:'Optimized copy for discovery.', price:{oneTime:100, monthly:100}},
-              {id:'brand_kit', icon:'badge', name:'Branded Watermarks & End-slates', desc:'Your brand on every clip.', price:{oneTime:150, monthly:150}},
-              {id:'extra_10k', icon:'eye', name:'Extra 10k Verified Views', desc:'+10,000 views to boost reach.', price:{oneTime:150, monthly:150}},
-              {id:'extra_20k', icon:'eye', name:'Extra 20k Verified Views', desc:'+20,000 additional views.', price:{oneTime:300, monthly:300}},
-              {id:'extra_70k', icon:'eye', name:'Extra 70k Verified Views', desc:'+70,000 additional views.', price:{oneTime:1050, monthly:1050}},
-              {id:'creator_match', icon:'people', name:'Creator Matching', desc:'We match 2–3 on-brand local creators.', price:{oneTime:200, monthly:200}},
-              {id:'tracking_setup', icon:'chart', name:'Performance Tracking', desc:'Dashboard for views & conversions.', price:{oneTime:150, monthly:150}},
-            ]
-          }
-        },
-
-        /* Selection (multi-service) */
-        selected:{
-          web:{included:false, addons:[], notes:''},
-          video:{included:false, addons:[], notes:''},
-          events:{included:false, addons:[], notes:''},
-          ugc:{included:false, addons:[], notes:''},
-        },
-
-        /* Icons */
-        icons:{
-          globe:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18M12 3a9 9 0 1 0 0 18"/></svg>',
-          search:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>',
-          phone:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>',
-          robot:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><rect x="3" y="7" width="18" height="10" rx="2"/><path d="M12 7V4"/><circle cx="8" cy="12" r="1"/><circle cx="16" cy="12" r="1"/></svg>',
-          plug:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M9 7V3m6 4V3M7 13h10a4 4 0 0 1-4 4v4"/></svg>',
-          cart:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>',
-          pen:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
-          shield:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M12 3l7 4v5a7 7 0 0 1-7 7 7 7 0 0 1-7-7V7z"/></svg>',
-          chart:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="7" width="3" height="11"/><rect x="17" y="9" width="3" height="9"/></svg>',
-          sparkle:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5z"/></svg>',
-          video:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><rect x="3" y="5" width="14" height="14" rx="2"/><path d="m17 9 4-3v12l-4-3z"/></svg>',
-          audio:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M12 17v5M8 12v2a4 4 0 0 0 8 0v-2"/></svg>',
-          layers:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="m12 2 9 5-9 5-9-5 9-5z"/><path d="m3 12 9 5 9-5"/></svg>',
-          drone:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="18" r="3"/><path d="M6 9v6M18 9v6M9 6h6M9 18h6"/></svg>',
-          scissors:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M20 4L8 16M8 8l12 12"/></svg>',
-          doc:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16l4-3h10a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>',
-          palette:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M12 3a9 9 0 1 0 0 18h1a2 2 0 0 0 2-2 2 2 0 0 1 2-2h1a2 2 0 0 0 2-2 9 9 0 0 0-8-9z"/></svg>',
-          grid:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>',
-          mic:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M12 17v5M8 12v2a4 4 0 0 0 8 0v-2"/></svg>',
-          calendar:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M8 2v4M16 2v4M4 11h16M5 6h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/></svg>',
-          people:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
-          camera:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M4 7h4l2-3h4l2 3h4v12H4z"/><circle cx="12" cy="13" r="4"/></svg>',
-          broadcast:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><circle cx="12" cy="12" r="2"/><path d="M5 12a7 7 0 0 1 14 0M2 12a10 10 0 0 1 20 0"/></svg>',
-          megaphone:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M3 10v4l13-2v-0l-13-2z"/><path d="M16 8v8"/></svg>',
-          star:'<svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b"><path d="m12 17.3-5.6 3 1.1-6.5-4.7-4.6 6.5-.9L12 2l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5z"/></svg>',
-          badge:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M5 22l7-5 7 5"/></svg>',
-          target:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/></svg>',
-          cc:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M3 5h18v14H3z"/><path d="M7 12h3M14 12h3"/></svg>',
-          eye:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>',
-        },
-
-        /* Derived */
-        get included(){ return Object.keys(this.selected).filter(k=>this.selected[k].included); },
-
-        /* Utils */
-        price(n){ return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n||0); },
-        priceLabel(p){ return this.plan==='oneTime' ? `+$${p.toFixed(0)}` : `+$${p.toFixed(0)}/mo`; },
-        addon(key,id){ return this.services[key].addons.find(a=>a.id===id); },
-        visibleAddons(key){
-          let list=[...this.services[key].addons];
-          const q=this.query.trim().toLowerCase();
-          if(q) list=list.filter(a=>(a.name+a.desc).toLowerCase().includes(q));
-          if(this.sortBy==='price') list.sort((a,b)=>a.price[this.plan]-b.price[this.plan]);
-          else if(this.sortBy==='az') list.sort((a,b)=>a.name.localeCompare(b.name));
-          else list.sort((a,b)=>(b.tag?1:0)-(a.tag?1:0));
-          return list;
-        },
-        toggleService(key, force){
-          this.selected[key].included=(typeof force==='boolean')?force:!this.selected[key].included; this.persist();
-        },
-        isSel(key,id){ return this.selected[key].addons.includes(id); },
-        toggleAddon(key,id){ const arr=this.selected[key].addons; const i=arr.indexOf(id); if(i>-1) arr.splice(i,1); else arr.push(id); this.persist(); },
-        ensure(key,id){ if(!this.isSel(key,id)) this.selected[key].addons.push(id); },
-        clearAll(){ Object.keys(this.selected).forEach(k=>this.selected[k]={included:false,addons:[],notes:''}); this.persist(); },
-        total(){ return this.included.reduce((sum,key)=> sum + this.services[key].base[this.plan] + this.selected[key].addons.reduce((s,id)=>s+this.addon(key,id).price[this.plan],0), 0); },
-
-        /* Bundles (from live catalog) */
-        bundlePrice(which){
-          const t=this.plan; let sum=0; const add=(k,id)=>{ sum+=this.addon(k,id).price[t]; };
-          if(which==='launch'){ sum+=this.services.web.base[t]+this.services.ugc.base[t]; add('web','seo_basics'); add('web','copy_1p'); add('ugc','repurpose'); add('ugc','brand_kit'); return sum; }
-          if(which==='event'){ sum+=this.services.events.base[t]+this.services.video.base[t]; add('events','vendor_coord'); add('events','event_page'); add('events','run_show'); add('video','audio_polish'); add('video','script_shotlist'); return sum; }
-          if(which==='growth'){ sum+=this.services.web.base[t]+this.services.video.base[t]+this.services.ugc.base[t]; add('web','seo_basics'); add('web','dashboard'); add('web','automations'); add('video','social_cuts'); add('video','extended_edit'); add('ugc','repurpose'); add('ugc','lead_funnel'); return sum; }
-          return 0;
-        },
-
-        /* Presets */
-        applyPreset(which){
-          this.clearAll();
-          if(which==='launch'){ this.toggleService('web',true); this.toggleService('ugc',true); this.ensure('web','seo_basics'); this.ensure('web','copy_1p'); this.ensure('ugc','repurpose'); this.ensure('ugc','brand_kit'); }
-          if(which==='event'){ this.toggleService('events',true); this.toggleService('video',true); this.ensure('events','vendor_coord'); this.ensure('events','event_page'); this.ensure('events','run_show'); this.ensure('video','audio_polish'); this.ensure('video','script_shotlist'); }
-          if(which==='growth'){ this.plan='monthly'; ['web','video','ugc'].forEach(k=>this.toggleService(k,true)); this.ensure('web','seo_basics'); this.ensure('web','dashboard'); this.ensure('web','automations'); this.ensure('video','social_cuts'); this.ensure('video','extended_edit'); this.ensure('ugc','repurpose'); this.ensure('ugc','lead_funnel'); }
-          this.persist();
-        },
-
-        /* Entry points for CTAs */
-        openBuilder(){ this.open=true; }
-        ,startWith(key){ this.clearAll(); this.toggleService(key,true); this.open=true; }
-        ,startWithAll(){ this.clearAll(); ['web','video','events','ugc'].forEach(k=>this.toggleService(k,true)); this.open=true; }
-
-        ,openReview(){ if(!this.included.length){ alert('Select at least one service.'); return; } this.review=true; }
-
-        /* Persistence */
-        load(){ try{ const s=JSON.parse(localStorage.getItem('builder_v3')||'null'); if(s){ Object.assign(this,s); } }catch(e){} }
-        ,persist(){ localStorage.setItem('builder_v3', JSON.stringify({plan:this.plan,selected:this.selected})); }
-
-        /* Checkout (server endpoint creates Stripe Session) */
-        ,async checkout(){
-          const cart=this.included.map(key=>({
-            service:key, plan:this.plan, base:this.services[key].base[this.plan],
-            addons:this.selected[key].addons.map(id=>({ id, name:this.addon(key,id).name, price:this.addon(key,id).price[this.plan] })),
-            notes:this.selected[key].notes||''
-          }));
-          const payload={ plan:this.plan, contact:this.contact, cart, source:'site-v3' };
-          const res=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-          if(!res.ok){ alert('Checkout error. Please email 1coastmedia@gmail.com'); return; }
-          const data=await res.json();
-          if(data.url){ window.location=data.url; } else { alert('Unable to start checkout.'); }
-        }
-      }
-    }
-    document.addEventListener('alpine:init',()=>{ Alpine.store('builder', builderStore()); Alpine.store('builder').load(); });
-
-    // Small intersection reveal for "Harvard-grade" polish
-    document.addEventListener('DOMContentLoaded',()=>{
-      const obs=new IntersectionObserver((entries)=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('opacity-100','translate-y-0');obs.unobserve(e.target);}}),{threshold:.12});
-      document.querySelectorAll('[data-reveal]').forEach(el=>{el.classList.add('opacity-0','translate-y-3','transition-all','duration-700'); obs.observe(el);});
-    });
-  </script>
-
-  <!-- =========================
-       NAV
-       ========================= -->
-  <header class="sticky top-0 z-40">
-    <div class="glass">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="h-9 w-9 rounded-xl bg-white/80 border border-white grid place-items-center shadow-sm">
-            <span class="text-sm font-extrabold">1C</span>
-          </div>
-          <div class="leading-tight">
-            <div class="font-extrabold text-lg">1Coast Media</div>
-            <div class="text-[11px] text-slate-500">Gulf Coast • Web • Video • Events • UGC</div>
-          </div>
-        </div>
-        <nav class="hidden md:flex items-center gap-6 text-sm">
-          <a href="#bundles" class="text-slate-700 hover:text-slate-900">Featured</a>
-          <a href="#base" class="text-slate-700 hover:text-slate-900">Base Packages</a>
-          <a href="#why" class="text-slate-700 hover:text-slate-900">Why Monthly</a>
-          <a href="#contact" class="text-slate-700 hover:text-slate-900">Contact</a>
-        </nav>
-        <div class="flex items-center gap-3">
-          <a href="https://calendly.com/bdaniels013/30min" target="_blank" class="hidden sm:inline-flex items-center gap-2 soft px-4 py-2 rounded-xl bg-white border">Book 30-min Call</a>
-          <button class="soft px-4 py-2 rounded-xl bg-blue-600 text-white" @click="$store.builder.openBuilder()">Build My Package</button>
-        </div>
-      </div>
+<body class="mesh text-slate-800" x-data="landingApp()" x-init="init()">
+  <!-- NAV -->
+  <header class="sticky top-0 z-40 backdrop-blur bg-white/80 border-b border-slate-200/70">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <a href="#top" class="inline-flex items-center gap-2">
+        <span class="inline-grid place-items-center h-9 w-9 rounded-xl bg-white ring-1 ring-slate-200">
+          <svg viewBox="0 0 24 24" class="h-5 w-5 text-slate-700" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3 6 6 .9-4.5 4.4 1 6.3L12 17l-5.5 2.6 1-6.3L3 8.9 9 8z"/></svg>
+        </span>
+        <span class="font-extrabold tracking-tight">1 Coast Media</span>
+      </a>
+      <nav class="hidden md:flex items-center gap-8 text-sm">
+        <a href="#services" class="hover:text-slate-900 text-slate-600">Base Services</a>
+        <button @click="addonsOpen=true" class="hover:text-slate-900 text-slate-600">Explore Add‑Ons</button>
+        <a href="#faq" class="hover:text-slate-900 text-slate-600">FAQ</a>
+        <a href="#contact" class="hover:text-slate-900 text-slate-600">Contact</a>
+        <button @click="builderOpen=true" class="inline-flex items-center gap-2 rounded-xl bg-slate-900 text-white px-3 py-2 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition">Build Your Package</button>
+      </nav>
+      <button @click="builderOpen=true" class="md:hidden inline-flex items-center justify-center h-10 px-3 rounded-lg bg-slate-900 text-white text-sm font-semibold">Build</button>
     </div>
   </header>
 
-  <!-- =========================
-       HERO (corporate+web3 aesthetic)
-       ========================= -->
-  <section class="relative overflow-hidden">
-    <div class="absolute -top-24 right-10 w-[520px] h-[520px] rounded-full bg-gradient-to-br from-blue-300 via-violet-300 to-emerald-300 blur-blob"></div>
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 pb-12 grid md:grid-cols-2 gap-10 items-center">
-      <div data-reveal>
-        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full glass text-xs font-semibold text-slate-700">
-          <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Done-for-you • Transparent pricing
-        </span>
-        <h1 class="mt-4 text-4xl sm:text-5xl font-extrabold leading-[1.05]">
-          Premium Digital, Media & Events<br>
-          <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-violet-500 to-emerald-500">built for Gulf Coast growth</span>
-        </h1>
-        <p class="mt-4 text-slate-600 text-lg">Launch fast, look pro, and convert more — with sleek websites, captivating video, stress-free events, and authentic UGC.</p>
-        <div class="mt-6 flex flex-wrap gap-3">
-          <button class="shine soft px-5 py-3 rounded-xl bg-blue-600 text-white font-semibold" @click="$store.builder.openBuilder()">Create My Own</button>
-          <a href="#bundles" class="soft px-5 py-3 rounded-xl bg-white text-slate-900 border font-semibold">See Featured Bundles</a>
-          <button class="soft px-5 py-3 rounded-xl bg-white border" @click="$store.builder.startWithAll()">Add All Services</button>
+  <!-- HERO -->
+  <section id="top" class="relative">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 md:py-20 grid lg:grid-cols-2 gap-12 items-center">
+      <div>
+        <h1 class="text-5xl font-black leading-tight tracking-tight">Gulf Coast Growth, <span class="bg-gradient-to-r from-slate-900 via-blue-600 to-indigo-500 bg-clip-text text-transparent">On Demand</span></h1>
+        <p class="mt-4 text-slate-600 max-w-prose">Pick a base service, stack add‑ons anywhere, or build from scratch. One‑time for quick wins, monthly for momentum.</p>
+        <div class="mt-8 flex flex-wrap items-center gap-3">
+          <a href="#services" class="inline-flex items-center gap-2 rounded-xl bg-slate-900 text-white px-5 py-3 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition">See Base Services</a>
+          <button @click="addonsOpen=true" class="inline-flex items-center gap-2 rounded-xl ring-1 ring-slate-200 bg-white px-5 py-3 font-semibold hover:bg-slate-50 transition">Explore Add‑Ons</button>
         </div>
-        <div class="mt-6 flex flex-wrap items-center gap-6 text-sm text-slate-600">
-          <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500"></span> Fast turnarounds</div>
-          <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> No-surprise pricing</div>
-          <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-violet-500"></span> Local expertise</div>
-        </div>
+        <div class="mt-6 text-xs text-slate-500">Email <a class="underline" href="mailto:1coastmedia@gmail.com">1coastmedia@gmail.com</a> • Free 30‑min call <a class="underline" href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noreferrer">here</a>.</div>
       </div>
-      <div class="relative" data-reveal>
-        <div class="halo p-0.5">
-          <div class="glass-strong rounded-2xl p-6 border">
-            <img alt="Creative montage" class="rounded-2xl w-full h-72 object-cover"
-                 src="https://images.unsplash.com/photo-1518779578993-ec3579fee39f?q=80&w=1400&auto=format&fit=crop" />
-            <div class="grid sm:grid-cols-3 gap-4 mt-4 text-sm">
-              <div class="glass rounded-xl p-3"><div class="text-xs text-slate-500">Web & Apps</div><div class="font-semibold">Launch in days</div></div>
-              <div class="glass rounded-xl p-3"><div class="text-xs text-slate-500">Video</div><div class="font-semibold">Standout visuals</div></div>
-              <div class="glass rounded-xl p-3"><div class="text-xs text-slate-500">UGC & Events</div><div class="font-semibold">Real engagement</div></div>
-            </div>
+      <div class="relative">
+        <div class="rounded-[1.25rem] bg-white ring-1 ring-slate-200 p-6 shadow-sm">
+          <div class="grid sm:grid-cols-3 gap-4 w-full">
+            <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4"><div class="text-3xl font-black text-slate-900">3‑7d</div><div class="text-xs text-slate-500">Website turnarounds</div></div>
+            <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4"><div class="text-3xl font-black text-slate-900">30k+</div><div class="text-xs text-slate-500">UGC views/campaign</div></div>
+            <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4"><div class="text-3xl font-black text-slate-900">100%</div><div class="text-xs text-slate-500">Transparent pricing</div></div>
           </div>
+          <p class="mt-4 text-sm text-slate-600">Built for creators, real estate, tourism & local brands.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- =========================
-       FEATURED BUNDLES (Anchoring)
-       ========================= -->
-  <section id="bundles" class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-10" x-data>
-    <div class="flex items-center justify-between mb-3">
-      <h2 class="text-2xl font-extrabold">Featured Bundles</h2>
-      <div class="glass rounded-full p-1 inline-flex">
-        <button @click="$store.builder.plan='oneTime'; $store.builder.persist()" :class="$store.builder.plan==='oneTime' ? 'bg-white text-slate-900':'text-slate-600'" class="px-3 py-1.5 rounded-full text-sm font-semibold">One-time</button>
-        <button @click="$store.builder.plan='monthly'; $store.builder.persist()" :class="$store.builder.plan==='monthly' ? 'bg-white text-slate-900':'text-slate-600'" class="px-3 py-1.5 rounded-full text-sm font-semibold">Monthly</button>
-      </div>
-    </div>
-
-    <div class="grid md:grid-cols-3 gap-6">
-      <!-- Launch Kit -->
-      <div class="halo p-0.5" data-reveal>
-        <div class="glass rounded-2xl p-5 border hover:shadow-xl transition">
-          <div class="flex items-center justify-between">
-            <h3 class="text-xl font-bold">Launch Kit</h3>
-            <span class="text-xs font-semibold px-2 py-1 rounded-full bg-blue-600 text-white">Fastest</span>
-          </div>
-          <p class="mt-1 text-sm text-slate-600">Conversion landing page + UGC burst to spark awareness.</p>
-          <ul class="mt-3 text-sm text-slate-700 list-disc list-inside space-y-1">
-            <li>Web: Landing page foundation</li>
-            <li>UGC: 30k-view campaign</li>
-            <li>SEO basics + Branded end-slates</li>
-          </ul>
-          <div class="mt-5 flex items-end justify-between">
-            <div>
-              <div class="text-xs text-slate-500">From</div>
-              <div class="text-2xl font-extrabold" x-text="$store.builder.price($store.builder.bundlePrice('launch'))"></div>
-            </div>
-            <div class="flex gap-2">
-              <button class="soft px-4 py-2 rounded-xl bg-white border" @click="$store.builder.applyPreset('launch'); $store.builder.openBuilder()">Customize</button>
-              <button class="soft px-4 py-2 rounded-xl bg-blue-600 text-white" @click="$store.builder.applyPreset('launch'); $store.builder.openReview()">Select & Review</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Event Spotlight -->
-      <div class="halo p-0.5" data-reveal>
-        <div class="glass rounded-2xl p-5 border hover:shadow-xl transition">
-          <div class="flex items-center justify-between">
-            <h3 class="text-xl font-bold">Event Spotlight</h3>
-            <span class="text-xs font-semibold px-2 py-1 rounded-full bg-emerald-500 text-white">Most Popular</span>
-          </div>
-          <p class="mt-1 text-sm text-slate-600">Pro coordination + RSVP page + highlight reel.</p>
-          <ul class="mt-3 text-sm text-slate-700 list-disc list-inside space-y-1">
-            <li>Events: Coordination & run-of-show</li>
-            <li>Video: Highlight reel</li>
-            <li>Event page with RSVPs</li>
-          </ul>
-          <div class="mt-5 flex items-end justify-between">
-            <div>
-              <div class="text-xs text-slate-500">From</div>
-              <div class="text-2xl font-extrabold" x-text="$store.builder.price($store.builder.bundlePrice('event'))"></div>
-            </div>
-            <div class="flex gap-2">
-              <button class="soft px-4 py-2 rounded-xl bg-white border" @click="$store.builder.applyPreset('event'); $store.builder.openBuilder()">Customize</button>
-              <button class="soft px-4 py-2 rounded-xl bg-blue-600 text-white" @click="$store.builder.applyPreset('event'); $store.builder.openReview()">Select & Review</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Growth Retainer -->
-      <div class="halo p-0.5" data-reveal>
-        <div class="glass rounded-2xl p-5 border hover:shadow-xl transition">
-          <div class="flex items-center justify-between">
-            <h3 class="text-xl font-bold">Growth Retainer</h3>
-            <span class="text-xs font-semibold px-2 py-1 rounded-full bg-violet-500 text-white">Best Value</span>
-          </div>
-          <p class="mt-1 text-sm text-slate-600">Monthly support: keep content rolling and your site improving.</p>
-          <ul class="mt-3 text-sm text-slate-700 list-disc list-inside space-y-1">
-            <li>Web maintenance & SEO boosts</li>
-            <li>3 videos / month</li>
-            <li>Recurring UGC campaigns</li>
-          </ul>
-          <div class="mt-5 flex items-end justify-between">
-            <div>
-              <div class="text-xs text-slate-500">From</div>
-              <div class="text-2xl font-extrabold" x-text="$store.builder.price($store.builder.bundlePrice('growth'))"></div>
-            </div>
-            <div class="flex gap-2">
-              <button class="soft px-4 py-2 rounded-xl bg-white border" @click="$store.builder.applyPreset('growth'); $store.builder.openBuilder()">Customize</button>
-              <button class="soft px-4 py-2 rounded-xl bg-blue-600 text-white" @click="$store.builder.applyPreset('growth'); $store.builder.openReview()">Select & Review</button>
-            </div>
-          </div>
+  <!-- PLAN TOGGLE -->
+  <section class="pt-2">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-end">
+        <div class="inline-flex rounded-lg bg-slate-100 p-1">
+          <button @click="setPlan('oneTime')" :class="plan==='oneTime' ? 'bg-white text-slate-900' : 'text-slate-700'" class="px-3 py-1 rounded-md text-sm font-semibold">One‑time</button>
+          <button @click="setPlan('monthly')" :class="plan==='monthly' ? 'bg-white text-slate-900' : 'text-slate-700'" class="px-3 py-1 rounded-md text-sm font-semibold">Monthly</button>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- =========================
-       BASE PACKAGES — Bento Grid (premium corporate style)
-       ========================= -->
-  <section id="base" class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-14" x-data>
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="text-2xl font-extrabold">Base Packages</h2>
-      <div class="glass rounded-full p-1 inline-flex">
-        <button @click="$store.builder.plan='oneTime'; $store.builder.persist()" :class="$store.builder.plan==='oneTime' ? 'bg-white text-slate-900':'text-slate-600'" class="px-3 py-1.5 rounded-full text-sm font-semibold">One-time</button>
-        <button @click="$store.builder.plan='monthly'; $store.builder.persist()" :class="$store.builder.plan==='monthly' ? 'bg-white text-slate-900':'text-slate-600'" class="px-3 py-1.5 rounded-full text-sm font-semibold">Monthly</button>
+  <!-- BASE SERVICES -->
+  <section id="services" class="py-10">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-extrabold tracking-tight">Base Services</h2>
+      <p class="mt-2 text-slate-600">Start with a base. Add add‑ons anywhere. You can also pick add‑ons without a base.</p>
+      <div class="mt-6 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <template x-for="svc in services" :key="'svc-'+svc.key">
+          <div class="rounded-3xl bg-white ring-1 ring-slate-200 p-6 shadow-sm hover:shadow-lg transition">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="text-xs text-slate-500 capitalize" x-text="plan==='oneTime' ? 'One‑time' : 'Monthly'"></div>
+                <h3 class="text-xl font-bold" x-text="svc.name"></h3>
+                <p class="text-sm text-slate-600 mt-1" x-text="svc.blurb"></p>
+              </div>
+              <div class="text-right">
+                <div class="text-xs text-slate-500">Base</div>
+                <div class="text-2xl font-extrabold" x-text="fmtUSD(svc.base[plan])"></div>
+              </div>
+            </div>
+            <ul class="mt-3 text-sm text-slate-700 space-y-1">
+              <template x-for="it in svc.includes" :key="it"><li class="flex gap-2"><span>•</span><span x-text="it"></span></li></template>
+            </ul>
+            <div class="mt-5 grid grid-cols-2 gap-2">
+              <button @click="toggleService(svc.key)" class="rounded-lg px-3 py-2 text-sm font-semibold" :class="cartServices.includes(svc.key) ? 'bg-emerald-600 text-white' : 'bg-slate-900 text-white'" x-text="cartServices.includes(svc.key) ? 'Added' : 'Add Base'"></button>
+              <button @click="activeService=svc.key; addonsOpen=true" class="rounded-lg ring-1 ring-slate-200 bg-white px-3 py-2 text-sm font-semibold">Add‑Ons</button>
+            </div>
+          </div>
+        </template>
       </div>
     </div>
+  </section>
 
-    <div class="bento">
-      <!-- Web (span-7) -->
-      <div class="span-7 halo p-0.5" data-reveal>
-        <div class="glass rounded-2xl p-6 border flex flex-col gap-4">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <span x-html="$store.builder.icons.globe" class="shrink-0"></span>
-              <h3 class="text-xl font-bold">Web & App Development</h3>
-            </div>
-            <div class="text-right">
-              <div class="text-xs text-slate-500">From</div>
-              <div class="text-2xl font-extrabold" x-text="$store.builder.price($store.builder.services.web.base[$store.builder.plan])"></div>
-              <div class="text-[11px] text-slate-500" x-text="$store.builder.plan==='oneTime' ? 'one-time' : 'per month'"></div>
-            </div>
-          </div>
-          <p class="text-slate-600">Responsive landing page with clean UI/UX and fast performance. Optional app prototype for simple tools or chatbots.</p>
-          <ul class="text-sm text-slate-700 grid sm:grid-cols-2 gap-2">
-            <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>Basic responsive landing</li>
-            <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>Wireframed UI/UX</li>
-            <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 bg-violet-500 rounded-full"></span>Consultation + setup</li>
-          </ul>
-          <div class="flex gap-3">
-            <button class="soft px-4 py-2 rounded-xl bg-white border" @click="$store.builder.startWith('web')">Build starting with Web</button>
-            <button class="soft px-4 py-2 rounded-xl bg-blue-600 text-white" @click="$store.builder.startWith('web'); $store.builder.openReview()">Select & Review</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Video (span-5) -->
-      <div class="span-5 halo p-0.5" data-reveal>
-        <div class="glass rounded-2xl p-6 border flex flex-col gap-4">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <span x-html="$store.builder.icons.video"></span>
-              <h3 class="text-xl font-bold">Video & Audio Production</h3>
-            </div>
-            <div class="text-right">
-              <div class="text-xs text-slate-500">From</div>
-              <div class="text-2xl font-extrabold" x-text="$store.builder.price($store.builder.services.video.base[$store.builder.plan])"></div>
-              <div class="text-[11px] text-slate-500" x-text="$store.builder.plan==='oneTime' ? 'one-time' : 'per month'"></div>
-            </div>
-          </div>
-          <p class="text-slate-600">Your choice of music video, commercial, or reels/shorts (1–2 minutes), edited clean with on-brand effects.</p>
-          <ul class="text-sm text-slate-700 grid sm:grid-cols-2 gap-2">
-            <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>Consult + project setup</li>
-            <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>Simple shoot + edit</li>
-          </ul>
-          <div class="flex gap-3">
-            <button class="soft px-4 py-2 rounded-xl bg-white border" @click="$store.builder.startWith('video')">Build starting with Video</button>
-            <button class="soft px-4 py-2 rounded-xl bg-blue-600 text-white" @click="$store.builder.startWith('video'); $store.builder.openReview()">Select & Review</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Events (span-6) -->
-      <div class="span-6 halo p-0.5" data-reveal>
-        <div class="glass rounded-2xl p-6 border flex flex-col gap-4">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <span x-html="$store.builder.icons.calendar"></span>
-              <h3 class="text-xl font-bold">Event Planning & Coordination</h3>
-            </div>
-            <div class="text-right">
-              <div class="text-xs text-slate-500">From</div>
-              <div class="text-2xl font-extrabold" x-text="$store.builder.price($store.builder.services.events.base[$store.builder.plan])"></div>
-              <div class="text-[11px] text-slate-500" x-text="$store.builder.plan==='oneTime' ? 'one-time' : 'per month'"></div>
-            </div>
-          </div>
-          <p class="text-slate-600">Seamless logistics for intimate gatherings or big launches—scouting, timelines, and on-site support.</p>
-          <ul class="text-sm text-slate-700 grid sm:grid-cols-2 gap-2">
-            <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>Venue scouting</li>
-            <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>Simple timelines</li>
-          </ul>
-          <div class="flex gap-3">
-            <button class="soft px-4 py-2 rounded-xl bg-white border" @click="$store.builder.startWith('events')">Build starting with Events</button>
-            <button class="soft px-4 py-2 rounded-xl bg-blue-600 text-white" @click="$store.builder.startWith('events'); $store.builder.openReview()">Select & Review</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- UGC (span-6) -->
-      <div class="span-6 halo p-0.5" data-reveal>
-        <div class="glass rounded-2xl p-6 border flex flex-col gap-4">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <span x-html="$store.builder.icons.sparkle"></span>
-              <h3 class="text-xl font-bold">UGC & Local Clipping Campaigns</h3>
-            </div>
-            <div class="text-right">
-              <div class="text-xs text-slate-500">From</div>
-              <div class="text-2xl font-extrabold" x-text="$store.builder.price($store.builder.services.ugc.base[$store.builder.plan])"></div>
-              <div class="text-[11px] text-slate-500" x-text="$store.builder.plan==='oneTime' ? 'one-time' : 'per month'"></div>
-            </div>
-          </div>
-          <p class="text-slate-600">30k verified views with local creators on 1–2 platforms, plus a report verifying reach & fit.</p>
-          <ul class="text-sm text-slate-700 grid sm:grid-cols-2 gap-2">
-            <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>Setup & creator match</li>
-            <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>Post-campaign report</li>
-          </ul>
-          <div class="flex gap-3">
-            <button class="soft px-4 py-2 rounded-xl bg-white border" @click="$store.builder.startWith('ugc')">Build starting with UGC</button>
-            <button class="soft px-4 py-2 rounded-xl bg-blue-600 text-white" @click="$store.builder.startWith('ugc'); $store.builder.openReview()">Select & Review</button>
-          </div>
+  <!-- Builder / Summary Bar -->
+  <section class="py-6">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="rounded-2xl bg-white ring-1 ring-slate-200 p-4 flex items-center justify-between gap-3">
+        <div class="text-sm text-slate-600">Selected: <strong x-text="cartServices.length"></strong> base • <strong x-text="cartAddons.length"></strong> add‑ons</div>
+        <div class="text-sm text-slate-600">Est. total: <strong x-text="fmtUSD(total)"></strong><span class="text-slate-500" x-show="plan==='monthly'">/mo</span></div>
+        <div class="flex gap-2">
+          <button @click="addonsOpen=true" class="rounded-lg ring-1 ring-slate-200 bg-white px-3 py-2 text-sm font-semibold">Explore Add‑Ons</button>
+          <button @click="builderOpen=true" class="rounded-lg bg-slate-900 text-white px-3 py-2 text-sm font-semibold">Review & Continue</button>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- =========================
-       WHY MONTHLY
-       ========================= -->
-  <section id="why" class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-    <div class="grid md:grid-cols-3 gap-6">
-      <div class="glass rounded-2xl p-6 border" data-reveal><div class="text-sm text-slate-500">Reason 1</div><div class="text-xl font-bold">Stay Relevant</div><p class="mt-2 text-slate-600">Trends shift weekly. Monthly plans keep your content fresh & your site optimized.</p></div>
-      <div class="glass rounded-2xl p-6 border" data-reveal><div class="text-sm text-slate-500">Reason 2</div><div class="text-xl font-bold">Compounding Wins</div><p class="mt-2 text-slate-600">Small improvements stack into big growth: SEO, video, UGC, and events.</p></div>
-      <div class="glass rounded-2xl p-6 border" data-reveal><div class="text-sm text-slate-500">Reason 3</div><div class="text-xl font-bold">Hands-Off Control</div><p class="mt-2 text-slate-600">We handle the heavy lifting. You approve; momentum continues.</p></div>
-    </div>
-  </section>
-
-  <!-- =========================
-       CONTACT
-       ========================= -->
-  <section id="contact" class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-20">
-    <div class="glass rounded-2xl p-6 border" data-reveal>
-      <div class="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h3 class="text-xl font-extrabold">Talk with us</h3>
-          <p class="text-slate-600">Email <a class="underline" href="mailto:1coastmedia@gmail.com">1coastmedia@gmail.com</a> or book a quick call.</p>
+  <!-- FAQ -->
+  <section id="faq" class="py-14 bg-white/60 border-y border-slate-200">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <h3 class="text-2xl font-extrabold">FAQ</h3>
+      <div class="mt-4 grid md:grid-cols-2 gap-3">
+        <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4" x-data="{open:false}">
+          <button @click="open=!open" class="w-full flex items-center justify-between text-left"><span class="font-semibold">How quickly can we start?</span><svg :class="{'rotate-180':open}" class="h-5 w-5 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
+          <div x-show="open" x-transition class="overflow-hidden"><p class="mt-3 text-slate-600">Kick off in ~48 hours. One‑time sites in 3–7 days; monthly starts this week.</p></div>
         </div>
-        <div class="flex gap-3">
-          <a href="https://calendly.com/bdaniels013/30min" target="_blank" class="soft px-4 py-2 rounded-xl bg-white border">Book 30-min Call</a>
-          <button class="soft px-4 py-2 rounded-xl bg-blue-600 text-white" @click="$store.builder.openBuilder()">Build My Package</button>
+        <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4" x-data="{open:false}">
+          <button @click="open=!open" class="w-full flex items-center justify-between text-left"><span class="font-semibold">Can I pick add‑ons without a base?</span><svg :class="{'rotate-180':open}" class="h-5 w-5 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
+          <div x-show="open" x-transition class="overflow-hidden"><p class="mt-3 text-slate-600">Yes. Choose any add‑on. We’ll scope it cleanly and deliver it standalone or bundle later.</p></div>
+        </div>
+        <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4" x-data="{open:false}">
+          <button @click="open=!open" class="w-full flex items-center justify-between text-left"><span class="font-semibold">Do you travel for shoots?</span><svg :class="{'rotate-180':open}" class="h-5 w-5 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
+          <div x-show="open" x-transition class="overflow-hidden"><p class="mt-3 text-slate-600">Yes. We’re Gulf Coast based with travel options for video and events.</p></div>
+        </div>
+        <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4" x-data="{open:false}">
+          <button @click="open=!open" class="w-full flex items-center justify-between text-left"><span class="font-semibold">Is there a contract?</span><svg :class="{'rotate-180':open}" class="h-5 w-5 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
+          <div x-show="open" x-transition class="overflow-hidden"><p class="mt-3 text-slate-600">One‑time = clear scope. Monthly = simple 3‑month minimum to build momentum.</p></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- =========================
-       BUILDER MODAL
-       ========================= -->
-  <div x-data x-cloak x-show="$store.builder.open" class="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-    <div class="absolute inset-0 bg-slate-900/45" @click="$store.builder.open=false"></div>
-    <div class="relative w-full md:max-w-6xl md:h-[85vh] glass-strong rounded-t-2xl md:rounded-2xl border overflow-hidden">
-      <div class="flex flex-col h-full">
-        <div class="px-5 py-4 border-b bg-white/70 backdrop-blur flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <h3 class="text-lg sm:text-xl font-extrabold">Build Your Package</h3>
-            <div class="glass rounded-full p-1 hidden sm:inline-flex">
-              <button @click="$store.builder.plan='oneTime'; $store.builder.persist()" :class="$store.builder.plan==='oneTime' ? 'bg-white text-slate-900':'text-slate-600'" class="px-3 py-1.5 rounded-full text-sm font-semibold">One-time</button>
-              <button @click="$store.builder.plan='monthly'; $store.builder.persist()" :class="$store.builder.plan==='monthly' ? 'bg-white text-slate-900':'text-slate-600'" class="px-3 py-1.5 rounded-full text-sm font-semibold">Monthly</button>
-            </div>
+  <!-- CONTACT -->
+  <section id="contact" class="py-16">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-10 items-start">
+      <div>
+        <h2 class="text-3xl font-extrabold tracking-tight">Ready to transform your brand?</h2>
+        <p class="mt-3 text-slate-600 max-w-prose">Email <span class="font-semibold">1coastmedia@gmail.com</span> for a free consult, or book a call below.</p>
+        <div class="mt-6 space-x-3 text-sm">
+          <a href="mailto:1coastmedia@gmail.com?subject=1%20Coast%20Media%20Inquiry" class="inline-flex items-center gap-2 rounded-xl bg-slate-900 text-white px-4 py-3 font-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition">Email Us</a>
+          <a href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noreferrer" class="inline-flex items-center gap-2 rounded-xl ring-1 ring-slate-200 bg-white px-4 py-3 font-semibold hover:bg-slate-50 transition">Open Calendly</a>
+        </div>
+      </div>
+      <div class="rounded-3xl bg-white ring-1 ring-slate-200 p-2 w-full">
+        <iframe title="Calendly" src="https://calendly.com/bdaniels013/30min?hide_event_type_details=1&text_color=0F172A&primary_color=0F172A" class="w-full rounded-2xl" style="min-height:660px"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <footer class="py-10 border-t border-slate-200 text-center text-xs text-slate-500">© <span x-text="year"></span> 1 Coast Media • Mississippi Gulf Coast • All rights reserved.</footer>
+
+  <!-- Mobile sticky CTA -->
+  <div class="md:hidden fixed bottom-4 left-4 right-4 z-40" x-show="stickyCta" x-transition>
+    <div class="rounded-2xl bg-slate-900 text-white shadow-xl px-4 py-3 ring-1 ring-black/5 flex items-center justify-between">
+      <div>
+        <div class="text-xs text-white/80">Ready when you are</div>
+        <div class="text-lg font-extrabold">Build your package</div>
+      </div>
+      <button @click="builderOpen=true" class="rounded-xl bg-white text-slate-900 px-4 py-2 font-semibold">Start</button>
+    </div>
+  </div>
+
+  <!-- Explore Add‑Ons (global) -->
+  <div x-show="addonsOpen" x-transition.opacity class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+    <div @click="addonsOpen=false" class="absolute inset-0 bg-slate-900/50"></div>
+    <div class="relative w-full sm:max-w-6xl rounded-2xl bg-white text-slate-900 shadow-2xl ring-1 ring-slate-200 max-h-[90vh] overflow-auto">
+      <div class="p-5 border-b border-slate-200 flex items-center justify-between">
+        <h3 class="text-lg font-bold">Explore Add‑Ons</h3>
+        <button @click="addonsOpen=false" class="h-9 w-9 grid place-items-center rounded-md hover:bg-slate-50" aria-label="Close"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6l12 12M6 18L18 6"/></svg></button>
+      </div>
+      <div class="p-5">
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+          <select x-model="activeService" class="rounded-lg bg-white ring-1 ring-slate-200 px-2 py-1 text-sm">
+            <template x-for="s in services" :key="'sel-'+s.key"><option :value="s.key" x-text="s.name"></option></template>
+          </select>
+          <div class="text-sm text-slate-600">Selected add‑ons: <strong x-text="cartAddons.length"></strong></div>
+        </div>
+        <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[60vh] overflow-auto pr-1">
+          <template x-for="ad in addonsFor(activeService)" :key="ad.id">
+            <button @click="toggleAddon(ad.id)" :aria-pressed="cartAddons.includes(ad.id)" class="text-left rounded-xl p-4 ring-1 ring-slate-200 bg-white hover:bg-slate-50 transition relative" :class="cartAddons.includes(ad.id) ? 'bg-gradient-to-br from-blue-50 to-indigo-50 ring-2 ring-blue-300' : ''">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <div class="font-medium leading-tight" x-text="ad.label"></div>
+                  <div class="text-xs mt-0.5 inline-flex items-center gap-2">
+                    <span class="rounded-full bg-slate-100 ring-1 ring-slate-200 px-2 py-0.5 text-[10px] uppercase tracking-wide" x-text="ad.badge"></span>
+                    <span class="text-slate-500" x-text="ad.desc"></span>
+                  </div>
+                </div>
+                <div class="text-sm font-semibold whitespace-nowrap" x-text="fmtUSD(ad.price[plan])"></div>
+              </div>
+              <div x-show="cartAddons.includes(ad.id)" class="absolute top-2 right-2 h-6 w-6 rounded-full grid place-items-center bg-white text-blue-600 ring-1 ring-blue-200">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l5 5L19 7"/></svg>
+              </div>
+              <div class="mt-3 text-[11px] text-slate-500">Works with or without base. We’ll scope delivery accordingly.</div>
+            </button>
+          </template>
+        </div>
+        <div class="mt-4 flex items-center justify-between gap-2">
+          <div class="text-sm text-slate-600">Est. total: <strong x-text="fmtUSD(total)"></strong><span class="text-slate-500" x-show="plan==='monthly'">/mo</span></div>
+          <div class="flex gap-2">
+            <button @click="addonsOpen=false" class="rounded-lg ring-1 ring-slate-200 px-4 py-2 bg-white">Close</button>
+            <button @click="addonsOpen=false; builderOpen=true" class="rounded-lg bg-slate-900 text-white px-4 py-2 font-semibold">Review & Continue</button>
           </div>
-          <button class="p-2 hover:bg-white rounded-lg" @click="$store.builder.open=false" aria-label="Close">
-            <svg width="20" height="20" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/></svg>
-          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Builder (Review) -->
+  <div x-show="builderOpen" x-transition.opacity class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+    <div @click="builderOpen=false" class="absolute inset-0 bg-slate-900/50"></div>
+    <div class="relative w-full sm:max-w-6xl rounded-2xl bg-white text-slate-900 shadow-2xl ring-1 ring-slate-200 max-h-[90vh] overflow-auto">
+      <div class="p-5 border-b border-slate-200 flex items-center justify-between">
+        <h3 class="text-lg font-bold">Build your package</h3>
+        <button @click="builderOpen=false" class="h-9 w-9 grid place-items-center rounded-md hover:bg-slate-50" aria-label="Close"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6l12 12M6 18L18 6"/></svg></button>
+      </div>
+      <div class="p-5">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <div class="inline-flex rounded-lg bg-slate-100 p-1">
+            <button @click="setPlan('oneTime')" :class="plan==='oneTime' ? 'bg-white text-slate-900' : 'text-slate-700'" class="px-3 py-1 rounded-md text-sm font-semibold">One‑time</button>
+            <button @click="setPlan('monthly')" :class="plan==='monthly' ? 'bg-white text-slate-900' : 'text-slate-700'" class="px-3 py-1 rounded-md text-sm font-semibold">Monthly</button>
+          </div>
+          <div class="text-sm text-slate-600">Est. total: <strong x-text="fmtUSD(total)"></strong><span class="text-slate-500" x-show="plan==='monthly'">/mo</span></div>
         </div>
 
-        <div class="grid md:grid-cols-[1.25fr_.95fr] gap-4 h-full">
-          <!-- LEFT -->
-          <div class="overflow-y-auto px-5 py-4">
-            <!-- Service chips -->
-            <div class="flex flex-wrap gap-2">
-              <template x-for="svc in Object.values($store.builder.services)" :key="svc.key">
-                <button class="soft px-3 py-2 rounded-xl border bg-white text-sm flex items-center gap-2"
-                        :class="$store.builder.selected[svc.key].included ? 'ring-2 ring-blue-400/30' : ''"
-                        @click="$store.builder.toggleService(svc.key)">
-                  <span x-html="$store.builder.icons[svc.icon]"></span>
-                  <span class="font-semibold" x-text="svc.name"></span>
-                  <span class="text-xs px-1.5 py-0.5 rounded bg-slate-100" x-text="$store.builder.price(svc.base[$store.builder.plan])"></span>
+        <div class="mt-4 grid lg:grid-cols-3 gap-6">
+          <!-- Left: choose bases -->
+          <div class="lg:col-span-1 rounded-2xl bg-white ring-1 ring-slate-200 p-4">
+            <h4 class="font-semibold">1) Base services (optional)</h4>
+            <div class="mt-2 grid grid-cols-2 gap-2">
+              <template x-for="s in services" :key="'pick-'+s.key">
+                <button @click="toggleService(s.key)" class="rounded-xl px-3 py-2 font-semibold ring-1 ring-slate-200 flex items-center justify-center gap-2" :class="cartServices.includes(s.key) ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 hover:bg-slate-50'">
+                  <span class="h-2.5 w-2.5 rounded-full" :class="cartServices.includes(s.key)?'bg-emerald-400':'bg-slate-300'"></span>
+                  <span x-text="s.name"></span>
                 </button>
               </template>
             </div>
-
-            <!-- Search / sort -->
-            <div class="mt-4 flex flex-wrap gap-3 items-center">
-              <div class="flex-1 min-w-[200px] glass rounded-xl px-3 py-2 border flex items-center gap-2">
-                <svg width="18" height="18" viewBox="0 0 24 24"><path d="M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z" stroke="#64748b" stroke-width="2" fill="none"/></svg>
-                <input x-model="$store.builder.query" class="w-full bg-transparent outline-none placeholder-slate-400 text-sm" placeholder="Search add-ons (e.g., “SEO”, “drone”, “RSVP”)" />
-              </div>
-              <select x-model="$store.builder.sortBy" class="glass rounded-xl px-3 py-2 border text-sm">
-                <option value="recommended">Recommended first</option>
-                <option value="price">Price</option>
-                <option value="az">A–Z</option>
-              </select>
-            </div>
-
-            <!-- Sections per included service -->
-            <div class="mt-6 space-y-8">
-              <template x-for="key in $store.builder.included" :key="'sec-'+key">
-                <section>
-                  <div class="flex items-center justify-between mb-2">
-                    <div class="flex items-center gap-2">
-                      <h4 class="text-lg font-extrabold" x-text="$store.builder.services[key].name"></h4>
-                      <span class="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700" x-text="$store.builder.plan==='oneTime' ? 'One-time':'Monthly'"></span>
-                    </div>
-                    <div class="text-sm text-slate-600">Base: <span class="font-semibold" x-text="$store.builder.price($store.builder.services[key].base[$store.builder.plan])"></span></div>
-                  </div>
-                  <p class="text-sm text-slate-600" x-text="$store.builder.services[key].why"></p>
-
-                  <div class="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    <template x-for="item in $store.builder.visibleAddons(key)" :key="item.id">
-                      <button role="switch" :aria-checked="$store.builder.isSel(key,item.id)"
-                              class="text-left rounded-2xl border bg-white p-3 soft hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                              :class="$store.builder.isSel(key,item.id) ? 'tile-selected' : 'glass'"
-                              @click="$store.builder.toggleAddon(key,item.id)">
-                        <div class="flex items-start gap-3">
-                          <div class="shrink-0">
-                            <div class="w-9 h-9 rounded-xl border grid place-items-center" :class="$store.builder.isSel(key,item.id)?'bg-blue-600 border-blue-600 text-white':''">
-                              <span x-html="$store.builder.icons[item.icon]"></span>
-                            </div>
-                          </div>
-                          <div class="min-w-0">
-                            <div class="flex items-center gap-2">
-                              <div class="font-semibold leading-tight" x-text="item.name"></div>
-                              <span x-show="item.tag" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700" x-text="item.tag"></span>
-                            </div>
-                            <div class="text-xs text-slate-600 leading-snug mt-0.5" x-text="item.desc"></div>
-                            <div class="mt-2 text-sm font-semibold" x-text="$store.builder.priceLabel(item.price[$store.builder.plan])"></div>
-                          </div>
-                        </div>
-                      </button>
-                    </template>
-                  </div>
-
-                  <div class="mt-3">
-                    <label class="text-xs text-slate-500">Notes for this service (optional)</label>
-                    <textarea x-model="$store.builder.selected[key].notes" rows="2" class="mt-1 w-full glass rounded-xl px-3 py-2 border text-sm" placeholder="Goals, timing, examples… (sent as Stripe metadata)"></textarea>
-                  </div>
-                </section>
-              </template>
-              <div x-show="!$store.builder.included.length" class="text-sm text-slate-600">Select one or more services above to start adding options.</div>
-            </div>
           </div>
 
-          <!-- RIGHT: Summary -->
-          <aside class="border-l bg-white/70 backdrop-blur px-5 py-4 flex flex-col">
-            <div class="flex items-center justify-between">
-              <h4 class="text-lg font-extrabold">Order Summary</h4>
-              <button class="text-sm text-slate-600 underline" @click="$store.builder.clearAll()">Reset</button>
+          <!-- Middle: add-ons -->
+          <div class="lg:col-span-2 rounded-2xl bg-white ring-1 ring-slate-200 p-4">
+            <div class="flex items-center justify-between gap-3 flex-wrap">
+              <h4 class="font-semibold">2) Add‑ons (pick anything)</h4>
+              <select x-model="activeService" class="rounded-lg bg-white ring-1 ring-slate-200 px-2 py-1 text-sm">
+                <template x-for="s in services" :key="'sel2-'+s.key"><option :value="s.key" x-text="s.name"></option></template>
+              </select>
             </div>
-            <div class="mt-3 space-y-3 flex-1 overflow-auto">
-              <template x-for="key in $store.builder.included" :key="'sum-'+key">
-                <div class="glass rounded-xl p-3 border">
-                  <div class="flex items-center justify-between">
-                    <div class="font-semibold" x-text="$store.builder.services[key].name"></div>
-                    <div class="font-semibold" x-text="$store.builder.price($store.builder.services[key].base[$store.builder.plan])"></div>
+            <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[28rem] overflow-auto pr-1">
+              <template x-for="ad in addonsFor(activeService)" :key="'ad-'+ad.id">
+                <button @click="toggleAddon(ad.id)" class="text-left rounded-xl p-4 ring-1 ring-slate-200 bg-white hover:bg-slate-50 transition relative" :class="cartAddons.includes(ad.id)?'bg-gradient-to-br from-blue-50 to-indigo-50 ring-2 ring-blue-300':''">
+                  <div class="flex items-start justify-between gap-3">
+                    <div>
+                      <div class="font-medium leading-tight" x-text="ad.label"></div>
+                      <div class="text-xs mt-0.5 inline-flex items-center gap-2">
+                        <span class="rounded-full bg-slate-100 ring-1 ring-slate-200 px-2 py-0.5 text-[10px] uppercase tracking-wide" x-text="ad.badge"></span>
+                        <span class="text-slate-500" x-text="ad.desc"></span>
+                      </div>
+                    </div>
+                    <div class="text-sm font-semibold whitespace-nowrap" x-text="fmtUSD(ad.price[plan])"></div>
                   </div>
-                  <ul class="mt-1 text-sm text-slate-700 space-y-0.5">
-                    <template x-for="id in $store.builder.selected[key].addons" :key="'a-'+id">
-                      <li class="flex items-center justify-between">
-                        <span x-text="$store.builder.addon(key,id).name"></span>
-                        <span x-text="$store.builder.price($store.builder.addon(key,id).price[$store.builder.plan])"></span>
-                      </li>
-                    </template>
-                  </ul>
-                  <div class="mt-2 text-sm text-slate-600" x-show="$store.builder.selected[key].notes">
-                    <span class="font-medium">Notes:</span> <span x-text="$store.builder.selected[key].notes"></span>
-                  </div>
+                  <div x-show="cartAddons.includes(ad.id)" class="absolute top-2 right-2 h-6 w-6 rounded-full grid place-items-center bg-white text-blue-600 ring-1 ring-blue-200"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l5 5L19 7"/></svg></div>
+                </button>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="mt-6 rounded-2xl bg-white ring-1 ring-slate-200 p-4">
+          <h4 class="font-semibold">Summary</h4>
+          <div class="mt-3 grid md:grid-cols-2 gap-4">
+            <div>
+              <div class="text-xs text-slate-500">Base services</div>
+              <template x-if="cartServices.length===0"><div class="text-sm text-slate-500">None selected</div></template>
+              <template x-for="k in cartServices" :key="'sum-base-'+k">
+                <div class="mt-2 flex items-center justify-between rounded-lg bg-slate-50 ring-1 ring-slate-200 p-3">
+                  <div class="text-sm font-semibold" x-text="serviceName(k)"></div>
+                  <div class="text-sm font-semibold" x-text="fmtUSD(serviceBase(k))"></div>
                 </div>
               </template>
             </div>
-            <div class="mt-2 border-t pt-3">
-              <div class="flex items-center justify-between">
-                <div class="text-sm text-slate-600">Total (<span x-text="$store.builder.plan==='oneTime'?'one-time':'per month'"></span>)</div>
-                <div class="text-2xl font-extrabold" x-text="$store.builder.price($store.builder.total())"></div>
-              </div>
-              <div class="mt-3 grid grid-cols-2 gap-3">
-                <button class="soft px-4 py-2 rounded-xl bg-white border" @click="$store.builder.open=false">Keep Browsing</button>
-                <button class="soft px-4 py-2 rounded-xl bg-blue-600 text-white" @click="$store.builder.openReview()">Review & Checkout</button>
-              </div>
+            <div>
+              <div class="text-xs text-slate-500">Add‑ons</div>
+              <template x-if="cartAddons.length===0"><div class="text-sm text-slate-500">None selected</div></template>
+              <template x-for="id in cartAddons" :key="'sum-addon-'+id">
+                <div class="mt-2 flex items-center justify-between rounded-lg bg-slate-50 ring-1 ring-slate-200 p-3">
+                  <div class="text-sm"><span class="font-medium" x-text="addonIndex[id].label"></span> <span class="text-slate-500">— <span x-text="serviceName(addonIndex[id].service)"></span></span></div>
+                  <div class="text-sm font-semibold" x-text="fmtUSD(addonIndex[id].price[plan])"></div>
+                </div>
+              </template>
             </div>
-          </aside>
-        </div>
-      </div>
-    </div>
-
-    <!-- Mobile sticky total -->
-    <div class="fixed bottom-3 left-0 right-0 mx-auto max-w-2xl px-3 md:hidden" x-show="$store.builder.open">
-      <div class="glass rounded-2xl border p-3 shadow-lg">
-        <div class="flex items-center justify-between">
-          <div>
-            <div class="text-xs text-slate-500" x-text="$store.builder.plan==='oneTime' ? 'Total (one-time)' : 'Total (monthly)'"></div>
-            <div class="text-xl font-extrabold" x-text="$store.builder.price($store.builder.total())"></div>
           </div>
-          <button class="soft px-4 py-2 rounded-xl bg-blue-600 text-white" @click="$store.builder.openReview()">Review</button>
+          <div class="mt-4 flex items-center justify-between border-t border-slate-200 pt-3">
+            <div class="text-sm text-slate-600">Estimated total <span x-show="plan==='monthly'">(per month)</span></div>
+            <div class="text-lg font-extrabold" x-text="fmtUSD(total)"></div>
+          </div>
+          <div class="mt-3 flex justify-end gap-2">
+            <button @click="clearAll()" class="rounded-lg ring-1 ring-slate-200 px-4 py-2 bg-white">Clear All</button>
+            <button @click="beginCheckout()" class="rounded-lg bg-slate-900 text-white px-4 py-2 font-semibold">Continue (Book Call)</button>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- =========================
-       REVIEW / CHECKOUT
-       ========================= -->
-  <div x-data x-cloak x-show="$store.builder.review" class="fixed inset-0 z-[60] flex items-end md:items-center justify-center">
-    <div class="absolute inset-0 bg-slate-900/55" @click="$store.builder.review=false"></div>
-    <div class="relative w-full md:max-w-3xl glass-strong rounded-t-2xl md:rounded-2xl border overflow-hidden">
-      <div class="px-5 py-4 border-b bg-white/70 backdrop-blur flex items-center justify-between">
-        <h3 class="text-lg font-extrabold">Review & Checkout</h3>
-        <button class="p-2 hover:bg-white rounded-lg" @click="$store.builder.review=false" aria-label="Close">
-          <svg width="20" height="20" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/></svg>
-        </button>
-      </div>
-      <div class="p-5 grid md:grid-cols-2 gap-5">
-        <div>
-          <label class="text-xs text-slate-500">Your name</label>
-          <input x-model="$store.builder.contact.name" class="w-full glass rounded-xl px-3 py-2 border" placeholder="First & last name" />
-        </div>
-        <div>
-          <label class="text-xs text-slate-500">Email (for receipt)</label>
-          <input x-model="$store.builder.contact.email" class="w-full glass rounded-xl px-3 py-2 border" placeholder="you@email.com" />
-        </div>
-        <div>
-          <label class="text-xs text-slate-500">Company (optional)</label>
-          <input x-model="$store.builder.contact.company" class="w-full glass rounded-xl px-3 py-2 border" placeholder="Company / brand" />
-        </div>
-        <div>
-          <label class="text-xs text-slate-500">Phone (optional)</label>
-          <input x-model="$store.builder.contact.phone" class="w-full glass rounded-xl px-3 py-2 border" placeholder="(###) ###-####" />
-        </div>
-        <div class="md:col-span-2">
-          <label class="text-xs text-slate-500">Project notes (optional)</label>
-          <textarea x-model="$store.builder.contact.notes" rows="3" class="w-full glass rounded-xl px-3 py-2 border" placeholder="Anything we should know? Timelines, goals, style references…"></textarea>
-        </div>
-        <div class="md:col-span-2 flex items-center gap-2 text-sm">
-          <input type="checkbox" x-model="$store.builder.contact.agree" id="agree" class="h-4 w-4 rounded border-slate-300">
-          <label for="agree" class="text-slate-600">I agree to be contacted. Payment is processed securely by Stripe.</label>
-        </div>
-        <div class="md:col-span-2 flex items-center justify-between">
-          <div>
-            <div class="text-xs text-slate-500" x-text="$store.builder.plan==='oneTime' ? 'Total (one-time)' : 'Total (monthly)'"></div>
-            <div class="text-2xl font-extrabold" x-text="$store.builder.price($store.builder.total())"></div>
-          </div>
-          <button class="soft px-5 py-2.5 rounded-xl bg-blue-600 text-white disabled:opacity-50"
-                  :disabled="!$store.builder.contact.agree || !$store.builder.included.length"
-                  @click="$store.builder.checkout()">
-            Checkout with Stripe
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+  <!-- Scripts -->
+  <script>
+    function landingApp(){
+      return {
+        // --- STATE ---
+        year: new Date().getFullYear(),
+        plan: 'oneTime', // 'oneTime' | 'monthly'
+        services: [
+          { key:'web', name:'Web & App', blurb:'Launch a clean, mobile‑first site fast.', base:{oneTime:300, monthly:500}, includes:['Kickoff & setup','Landing page (3–5 sections)','Light copy help'], addOns:[
+            { id:'web-seo', label:'SEO Basics', desc:'Titles, speed checks, findable.', price:{oneTime:150, monthly:150}, badge:'Quick win' },
+            { id:'web-auto', label:'Lead Automations', desc:'Instant replies, no leak.', price:{oneTime:100, monthly:100}, badge:'Hands‑off' },
+            { id:'web-api', label:'Payments & Maps', desc:'Stripe, Maps, analytics.', price:{oneTime:250, monthly:250}, badge:'High impact' },
+            { id:'web-mvp', label:'Clickable MVP', desc:'Tap‑through prototype.', price:{oneTime:500, monthly:500}, badge:'Prototype' },
+          ]},
+          { key:'video', name:'Video / Audio', blurb:'Short, on‑brand edits that convert.', base:{oneTime:600, monthly:1200}, includes:['Kickoff & plan','1–2 min edit','Clean edit, coastal vibe'], addOns:[
+            { id:'vid-audio', label:'Clean Audio + Captions', desc:'Watchable anywhere.', price:{oneTime:200, monthly:250}, badge:'Accessibility' },
+            { id:'vid-adv', label:'Advanced Edit / Series', desc:'More story, more polish.', price:{oneTime:800, monthly:1000}, badge:'Premium' },
+            { id:'vid-drone', label:'Drone B‑roll', desc:'Dynamic aerial flavor.', price:{oneTime:300, monthly:300}, badge:'Wow' },
+          ]},
+          { key:'events', name:'Events', blurb:'Plan smooth, run tight, look great.', base:{oneTime:1000, monthly:1200}, includes:['Scope & timeline','Basic coordination','Day‑of support'], addOns:[
+            { id:'ev-ven', label:'Vendor/Venue Handling', desc:'We wrangle the calls.', price:{oneTime:500, monthly:600}, badge:'Stress‑free' },
+            { id:'ev-digital', label:'RSVP/Tickets Page', desc:'Modern guest flow.', price:{oneTime:200, monthly:200}, badge:'Modern' },
+          ]},
+          { key:'ugc', name:'UGC', blurb:'Creators + clips that actually get seen.', base:{oneTime:450, monthly:600}, includes:['Kickoff & setup','30k verified views','Simple report'], addOns:[
+            { id:'ugc-views', label:'+20k Verified Views', desc:'More reach, guaranteed.', price:{oneTime:300, monthly:300}, badge:'+20k' },
+            { id:'ugc-repurpose', label:'Ads‑Ready Pack', desc:'Cut‑downs + hooks.', price:{oneTime:200, monthly:200}, badge:'Ads‑ready' },
+          ]},
+        ],
+        addonIndex: {},
+        cartServices: [],
+        cartAddons: [],
+        builderOpen: false,
+        addonsOpen: false,
+        activeService: 'web',
+        stickyCta: false,
 
-  <!-- =========================
-       FOOTER
-       ========================= -->
-  <footer class="border-t">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 text-sm text-slate-600 flex flex-wrap items-center justify-between gap-3">
-      <div>© <span id="y"></span> 1Coast Media. All rights reserved.</div>
-      <div class="flex items-center gap-4">
-        <a class="hover:underline" href="mailto:1coastmedia@gmail.com">1coastmedia@gmail.com</a>
-        <a class="hover:underline" href="https://calendly.com/bdaniels013/30min" target="_blank">Book a call</a>
-        <button class="soft px-3 py-1.5 rounded-lg bg-white border" @click="$store.builder.openBuilder()">Build My Package</button>
-      </div>
-    </div>
-    <script>document.getElementById('y').textContent=new Date().getFullYear()</script>
-  </footer>
+        // --- INIT ---
+        init(){
+          // Build add-on index
+          this.addonIndex = this.services.reduce((acc, svc) => {
+            svc.addOns.forEach(a => acc[a.id] = { ...a, service: svc.key });
+            return acc;
+          }, {});
+          // Sticky CTA listener
+          const onScroll = () => { this.stickyCta = window.scrollY > 640 };
+          onScroll();
+          window.addEventListener('scroll', onScroll);
+        },
+
+        // --- GETTERS ---
+        get total(){
+          const baseSum = this.cartServices.reduce((s, key) => {
+            const svc = this.services.find(x => x.key === key);
+            return s + (svc ? svc.base[this.plan] : 0);
+          }, 0);
+          const addonSum = this.cartAddons.reduce((s, id) => s + (this.addonIndex[id]?.price?.[this.plan] || 0), 0);
+          return baseSum + addonSum;
+        },
+        addonsFor(key){
+          const svc = this.services.find(s => s.key === key);
+          return svc ? svc.addOns : [];
+        },
+        serviceName(key){
+          return (this.services.find(s => s.key === key) || {}).name || key;
+        },
+        serviceBase(key){
+          const svc = this.services.find(s => s.key === key);
+          return svc ? svc.base[this.plan] : 0;
+        },
+
+        // --- ACTIONS ---
+        setPlan(p){ this.plan = p; },
+        toggleService(key){
+          const i = this.cartServices.indexOf(key);
+          if(i>-1) this.cartServices.splice(i,1); else this.cartServices.push(key);
+        },
+        toggleAddon(id){
+          const i = this.cartAddons.indexOf(id);
+          if(i>-1) this.cartAddons.splice(i,1); else this.cartAddons.push(id);
+        },
+        clearAll(){ this.cartServices = []; this.cartAddons = []; },
+        fmtUSD(v){ return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v); },
+        beginCheckout(){
+          const baseLines = this.cartServices.map(k => this.serviceName(k));
+          const addonLines = this.cartAddons.map(id => `${this.addonIndex[id].label} (${this.serviceName(this.addonIndex[id].service)})`);
+          const details = encodeURIComponent([ 'Base:', ...baseLines, '', 'Add‑Ons:', ...addonLines ].join('\n'));
+          const url = `https://calendly.com/bdaniels013/30min?hide_event_type_details=1&text_color=0F172A&primary_color=0F172A&name=1%20Coast%20Media%20Inquiry&details=${details}`;
+          window.location.href = url;
+        }
+      }
+    }
+  </script>
 </body>
 </html>
