@@ -556,6 +556,15 @@
         contact:{ name:'', email:'', company:'', phone:'', notes:'' },
 
         init(){
+          try{
+  const r = await fetch('/api/catalog');
+  if(r.ok){
+    const j = await r.json();
+    if(Array.isArray(j.services) && j.services.length){
+      this.services = j.services;
+    }
+  }
+}catch{}
           // Build add-on index
           this.addonIndex = this.services.reduce((acc, svc) => {
             svc.addOns.forEach(a => acc[a.id] = { ...a, service: svc.key });
