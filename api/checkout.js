@@ -10,31 +10,34 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
   module.exports = async (req, res) => {
     try{
       if(req.method !== 'POST') return res.status(405).send('Method Not Allowed');
-      const { serviceKey, plan, addons, customer } = req.body || {};
-      if(!['web','video','events','ugc'].includes(serviceKey)) return res.status(400).send('Invalid service');
-      if(!['oneTime','monthly'].includes(plan)) return res.status(400).send('Invalid plan');
-      const t = PRICE_TABLE[serviceKey];
-      const isMonthly = plan==='monthly';
+      const { cart, customer } = req.body || {};
+      if(!Array.isArray(cart) || !cart.length) return res.status(400).send('Cart required');
 
       const line_items = [];
-      // Base
-      const baseAmount = isMonthly ? t.monthlyBase : t.oneTimeBase;
-      line_items.push({ price_data: { currency: 'usd', product_data: { name: `${serviceKey.toUpperCase()} — ${isMonthly?'Monthly':'One‑time'} Base` }, unit_amount: baseAmount, ...(isMonthly? {recurring:{interval:'month'}} : {}) }, quantity: 1 });
-
-      // Addons (server‑authoritative)
-      for(const id of Array.isArray(addons)?addons:[]){
-        const a = t.addons[id]; if(!a) continue;
-        const amt = isMonthly ? a.mo : a.ot; if(!amt) continue;
-        line_items.push({ price_data: { currency: 'usd', product_data: { name: `Add‑on: ${id}` }, unit_amount: amt, ...(isMonthly? {recurring:{interval:'month'}} : {}) }, quantity: 1 });
+      for(const item of cart){
+        const { serviceKey, plan, addons } = item;
+        if(!['web','video','events','ugc'].includes(serviceKey)) continue;
+        if(!['oneTime','monthly'].includes(plan)) continue;
+        const t = PRICE_TABLE[serviceKey];
+        const isMonthly = plan==='monthly';
+        // Base
+        line_items.push({ price_data: { currency: 'usd', product_data: { name: `${serviceKey.toUpperCase()} — ${isMonthly?'Monthly':'One‑time'} Base` }, unit_amount: isMonthly? t.monthlyBase : t.oneTimeBase, ...(isMonthly? {recurring:{interval:'month'}} : {}) }, quantity: 1 });
+        // Add-ons
+        for(const id of Array.isArray(addons)?addons:[]){
+          const a=t.addons[id]; if(!a) continue; const amt=isMonthly? a.mo : a.ot; if(!amt) continue;
+          line_items.push({ price_data: { currency: 'usd', product_data: { name: `Add‑on: ${id}` }, unit_amount: amt, ...(isMonthly? {recurring:{interval:'month'}} : {}) }, quantity: 1 });
+        }
       }
 
+      if(!line_items.length) return res.status(400).send('No billable items');
+
       const session = await stripe.checkout.sessions.create({
-        mode: isMonthly ? 'subscription' : 'payment',
+        mode: cart.some(c=>c.plan==='monthly') ? 'subscription' : 'payment',
         line_items,
         success_url: `${req.headers.origin || 'https://yourdomain.com'}/#contact`,
         cancel_url: `${req.headers.origin || 'https://yourdomain.com'}/#pricing`,
         allow_promotion_codes: true,
-        metadata: { serviceKey, plan, ...(customer||{}) },
+        metadata: { cart: JSON.stringify(cart), ...(customer||{}) },
         customer_email: customer?.email || undefined
       });
 
