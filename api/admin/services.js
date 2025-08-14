@@ -1,6 +1,11 @@
 import { sql } from '@vercel/postgres';
 import { requireAdmin } from '../../lib/requireAdmin.js';
 
+// Fallback if your project only has POSTGRES_URL_NO_SSL
+if (!process.env.POSTGRES_URL && process.env.POSTGRES_URL_NO_SSL) {
+  process.env.POSTGRES_URL = process.env.POSTGRES_URL_NO_SSL + (process.env.POSTGRES_URL_NO_SSL.includes('?') ? '&' : '?') + 'sslmode=require';
+}
+
 export default async function handler(req, res) {
   const me = requireAdmin(req, res);
   if (!me) return;
@@ -27,13 +32,6 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
-    if (req.method === 'DELETE') {
-      const { id } = req.query;
-      if (!id) return res.status(400).json({ error: 'id required' });
-      await sql`DELETE FROM services WHERE id = ${id}`;
-      return res.status(200).json({ ok: true });
-    }
-
     if (req.method === 'PUT') {
       const b = req.body || {};
       if (!b.id) return res.status(400).json({ error: 'id required' });
@@ -47,6 +45,13 @@ export default async function handler(req, res) {
           updated_at = NOW()
         WHERE id = ${b.id}
       `;
+      return res.status(200).json({ ok: true });
+    }
+
+    if (req.method === 'DELETE') {
+      const { id } = req.query;
+      if (!id) return res.status(400).json({ error: 'id required' });
+      await sql`DELETE FROM services WHERE id = ${id}`;
       return res.status(200).json({ ok: true });
     }
 
