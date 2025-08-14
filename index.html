@@ -5,15 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>1 Coast Media — Premium Digital, Media & Event Services</title>
   <meta name="description" content="Premium Web & App, Video/Audio Production, Event Planning, and UGC Campaigns for Mississippi Gulf Coast creators and brands. Transparent pricing. Fast turnarounds. Results-driven."/>
-  <meta name="checkout-endpoint" content="https://your-project.vercel.app/api/checkout" />
 
+  <!-- Where to POST the checkout payload (default: /api/checkout) -->
+  <meta name="checkout-endpoint" content="/api/checkout" />
+
+  <!-- Fonts / UI libs -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-
-  <!-- Tailwind + Alpine -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <!-- Stripe.js for sessionId fallback (not strictly required, but nice to have) -->
+  <script src="https://js.stripe.com/v3/"></script>
+  <script>
+    // Your publishable key (safe to expose)
+    window.STRIPE_PUBLISHABLE_KEY = "pk_live_51O4Qh0KoF1Q8iKteAbGsSkEj65fg0tSGOG6dcJCcLyvz0PHC5y8jEAkMDfDFfCTdEeRyPcOtZ7O13MBNZkDhBMR900NqzTN4LN";
+  </script>
 
   <style>
     :root{ --ink:#0b1220; --indigo:#4f46e5; --cyan:#06b6d4; --emerald:#10b981; }
@@ -185,10 +193,10 @@
         </div>
         <div class="card p-4" x-data="{open:false}">
           <button @click="open=!open" class="w-full flex items-center justify-between text-left f-ring"><span class="font-semibold">Can I pick add-ons without a base?</span><svg :class="{'rotate-180':open}" class="h-5 w-5 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
-          <div x-show="open" x-transition class="overflow-hidden"><p class="mt-3 text-slate-600">Yes for browsing; at checkout we’ll add the correct base automatically if needed.</p></div>
+          <div x-show="open" x-transition class="overflow-hidden"><p class="mt-3 text-slate-600">Browse freely; we’ll auto-add the correct base at checkout if needed.</p></div>
         </div>
         <div class="card p-4" x-data="{open:false}">
-          <button @click="open=!open" class="w-full flex items-center justify-between text-left f-ring"><span class="font-semibold">Do you travel for shoots?</span><svg :class="{'rotate-180':open}" class="h-5 w-5 transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
+          <button @click="open=!open" class="w-full flex items-center justify-between text-left f-ring"><span class="font-semibold">Do you travel for shoots?</span><svg :class="{'rotate-180':open}" class="h-5 w-5 transition" viewBox="0 0 24 24  fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
           <div x-show="open" x-transition class="overflow-hidden"><p class="mt-3 text-slate-600">Yes. We’re Gulf Coast based with travel options for video and events.</p></div>
         </div>
         <div class="card p-4" x-data="{open:false}">
@@ -422,12 +430,6 @@
             </button>
           </div>
           <p class="mt-2 text-[11px] text-slate-500">By continuing you agree to simple scope for one-time projects or a 3-month minimum for monthly plans.</p>
-
-          <!-- Minimal debug toggle (press Alt+D) -->
-          <div x-show="debug.open" class="mt-4 text-[11px] text-slate-600 bg-slate-50 rounded-lg p-3 ring-1 ring-slate-200 overflow-auto max-h-40">
-            <div class="font-semibold mb-1">Debug</div>
-            <pre class="whitespace-pre-wrap break-words" x-text="debug.text"></pre>
-          </div>
         </div>
       </div>
     </div>
@@ -443,7 +445,6 @@
         plan: 'oneTime',
         addonQuery: '',
         sortBy: 'popular',
-        debug: { open:false, text:'' },
 
         services: [
           { key:'web', name:'Web & App', blurb:'Launch a clean, mobile-first site fast.', base:{oneTime:300, monthly:500}, includes:['Kickoff & setup','Landing page (3–5 sections)','Light copy help'], addOns:[
@@ -537,7 +538,6 @@
             svc.addOns.forEach(a => acc[a.id] = { ...a, service: svc.key });
             return acc;
           }, {});
-
           // Restore cart
           try{
             const saved = JSON.parse(localStorage.getItem('coast_cart')||'{}');
@@ -546,13 +546,9 @@
             if(saved.plan) this.plan = saved.plan;
             if(saved.contact) this.contact = {...this.contact, ...saved.contact};
           }catch{}
-
           // Sticky CTA
           const onScroll = () => { this.stickyCta = window.scrollY > 640 };
           onScroll(); window.addEventListener('scroll', onScroll);
-
-          // tiny debug toggle
-          window.addEventListener('keydown', (e)=>{ if(e.altKey && e.key.toLowerCase()==='d'){ this.debug.open = !this.debug.open; } });
         },
 
         // --- Derived ---
@@ -579,28 +575,47 @@
         fmtUSD(v){ return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v); },
         save(){ localStorage.setItem('coast_cart', JSON.stringify({ services:this.cartServices, addons:this.cartAddons, plan:this.plan, contact:this.contact })); },
         emailValid(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e||''); },
-        endpoint(){
-          return window.CHECKOUT_ENDPOINT || (document.querySelector('meta[name="checkout-endpoint"]')?.content || '/api/checkout');
-        },
-        setPlan(p){ this.plan = p; this.save(); },
 
         // --- UI Actions ---
-        toggleService(key){ const i = this.cartServices.indexOf(key); if(i>-1) this.cartServices.splice(i,1); else this.cartServices.push(key); this.save(); this.flash('Updated base services'); },
+        setPlan(p){ this.plan = p; this.save(); },
+        toggleService(key){
+          const i = this.cartServices.indexOf(key);
+          if(i>-1) this.cartServices.splice(i,1); else this.cartServices.push(key);
+          this.save(); this.flash('Updated base services');
+        },
         toggleAddon(id){
           const svcKey = this.addonIndex[id]?.service;
           const i = this.cartAddons.indexOf(id);
-          if(i>-1){ this.cartAddons.splice(i,1); this.flash('Removed add-on'); }
-          else {
-            if(!this.cartServices.includes(svcKey)){ this.cartServices.push(svcKey); this.flash(`Added “${this.serviceName(svcKey)}” base for this add-on.`); }
-            this.cartAddons.push(id); this.flash('Added add-on');
+          if(i>-1){
+            this.cartAddons.splice(i,1);
+            this.flash('Removed add-on');
+          } else {
+            // Auto-add base for seamless checkout
+            if(!this.cartServices.includes(svcKey)){
+              this.cartServices.push(svcKey);
+              this.flash(`Added “${this.serviceName(svcKey)}” base for this add-on.`);
+            }
+            this.cartAddons.push(id);
+            this.flash('Added add-on');
           }
           this.save();
         },
-        toggleDesc(id){ this.openDescs = { ...this.openDescs, [id]: !this.openDescs[id] }; },
+        toggleDesc(id){
+          this.openDescs = { ...this.openDescs, [id]: !this.openDescs[id] };
+        },
         quickPick(kind){
-          const maps = { essentials: { web:['web-seo','web-auto'], video:['vid-audio','vid-sizes'], events:['ev-digital','ev-media'], ugc:['ugc-captions','ugc-enhance'] }, premium: { web:['web-mvp','web-api','web-copy'], video:['vid-adv','vid-drone-p'], events:['ev-ven','ev-hybrid'], ugc:['ugc-repurpose','ugc-leads','ugc-views-20k'] }, };
+          const maps = {
+            essentials: { web:['web-seo','web-auto'], video:['vid-audio','vid-sizes'], events:['ev-digital','ev-media'], ugc:['ugc-captions','ugc-enhance'] },
+            premium:    { web:['web-mvp','web-api','web-copy'], video:['vid-adv','vid-drone-p'], events:['ev-ven','ev-hybrid'], ugc:['ugc-repurpose','ugc-leads','ugc-views-20k'] },
+          };
           const add = maps[kind]?.[this.activeService] || [];
-          for(const id of add){ if(!this.cartAddons.includes(id)){ const svcKey = this.addonIndex[id]?.service; if(!this.cartServices.includes(svcKey)) this.cartServices.push(svcKey); this.cartAddons.push(id); } }
+          for(const id of add){
+            if(!this.cartAddons.includes(id)){
+              const svcKey = this.addonIndex[id]?.service;
+              if(!this.cartServices.includes(svcKey)) this.cartServices.push(svcKey);
+              this.cartAddons.push(id);
+            }
+          }
           this.save(); this.flash('Quick picks added');
         },
         openAddons(key){ this.activeService = key || 'web'; this.addonsOpen = true; },
@@ -612,34 +627,56 @@
         async beginCheckout(){
           try{
             if(this.isSubmitting) return;
-            if(!this.cartServices.length){ this.flash('Please add at least one Base Service to continue.'); return; }
-            if(!this.emailValid(this.contact.email)){ this.flash('Enter a valid email for receipt & updates.'); return; }
 
+            if(!this.cartServices.length){
+              this.flash('Please add at least one Base Service to continue.');
+              return;
+            }
+            if(!this.emailValid(this.contact.email)){
+              this.flash('Enter a valid email for receipt & updates.');
+              return;
+            }
+
+            // Build cart payload grouped by base service
             const cart = this.cartServices.map(svcKey => {
               const svc = this.services.find(s => s.key === svcKey);
               const base = svc?.base?.[this.plan] || 0;
+              // Filter out zero-priced MONTHLY add-ons to avoid Stripe subscription errors
               const addons = this.cartAddons
                 .filter(id => this.addonIndex[id]?.service === svcKey)
-                .map(id => ({ id, name: this.addonIndex[id].label, price: this.addonIndex[id].price[this.plan] }));
+                .map(id => ({ id, name: this.addonIndex[id].label, price: this.addonIndex[id].price[this.plan] }))
+                .filter(a => this.plan === 'monthly' ? a.price > 0 : true);
+
               return { service: svcKey, base, addons, notes: '' };
             });
 
-            const payload = { plan: this.plan, cart, contact: { ...this.contact } };
-            const ENDPOINT = this.endpoint();
-            this.debug.text = `POST ${ENDPOINT}\n` + JSON.stringify(payload, null, 2);
             this.isSubmitting = true;
 
-            const res = await fetch(ENDPOINT, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload) });
-            const ct = res.headers.get('content-type')||'';
-            const body = ct.includes('application/json') ? await res.json() : { raw: await res.text() };
-            this.debug.text += `\n\nSTATUS ${res.status}\n` + JSON.stringify(body, null, 2);
+            const endpoint = document.querySelector('meta[name="checkout-endpoint"]')?.content || '/api/checkout';
+            const res = await fetch(endpoint, {
+              method:'POST',
+              headers:{ 'Content-Type':'application/json' },
+              body: JSON.stringify({ plan: this.plan, cart, contact: { ...this.contact } })
+            });
 
-            if(!res.ok){ throw new Error(body?.error || body?.raw || `HTTP ${res.status}`); }
-            if(!body?.url){ throw new Error('No checkout URL returned from server'); }
-            window.location.assign(body.url);
+            const out = await res.json().catch(()=>({}));
+            if(!res.ok){
+              throw new Error(out.error || 'Checkout could not start');
+            }
+
+            // Prefer session.url; fallback to sessionId + Stripe.js
+            if(out.url){
+              window.location.assign(out.url);
+            }else if(out.id && window.STRIPE_PUBLISHABLE_KEY && window.Stripe){
+              const stripe = Stripe(window.STRIPE_PUBLISHABLE_KEY);
+              const { error } = await stripe.redirectToCheckout({ sessionId: out.id });
+              if(error) throw error;
+            }else{
+              throw new Error('Checkout response missing url');
+            }
           }catch(e){
             console.error(e);
-            this.flash(e.message || 'Checkout failed.');
+            this.flash(e.message || 'Checkout failed. Email 1coastmedia@gmail.com for help.');
             this.isSubmitting = false;
           }
         },
