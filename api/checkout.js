@@ -10,7 +10,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
   module.exports = async (req, res) => {
     try{
       if(req.method !== 'POST') return res.status(405).send('Method Not Allowed');
-      const { serviceKey, plan, addons } = req.body || {};
+      const { serviceKey, plan, addons, customer } = req.body || {};
       if(!['web','video','events','ugc'].includes(serviceKey)) return res.status(400).send('Invalid service');
       if(!['oneTime','monthly'].includes(plan)) return res.status(400).send('Invalid plan');
       const t = PRICE_TABLE[serviceKey];
@@ -34,7 +34,8 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
         success_url: `${req.headers.origin || 'https://yourdomain.com'}/#contact`,
         cancel_url: `${req.headers.origin || 'https://yourdomain.com'}/#pricing`,
         allow_promotion_codes: true,
-        metadata: { serviceKey, plan }
+        metadata: { serviceKey, plan, ...(customer||{}) },
+        customer_email: customer?.email || undefined
       });
 
       res.status(200).json({ id: session.id });
