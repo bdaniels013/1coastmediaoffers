@@ -246,6 +246,7 @@
 
 <script>
 function adminApp(){
+  const API = (r) => `/api/admin?r=${encodeURIComponent(r)}`;
   return {
     authed:false, me:null, error:'', formError:'',
     login:{username:'',password:''},
@@ -259,18 +260,18 @@ function adminApp(){
     addonForm:{id:'', _lockId:false, service_id:'', label:'', description:'', short:'', badge:'', popular:false, price_one_time_usd:0, price_monthly_usd:0},
 
     async init(){ await this.checkAuth(); if(this.authed) await this.refreshAll(); },
-    async checkAuth(){ try{ const r=await fetch('/api/admin/me'); if(!r.ok) throw 0; const j=await r.json(); this.me=j.user; this.authed=true; }catch{ this.authed=false; } },
-    async doLogin(){ this.error=''; const r=await fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(this.login)}); if(!r.ok){ this.error='Invalid login'; return; } this.authed=true; this.me=this.login.username; this.login={username:'',password:''}; await this.refreshAll(); },
-    async logout(){ await fetch('/api/admin/logout'); location.reload(); },
+    async checkAuth(){ try{ const r=await fetch(API('me')); if(!r.ok) throw 0; const j=await r.json(); this.me=j.user; this.authed=true; }catch{ this.authed=false; } },
+    async doLogin(){ this.error=''; const r=await fetch(API('login'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(this.login)}); if(!r.ok){ this.error='Invalid login'; return; } this.authed=true; this.me=this.login.username; this.login={username:'',password:''}; await this.refreshAll(); },
+    async logout(){ await fetch(API('logout')); location.reload(); },
 
     async refreshAll(){
       const [m,o,c,l,s,a]=await Promise.all([
-        fetch('/api/admin/metrics').then(r=>r.json()),
-        fetch('/api/admin/orders').then(r=>r.json()),
-        fetch('/api/admin/customers').then(r=>r.json()),
-        fetch('/api/admin/leads').then(r=>r.json()),
-        fetch('/api/admin/services').then(r=>r.json()),
-        fetch('/api/admin/addons').then(r=>r.json())
+        fetch(API('metrics')).then(r=>r.json()),
+        fetch(API('orders')).then(r=>r.json()),
+        fetch(API('customers')).then(r=>r.json()),
+        fetch(API('leads')).then(r=>r.json()),
+        fetch(API('services')).then(r=>r.json()),
+        fetch(API('addons')).then(r=>r.json())
       ]);
       this.kpis=m; this.orders=o; this.customers=c; this.leads=l; this.services=s; this.addons=a;
     },
