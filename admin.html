@@ -11,6 +11,8 @@
   body{font-family:Inter,ui-sans-serif,system-ui}
   .card{background:#fff;border:1px solid rgba(15,23,42,.08);border-radius:1rem;box-shadow:0 8px 24px rgba(2,6,23,.06)}
   .grid-auto{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem}
+  .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(2,6,23,.5)}
+  .modal>div{max-width:720px;width:100%}
 </style>
 </head>
 <body class="bg-slate-50" x-data="adminApp()" x-init="init()">
@@ -92,57 +94,13 @@
       </div>
     </section>
 
-    <!-- Customers and Leads -->
-    <section class="grid md:grid-cols-2 gap-6">
-      <div>
-        <h2 class="text-lg font-bold mb-2">Customers</h2>
-        <div class="card overflow-auto max-h-[24rem]">
-          <table class="min-w-full text-sm">
-            <thead class="bg-slate-100 text-slate-600">
-              <tr><th class="text-left p-2">When</th><th class="text-left p-2">Name</th><th class="text-left p-2">Email</th><th class="text-left p-2">Company</th></tr>
-            </thead>
-            <tbody>
-              <template x-for="c in customers" :key="c.id">
-                <tr class="border-t">
-                  <td class="p-2" x-text="new Date(c.created_at).toLocaleDateString()"></td>
-                  <td class="p-2" x-text="c.name || '—'"></td>
-                  <td class="p-2" x-text="c.email"></td>
-                  <td class="p-2" x-text="c.company || '—'"></td>
-                </tr>
-              </template>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div>
-        <h2 class="text-lg font-bold mb-2">Leads</h2>
-        <div class="card overflow-auto max-h-[24rem]">
-          <table class="min-w-full text-sm">
-            <thead class="bg-slate-100 text-slate-600">
-              <tr><th class="text-left p-2">When</th><th class="text-left p-2">Name</th><th class="text-left p-2">Email</th><th class="text-left p-2">Message</th></tr>
-            </thead>
-            <tbody>
-              <template x-for="l in leads" :key="l.id">
-                <tr class="border-t">
-                  <td class="p-2" x-text="new Date(l.created_at).toLocaleDateString()"></td>
-                  <td class="p-2" x-text="l.name || '—'"></td>
-                  <td class="p-2" x-text="l.email || '—'"></td>
-                  <td class="p-2" x-text="l.message || '—'"></td>
-                </tr>
-              </template>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
     <!-- Catalog (Services & Add-ons CRUD) -->
     <section class="grid md:grid-cols-2 gap-6">
       <!-- Services -->
       <div class="card p-4">
         <div class="flex items-center justify-between mb-3">
           <h2 class="text-lg font-bold">Base Services</h2>
-          <button class="px-3 py-1.5 text-sm rounded bg-slate-900 text-white" @click="newService()">+ New</button>
+          <button class="px-3 py-1.5 text-sm rounded bg-slate-900 text-white" @click="openService()">+ New</button>
         </div>
         <div class="space-y-3">
           <template x-for="s in services" :key="s.id">
@@ -150,8 +108,9 @@
               <div class="font-semibold" x-text="s.name + ' (' + s.id + ') '"></div>
               <div class="text-xs text-slate-500" x-text="s.blurb"></div>
               <div class="text-xs mt-1">One-time: <b x-text="fmtUSD(s.base_one_time_cents)"></b> • Monthly: <b x-text="fmtUSD(s.base_monthly_cents)"></b></div>
+              <div class="text-xs mt-1">Includes: <span x-text="(s.includes||[]).join(', ') || '—'"></span></div>
               <div class="mt-2 flex gap-2">
-                <button class="px-2 py-1 text-xs rounded bg-indigo-600 text-white" @click="editService(s)">Edit</button>
+                <button class="px-2 py-1 text-xs rounded bg-indigo-600 text-white" @click="openService(s)">Edit</button>
                 <button class="px-2 py-1 text-xs rounded bg-rose-600 text-white" @click="delService(s.id)">Delete</button>
               </div>
             </div>
@@ -163,7 +122,7 @@
       <div class="card p-4">
         <div class="flex items-center justify-between mb-3">
           <h2 class="text-lg font-bold">Add-ons</h2>
-          <button class="px-3 py-1.5 text-sm rounded bg-slate-900 text-white" @click="newAddon()">+ New</button>
+          <button class="px-3 py-1.5 text-sm rounded bg-slate-900 text-white" @click="openAddon()">+ New</button>
         </div>
         <div class="space-y-3">
           <template x-for="a in addons" :key="a.id">
@@ -172,7 +131,7 @@
               <div class="text-xs text-slate-500" x-text="a.description"></div>
               <div class="text-xs mt-1">Service: <b x-text="a.service_id"></b> • One-time: <b x-text="fmtUSD(a.price_one_time_cents)"></b> • Monthly: <b x-text="fmtUSD(a.price_monthly_cents)"></b></div>
               <div class="mt-2 flex gap-2">
-                <button class="px-2 py-1 text-xs rounded bg-indigo-600 text-white" @click="editAddon(a)">Edit</button>
+                <button class="px-2 py-1 text-xs rounded bg-indigo-600 text-white" @click="openAddon(a)">Edit</button>
                 <button class="px-2 py-1 text-xs rounded bg-rose-600 text-white" @click="delAddon(a.id)">Delete</button>
               </div>
             </div>
@@ -182,113 +141,234 @@
     </section>
   </main>
 
-  <script>
-    function adminApp(){
-      return {
-        authed:false,
-        me:null,
-        error:'',
-        login:{username:'',password:''},
-        kpis:{revenue_cents:0,orders:0,customers:0,pageviews:0},
-        orders:[],
-        customers:[],
-        leads:[],
-        services:[],
-        addons:[],
+  <!-- SERVICE MODAL -->
+  <div class="modal" x-show="modals.service" x-transition>
+    <div class="card p-5">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold" x-text="serviceForm.id ? 'Edit Service' : 'New Service'"></h3>
+        <button class="h-9 w-9 rounded hover:bg-slate-100 grid place-items-center" @click="modals.service=false">✕</button>
+      </div>
+      <div class="grid md:grid-cols-2 gap-3 mt-3">
+        <div>
+          <label class="text-xs text-slate-500">Key (e.g. web)</label>
+          <input class="w-full rounded border px-3 py-2" x-model.trim="serviceForm.id" :disabled="!!serviceForm._lockId"/>
+        </div>
+        <div>
+          <label class="text-xs text-slate-500">Name</label>
+          <input class="w-full rounded border px-3 py-2" x-model.trim="serviceForm.name"/>
+        </div>
+        <div class="md:col-span-2">
+          <label class="text-xs text-slate-500">Blurb</label>
+          <input class="w-full rounded border px-3 py-2" x-model.trim="serviceForm.blurb"/>
+        </div>
+        <div>
+          <label class="text-xs text-slate-500">Base (One-time) USD</label>
+          <input type="number" class="w-full rounded border px-3 py-2" x-model.number="serviceForm.base_one_time_usd"/>
+        </div>
+        <div>
+          <label class="text-xs text-slate-500">Base (Monthly) USD</label>
+          <input type="number" class="w-full rounded border px-3 py-2" x-model.number="serviceForm.base_monthly_usd"/>
+        </div>
+        <div class="md:col-span-2">
+          <label class="text-xs text-slate-500">Includes (comma separated)</label>
+          <input class="w-full rounded border px-3 py-2" x-model.trim="serviceForm.includes_csv" placeholder="Kickoff & setup, Landing page (3–5 sections), Light copy help"/>
+        </div>
+      </div>
+      <div class="mt-4 flex justify-end gap-2">
+        <button class="px-3 py-2 rounded border" @click="modals.service=false">Cancel</button>
+        <button class="px-3 py-2 rounded bg-indigo-600 text-white" @click="saveService">Save</button>
+      </div>
+      <p class="text-xs text-rose-600 mt-2" x-text="formError"></p>
+    </div>
+  </div>
 
-        async init(){
-          await this.checkAuth();
-          if(this.authed) await this.refreshAll();
-        },
-        async checkAuth(){
-          try{
-            const r = await fetch('/api/admin/me'); if(!r.ok) throw 0;
-            const j = await r.json(); this.me = j.user; this.authed = true;
-          }catch{ this.authed = false; }
-        },
-        async doLogin(){
-          this.error='';
-          const r = await fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(this.login)});
-          if(!r.ok){ this.error='Invalid login'; return; }
-          this.authed=true; this.me=this.login.username; this.login={username:'',password:''};
-          await this.refreshAll();
-        },
-        async logout(){ await fetch('/api/admin/logout'); location.reload(); },
+  <!-- ADDON MODAL -->
+  <div class="modal" x-show="modals.addon" x-transition>
+    <div class="card p-5">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold" x-text="addonForm.id ? 'Edit Add-on' : 'New Add-on'"></h3>
+        <button class="h-9 w-9 rounded hover:bg-slate-100 grid place-items-center" @click="modals.addon=false">✕</button>
+      </div>
+      <div class="grid md:grid-cols-2 gap-3 mt-3">
+        <div>
+          <label class="text-xs text-slate-500">ID (e.g. web-seo)</label>
+          <input class="w-full rounded border px-3 py-2" x-model.trim="addonForm.id" :disabled="!!addonForm._lockId"/>
+        </div>
+        <div>
+          <label class="text-xs text-slate-500">Service</label>
+          <select class="w-full rounded border px-3 py-2" x-model="addonForm.service_id">
+            <template x-for="s in services" :key="'sopt-'+s.id">
+              <option :value="s.id" x-text="s.id"></option>
+            </template>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs text-slate-500">Label</label>
+          <input class="w-full rounded border px-3 py-2" x-model.trim="addonForm.label"/>
+        </div>
+        <div>
+          <label class="text-xs text-slate-500">Badge</label>
+          <input class="w-full rounded border px-3 py-2" x-model.trim="addonForm.badge"/>
+        </div>
+        <div class="md:col-span-2">
+          <label class="text-xs text-slate-500">Short</label>
+          <input class="w-full rounded border px-3 py-2" x-model.trim="addonForm.short"/>
+        </div>
+        <div class="md:col-span-2">
+          <label class="text-xs text-slate-500">Description</label>
+          <textarea class="w-full rounded border px-3 py-2" x-model.trim="addonForm.description"></textarea>
+        </div>
+        <div>
+          <label class="text-xs text-slate-500">One-time USD</label>
+          <input type="number" class="w-full rounded border px-3 py-2" x-model.number="addonForm.price_one_time_usd"/>
+        </div>
+        <div>
+          <label class="text-xs text-slate-500">Monthly USD</label>
+          <input type="number" class="w-full rounded border px-3 py-2" x-model.number="addonForm.price_monthly_usd"/>
+        </div>
+        <div class="flex items-center gap-2">
+          <input id="popular" type="checkbox" x-model="addonForm.popular"/>
+          <label for="popular" class="text-sm">Popular</label>
+        </div>
+      </div>
+      <div class="mt-4 flex justify-end gap-2">
+        <button class="px-3 py-2 rounded border" @click="modals.addon=false">Cancel</button>
+        <button class="px-3 py-2 rounded bg-indigo-600 text-white" @click="saveAddon">Save</button>
+      </div>
+      <p class="text-xs text-rose-600 mt-2" x-text="formError"></p>
+    </div>
+  </div>
 
-        async refreshAll(){
-          const [m, o, c, l, s, a] = await Promise.all([
-            fetch('/api/admin/metrics').then(r=>r.json()),
-            fetch('/api/admin/orders').then(r=>r.json()),
-            fetch('/api/admin/customers').then(r=>r.json()),
-            fetch('/api/admin/leads').then(r=>r.json()),
-            fetch('/api/admin/services').then(r=>r.json()),
-            fetch('/api/admin/addons').then(r=>r.json()),
-          ]);
-          this.kpis=m; this.orders=o; this.customers=c; this.leads=l; this.services=s; this.addons=a;
-        },
+  <!-- Toast -->
+  <div x-show="toast.show" x-transition class="fixed bottom-4 left-1/2 -translate-x-1/2 bg-slate-900 text-white rounded px-4 py-2 shadow">
+    <span x-text="toast.text"></span>
+  </div>
 
-        // Money
-        fmtUSD(cents){ return (cents/100).toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}); },
+<script>
+function adminApp(){
+  return {
+    authed:false, me:null, error:'', formError:'',
+    login:{username:'',password:''},
+    kpis:{revenue_cents:0,orders:0,customers:0,pageviews:0},
+    orders:[], customers:[], leads:[], services:[], addons:[],
+    modals:{service:false, addon:false},
+    toast:{show:false,text:''},
 
-        // Services CRUD
-        async newService(){
-          const id = prompt('Service key (e.g. web, video):'); if(!id) return;
-          const name = prompt('Display name:'); if(!name) return;
-          const blurb = prompt('Blurb (optional):')||'';
-          const ot = Number(prompt('One-time price (USD, whole number):')||'0')*100;
-          const mo = Number(prompt('Monthly price (USD, whole number):')||'0')*100;
-          const payload = { id, name, blurb, base_one_time_cents:ot, base_monthly_cents:mo, includes:[] };
-          await fetch('/api/admin/services',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-          await this.refreshAll();
-        },
-        async editService(s){
-          const name = prompt('Display name:', s.name)||s.name;
-          const blurb = prompt('Blurb:', s.blurb||'')||'';
-          const ot = Number(prompt('One-time price (USD):', (s.base_one_time_cents/100))||s.base_one_time_cents/100)*100;
-          const mo = Number(prompt('Monthly price (USD):', (s.base_monthly_cents/100))||s.base_monthly_cents/100)*100;
-          const payload = { id:s.id, name, blurb, base_one_time_cents:ot, base_monthly_cents:mo, includes:s.includes||[] };
-          await fetch('/api/admin/services',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-          await this.refreshAll();
-        },
-        async delService(id){
-          if(!confirm('Delete service '+id+'? This also deletes its add-ons.')) return;
-          await fetch('/api/admin/services?id='+encodeURIComponent(id),{method:'DELETE'});
-          await this.refreshAll();
-        },
+    // form models
+    serviceForm:{id:'', _lockId:false, name:'', blurb:'', base_one_time_usd:0, base_monthly_usd:0, includes_csv:''},
+    addonForm:{id:'', _lockId:false, service_id:'', label:'', description:'', short:'', badge:'', popular:false, price_one_time_usd:0, price_monthly_usd:0},
 
-        // Addons CRUD
-        async newAddon(){
-          const id = prompt('Addon id (e.g. web-seo):'); if(!id) return;
-          const service_id = prompt('Service key this belongs to:'); if(!service_id) return;
-          const label = prompt('Label:'); if(!label) return;
-          const description = prompt('Description (optional):')||'';
-          const short = prompt('Short (optional):')||'';
-          const badge = prompt('Badge (optional):')||'';
-          const ot = Number(prompt('One-time (USD):')||'0')*100;
-          const mo = Number(prompt('Monthly (USD):')||'0')*100;
-          const payload = { id, service_id, label, description, short, badge, popular:false, price_one_time_cents:ot, price_monthly_cents:mo };
-          await fetch('/api/admin/addons',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-          await this.refreshAll();
-        },
-        async editAddon(a){
-          const service_id = prompt('Service key:', a.service_id)||a.service_id;
-          const label = prompt('Label:', a.label)||a.label;
-          const description = prompt('Description:', a.description||'')||'';
-          const short = prompt('Short:', a.short||'')||'';
-          const badge = prompt('Badge:', a.badge||'')||'';
-          const ot = Number(prompt('One-time (USD):', a.price_one_time_cents/100)||a.price_one_time_cents/100)*100;
-          const mo = Number(prompt('Monthly (USD):', a.price_monthly_cents/100)||a.price_monthly_cents/100)*100;
-          const payload = { id:a.id, service_id, label, description, short, badge, price_one_time_cents:ot, price_monthly_cents:mo };
-          await fetch('/api/admin/addons',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); // upsert
-          await this.refreshAll();
-        },
-        async delAddon(id){
-          if(!confirm('Delete add-on '+id+'?')) return;
-          await fetch('/api/admin/addons?id='+encodeURIComponent(id),{method:'DELETE'});
-          await this.refreshAll();
-        },
+    async init(){ await this.checkAuth(); if(this.authed) await this.refreshAll(); },
+    async checkAuth(){ try{ const r=await fetch('/api/admin/me'); if(!r.ok) throw 0; const j=await r.json(); this.me=j.user; this.authed=true; }catch{ this.authed=false; } },
+    async doLogin(){ this.error=''; const r=await fetch('/api/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(this.login)}); if(!r.ok){ this.error='Invalid login'; return; } this.authed=true; this.me=this.login.username; this.login={username:'',password:''}; await this.refreshAll(); },
+    async logout(){ await fetch('/api/admin/logout'); location.reload(); },
+
+    async refreshAll(){
+      const [m,o,c,l,s,a]=await Promise.all([
+        fetch('/api/admin/metrics').then(r=>r.json()),
+        fetch('/api/admin/orders').then(r=>r.json()),
+        fetch('/api/admin/customers').then(r=>r.json()),
+        fetch('/api/admin/leads').then(r=>r.json()),
+        fetch('/api/admin/services').then(r=>r.json()),
+        fetch('/api/admin/addons').then(r=>r.json())
+      ]);
+      this.kpis=m; this.orders=o; this.customers=c; this.leads=l; this.services=s; this.addons=a;
+    },
+
+    // Toast helper
+    flash(t){ this.toast={show:true,text:t}; setTimeout(()=>this.toast.show=false,1300); },
+
+    // Money
+    fmtUSD(c){ return (Number(c||0)/100).toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}); },
+
+    // Service CRUD
+    openService(s=null){
+      this.formError='';
+      if(s){
+        this.serviceForm = {
+          id: s.id, _lockId:true,
+          name: s.name||'',
+          blurb: s.blurb||'',
+          base_one_time_usd: Math.round((s.base_one_time_cents||0)/100),
+          base_monthly_usd: Math.round((s.base_monthly_cents||0)/100),
+          includes_csv: (s.includes||[]).join(', ')
+        };
+      } else {
+        this.serviceForm = {id:'', _lockId:false, name:'', blurb:'', base_one_time_usd:0, base_monthly_usd:0, includes_csv:''};
       }
-    }
-  </script>
+      this.modals.service=true;
+    },
+    async saveService(){
+      try{
+        const f=this.serviceForm;
+        if(!f.id || !f.name){ this.formError='Key and Name are required'; return; }
+        const payload={
+          id:f.id.trim(),
+          name:f.name.trim(),
+          blurb:f.blurb||'',
+          base_one_time_cents: Math.round(Number(f.base_one_time_usd||0)*100),
+          base_monthly_cents: Math.round(Number(f.base_monthly_usd||0)*100),
+          includes: f.includes_csv.split(',').map(x=>x.trim()).filter(Boolean)
+        };
+        const method = f._lockId ? 'PUT' : 'POST';
+        const r = await fetch('/api/admin/services',{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+        if(!r.ok){ const e=await r.json().catch(()=>({})); throw new Error(e.error||'Save failed'); }
+        this.modals.service=false; this.flash('Saved'); await this.refreshAll();
+      }catch(e){ this.formError=e.message; }
+    },
+    async delService(id){
+      if(!confirm('Delete service '+id+'? This also deletes its add-ons.')) return;
+      const r=await fetch('/api/admin/services?id='+encodeURIComponent(id),{method:'DELETE'});
+      if(!r.ok){ alert('Delete failed'); return; }
+      this.flash('Deleted'); await this.refreshAll();
+    },
+
+    // Addon CRUD
+    openAddon(a=null){
+      this.formError='';
+      const firstService = this.services[0]?.id || '';
+      if(a){
+        this.addonForm = {
+          id:a.id, _lockId:true, service_id:a.service_id,
+          label:a.label||'', description:a.description||'', short:a.short||'', badge:a.badge||'',
+          popular:!!a.popular,
+          price_one_time_usd: Math.round((a.price_one_time_cents||0)/100),
+          price_monthly_usd: Math.round((a.price_monthly_cents||0)/100)
+        };
+      } else {
+        this.addonForm = {id:'', _lockId:false, service_id:firstService, label:'', description:'', short:'', badge:'', popular:false, price_one_time_usd:0, price_monthly_usd:0};
+      }
+      this.modals.addon=true;
+    },
+    async saveAddon(){
+      try{
+        const f=this.addonForm;
+        if(!f.id || !f.service_id || !f.label){ this.formError='ID, Service, Label are required'; return; }
+        const payload={
+          id:f.id.trim(),
+          service_id:f.service_id,
+          label:f.label.trim(),
+          description:f.description||'',
+          short:f.short||'',
+          badge:f.badge||'',
+          popular: !!f.popular,
+          price_one_time_cents: Math.round(Number(f.price_one_time_usd||0)*100),
+          price_monthly_cents: Math.round(Number(f.price_monthly_usd||0)*100)
+        };
+        // upsert with POST; PUT also supported
+        const r = await fetch('/api/admin/addons',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+        if(!r.ok){ const e=await r.json().catch(()=>({})); throw new Error(e.error||'Save failed'); }
+        this.modals.addon=false; this.flash('Saved'); await this.refreshAll();
+      }catch(e){ this.formError=e.message; }
+    },
+    async delAddon(id){
+      if(!confirm('Delete add-on '+id+'?')) return;
+      const r=await fetch('/api/admin/addons?id='+encodeURIComponent(id),{method:'DELETE'});
+      if(!r.ok){ alert('Delete failed'); return; }
+      this.flash('Deleted'); await this.refreshAll();
+    },
+  }
+}
+</script>
 </body>
 </html>
