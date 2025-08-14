@@ -157,6 +157,22 @@
                 </button>
               </template>
             </div>
+
+            <!-- Quick Presets -->
+            <div class="mt-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs text-white/60">Quick presets (curated, non‑random)</span>
+                <button class="text-[11px] underline decoration-dotted" @click="clearPreset()" x-show="activePreset">Clear preset</button>
+              </div>
+              <div class="flex gap-2 overflow-x-auto pb-1">
+                <template x-for="p in Object.keys(presets)" :key="'preset-'+p">
+                  <button @click="applyPreset(p)" :class="activePreset===p?'bg-white text-slate-900':'bg-white/0 text-white/80 hover:bg-white/10'" class="whitespace-nowrap rounded-xl px-3 py-2 ring-1 ring-white/15 text-sm font-semibold">
+                    <span x-text="p"></span>
+                    <span class="ml-2 text-[10px] uppercase tracking-wide rounded bg-white/10 ring-1 ring-white/15 px-1.5 py-0.5" x-text="presets[p].plan==='oneTime'?'one‑time':'monthly'"></span>
+                  </button>
+                </template>
+              </div>
+            </div>
           </div>
 
           <!-- Service Tabs (focus which to edit) + Base Details for focused service -->
@@ -288,6 +304,11 @@
                       <div class="text-sm font-semibold" x-text="formatPrice(ad.price)"></div>
                     </div>
                   </template>
+                  <!-- Per-service notes input -->
+                  <div class="mt-3">
+                    <label class="text-[11px] text-white/60">Notes (optional)</label>
+                    <textarea x-model.trim="serviceNotes[key]" rows="2" class="mt-1 w-full rounded-lg bg-white/5 ring-1 ring-white/10 px-3 py-2 text-xs placeholder:text-white/40" placeholder="Add timing, goals, links…"></textarea>
+                  </div>
                   <div class="mt-3 flex items-center justify-between">
                     <button @click="setService(key)" class="text-xs underline decoration-dotted">Edit add‑ons</button>
                     <button @click="toggleActive(key)" class="text-xs rounded-md ring-1 ring-white/15 px-2 py-1 hover:bg-white/10">Remove</button>
@@ -345,6 +366,7 @@
                       </template>
                       <li x-show="!selectedAddonsDetailedFor(key).length" class="text-slate-500">No add‑ons selected</li>
                     </ul>
+                    <div x-show="serviceNotes[key]" class="mt-2 text-xs text-slate-600"><span class="font-medium">Notes:</span> <span x-text="serviceNotes[key]"></span></div>
                   </div>
                 </template>
                 <div class="mt-3 flex items-center justify-between border-t border-black/10 pt-3">
@@ -478,11 +500,13 @@
         query: '',
         selectedAddons: [], // for focused service (mirrors selectedByService[serviceKey])
         selectedByService: { web: [], video: [], events: [], ugc: [] },
+        serviceNotes: { web:'', video:'', events:'', ugc:'' },
         reviewOpen: false,
         accepted: true,
         customer: { name:'', company:'', email:'', phone:'', notes:'' },
         sortBy: 'popular',
         recommendedFirst: true,
+        activePreset: '',
 
         // DATA
         services: {
@@ -546,6 +570,15 @@
           ]}
         },
 
+        // PRESETS (curated, not random)
+        presets: {
+          'Launch Kit': { plan:'oneTime', services: { web:'essentials', video:'essentials', events:'essentials' } },
+          'Local Biz Starter': { plan:'oneTime', services: { web:'essentials', ugc:'essentials' } },
+          'Event Spotlight': { plan:'oneTime', services: { events:'premium', video:'essentials' } },
+          'Creator Engine': { plan:'monthly', services: { video:'premium', ugc:'premium' } },
+          'Growth Retainer': { plan:'monthly', services: { web:'premium', video:'premium', ugc:'premium', events:'essentials' } }
+        },
+
         // COMPUTEDS
         addonsListFor(key){
           return this.plan==='oneTime'
@@ -555,7 +588,7 @@
         basePriceFor(key){ return this.plan==='oneTime' ? this.services[key].oneTime.base : this.monthlyOverrides[key].base; },
         baseIncludesFor(key){ return this.plan==='oneTime' ? this.services[key].oneTime.includes : this.monthlyOverrides[key].includes; },
 
-        get currentAddons(){ return this.addonsListFor(this.serviceKey); }, // FIX: one‑time add‑ons now show
+        get currentAddons(){ return this.addonsListFor(this.serviceKey); }, // one‑time & monthly supported
         get selectedAddonsDetailed(){ const idx=Object.fromEntries(this.currentAddons.map(a=>[a.id,a])); return (this.selectedByService[this.serviceKey]||[]).map(id=>idx[id]).filter(Boolean); },
         selectedAddonsDetailedFor(key){ const list=this.addonsListFor(key); const idx=Object.fromEntries(list.map(a=>[a.id,a])); return (this.selectedByService[key]||[]).map(id=>idx[id]).filter(Boolean); },
 
@@ -579,10 +612,10 @@
 
         // METHODS
         isActive(key){ return this.activeServices.includes(key); },
-        toggleActive(key){ const i=this.activeServices.indexOf(key); if(i>-1){ this.activeServices.splice(i,1); } else { this.activeServices.push(key); this.setService(key); } },
-        toggleAddon(id){ const list=this.selectedByService[this.serviceKey]||[]; const i=list.indexOf(id); if(i>-1) list.splice(i,1); else list.push(id); this.selectedByService[this.serviceKey]=list; this.selectedAddons=list.slice(); },
-        reset(){ this.selectedByService[this.serviceKey]=[]; this.selectedAddons=[]; this.recommendedIds=this.getBundle('essentials'); this.query=''; },
-        resetAll(){ this.activeServices=['web']; this.serviceKey='web'; this.selectedByService={ web: [], video: [], events: [], ugc: [] }; this.selectedAddons=[]; this.recommendedIds=this.getBundle('essentials'); this.query=''; },
+        toggleActive(key){ const i=this.activeServices.indexOf(key); if(i>-1){ this.activeServices.splice(i,1); } else { this.activeServices.push(key); this.setService(key); } this.activePreset=''; },
+        toggleAddon(id){ const list=this.selectedByService[this.serviceKey]||[]; const i=list.indexOf(id); if(i>-1) list.splice(i,1); else list.push(id); this.selectedByService[this.serviceKey]=list; this.selectedAddons=list.slice(); this.activePreset=''; },
+        reset(){ this.selectedByService[this.serviceKey]=[]; this.selectedAddons=[]; this.recommendedIds=this.getBundle('essentials'); this.query=''; this.activePreset=''; },
+        resetAll(){ this.activeServices=['web']; this.serviceKey='web'; this.selectedByService={ web: [], video: [], events: [], ugc: [] }; this.selectedAddons=[]; this.recommendedIds=this.getBundle('essentials'); this.query=''; this.activePreset=''; this.serviceNotes={ web:'', video:'', events:'', ugc:'' }; },
         init(){ this.selectedAddons=this.selectedByService[this.serviceKey]||[]; this.recommendedIds=this.getBundle('essentials'); },
         formatPrice(v){ return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v); },
         isSelected(id){ return (this.selectedByService[this.serviceKey]||[]).includes(id); },
@@ -596,7 +629,7 @@
           }; const bundle = map[this.serviceKey]?.[this.plan]?.[kind] || []; this.recommendedIds = bundle; return bundle; },
         setPlan(newPlan){ if(this.plan===newPlan) return; this.plan=newPlan; // filter selections per service to valid ids in new plan
           for(const key of this.order){ const valid=new Set(this.addonsListFor(key).map(a=>a.id)); this.selectedByService[key]=(this.selectedByService[key]||[]).filter(id=>valid.has(id)); }
-          this.selectedAddons=this.selectedByService[this.serviceKey].slice(); this.recommendedIds=this.getBundle('essentials'); },
+          this.selectedAddons=this.selectedByService[this.serviceKey].slice(); this.recommendedIds=this.getBundle('essentials'); this.activePreset=''; },
         setService(key){ this.serviceKey = key; this.selectedAddons=(this.selectedByService[key]||[]).slice(); this.recommendedIds=this.getBundle('essentials'); },
         addonIcon(id){
           const simple = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 7h10v10H7z"/></svg>';
@@ -627,12 +660,29 @@
           return map[id] || simple;
         },
 
+        // PRESET APPLIER
+        applyPreset(name){
+          const p = this.presets[name]; if(!p) return;
+          this.setPlan(p.plan);
+          this.activeServices = Object.keys(p.services);
+          // seed selections for each service based on bundle kind
+          for(const key of this.activeServices){
+            const kind = p.services[key];
+            // temporarily focus to reuse selectBundle logic
+            const prev = this.serviceKey; this.serviceKey = key; this.selectBundle(kind); this.serviceKey = prev;
+          }
+          // focus first active service
+          this.serviceKey = this.activeServices[0] || 'web';
+          this.activePreset = name;
+        },
+        clearPreset(){ this.activePreset=''; },
+
         // STRIPE CHECKOUT (opens from review modal)
         async checkout(){
           try{
             if(!this.accepted){ alert('Please accept the notice before continuing.'); return; }
             if(!this.activeServices.length){ alert('Please select at least one service.'); return; }
-            const cart = this.activeServices.map(key=>({ serviceKey:key, plan:this.plan, addons:(this.selectedByService[key]||[]) }));
+            const cart = this.activeServices.map(key=>({ serviceKey:key, plan:this.plan, addons:(this.selectedByService[key]||[]), notes: (this.serviceNotes[key]||'').slice(0,500) }));
             const payload = { cart, customer: this.customer };
             const res = await fetch('/api/checkout', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
             if(!res.ok){ const t = await res.text(); throw new Error(t || 'Failed to create checkout session'); }
@@ -670,6 +720,15 @@
         p.toggleActive('video'); // now web+video
         const expected = 300 + 600; // bases only
         results.push({name:'T5 multi-service bases', pass: p.total === expected, got:p.total, expect:expected});
+        // T6: preset Launch Kit
+        p.applyPreset('Launch Kit');
+        results.push({name:'T6 preset plan', pass: p.plan==='oneTime'});
+        results.push({name:'T6 services count', pass: p.activeServices.length===3, got:p.activeServices.slice()});
+        // T7: per-service notes included in cart
+        p.serviceNotes.web='Note A'; p.serviceNotes.video='Note B';
+        const cart = p.activeServices.map(key=>({ serviceKey:key, plan:p.plan, addons:(p.selectedByService[key]||[]), notes:(p.serviceNotes[key]||'').slice(0,500) }));
+        const hasNotes = cart.some(c=>c.serviceKey==='web' && c.notes==='Note A') && cart.some(c=>c.serviceKey==='video' && c.notes==='Note B');
+        results.push({name:'T7 notes in cart', pass: hasNotes});
 
         const failed = results.filter(r=>!r.pass);
         if(failed.length){ console.error('Pricing tests failed:', failed); }
@@ -703,17 +762,17 @@
 
       const line_items = [];
       for(const item of cart){
-        const { serviceKey, plan, addons } = item;
+        const { serviceKey, plan, addons, notes } = item;
         if(!['web','video','events','ugc'].includes(serviceKey)) continue;
         if(!['oneTime','monthly'].includes(plan)) continue;
         const t = PRICE_TABLE[serviceKey];
         const isMonthly = plan==='monthly';
         // Base
-        line_items.push({ price_data: { currency: 'usd', product_data: { name: `${serviceKey.toUpperCase()} — ${isMonthly?'Monthly':'One‑time'} Base` }, unit_amount: isMonthly? t.monthlyBase : t.oneTimeBase, ...(isMonthly? {recurring:{interval:'month'}} : {}) }, quantity: 1 });
+        line_items.push({ price_data: { currency: 'usd', product_data: { name: `${serviceKey.toUpperCase()} — ${isMonthly?'Monthly':'One‑time'} Base`, description: notes?`Notes: ${notes}`:undefined, metadata:{service:serviceKey,type:'base',plan,notes:notes||''} }, unit_amount: isMonthly? t.monthlyBase : t.oneTimeBase, ...(isMonthly? {recurring:{interval:'month'}} : {}) }, quantity: 1 });
         // Add-ons
         for(const id of Array.isArray(addons)?addons:[]){
           const a=t.addons[id]; if(!a) continue; const amt=isMonthly? a.mo : a.ot; if(!amt) continue;
-          line_items.push({ price_data: { currency: 'usd', product_data: { name: `Add‑on: ${id}` }, unit_amount: amt, ...(isMonthly? {recurring:{interval:'month'}} : {}) }, quantity: 1 });
+          line_items.push({ price_data: { currency: 'usd', product_data: { name: `Add‑on: ${id}`, description: notes?`Service notes: ${notes}`:undefined, metadata:{service:serviceKey,type:'addon',id,plan,notes:notes||''} }, unit_amount: amt, ...(isMonthly? {recurring:{interval:'month'}} : {}) }, quantity: 1 });
         }
       }
 
