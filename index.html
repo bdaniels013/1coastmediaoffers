@@ -23,6 +23,10 @@
     html::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#60a5fa,#8b5cf6);border-radius:9999px}
     .tooltip[data-tip]{position:relative}
     .tooltip[data-tip]:hover:after{content:attr(data-tip); position:absolute; z-index:50; white-space:nowrap; transform:translateY(-110%); background:rgba(15,23,42,.95); color:white; font-size:11px; padding:.35rem .5rem; border-radius:.5rem; border:1px solid rgba(255,255,255,.15)}
+    /* 3D-ish card hover */
+    .pop-card { transition: transform .25s ease, box-shadow .25s ease, background .25s ease; }
+    .pop-card:hover { transform: translateY(-2px) scale(1.01); box-shadow: 0 10px 30px rgba(59,130,246,.15); }
+    .pop-card[aria-pressed="true"], .pop-card[aria-checked="true"] { transform: translateY(-2px) scale(1.01); box-shadow: 0 10px 30px rgba(59,130,246,.35); }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100">
@@ -150,7 +154,7 @@
 
       <div class="mt-6 grid md:grid-cols-3 gap-4">
         <template x-for="name in ['Launch Kit','Creator Engine','Growth Retainer']" :key="'cmp-'+name">
-          <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-5">
+          <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-5 pop-card">
             <div class="flex items-start justify-between">
               <div>
                 <div class="text-xs text-white/60" x-text="presets[name].plan==='oneTime'?'One‑time':'Monthly'"></div>
@@ -304,13 +308,14 @@
             <!-- Add‑on cards -->
             <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[32rem] overflow-auto pr-1">
               <template x-for="ad in visibleAddons" :key="ad.id">
-                <button type="button" role="switch" :aria-checked="isSelected(ad.id)" @click="toggleAddon(ad.id)" :aria-pressed="isSelected(ad.id)" class="group text-left rounded-xl p-4 ring-1 ring-white/10 bg-white/5 hover:bg-white/10 hover:ring-white/20 transition relative">
+                <button type="button" role="switch" :aria-checked="isSelected(ad.id)" @click="toggleAddon(ad.id)" :aria-pressed="isSelected(ad.id)" class="pop-card group text-left rounded-xl p-4 ring-1 ring-white/10 bg-white/5 hover:bg-white/10 hover:ring-white/20 transition relative" :class="isSelected(ad.id)?'bg-gradient-to-br from-blue-500/15 to-indigo-500/15 ring-2 ring-blue-400/50':''">
                   <input type="checkbox" class="sr-only" :value="ad.id" x-model="selectedAddons">
                   <div class="flex items-start gap-3">
                     <div class="mt-0.5 h-9 w-9 rounded-lg grid place-items-center ring-1 ring-white/15" :class="isSelected(ad.id) ? 'bg-blue-500 text-white ring-0' : 'bg-slate-900/40'" x-html="addonIcon(ad.id)"></div>
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center gap-2">
                         <span class="font-medium leading-tight break-words" x-text="ad.label"></span>
+                        <span x-show="addonBadge(ad.id)" class="text-[10px] uppercase tracking-wide rounded bg-white/10 ring-1 ring-white/15 px-2 py-0.5" x-text="addonBadge(ad.id)"></span>
                         <span x-show="recommendedIds.includes(ad.id)" class="text-[10px] uppercase tracking-wide rounded bg-white/10 ring-1 ring-white/15 px-2 py-0.5">Popular</span>
                       </div>
                       <div class="text-sm text-white/60 break-words" x-text="ad.desc"></div>
@@ -536,71 +541,123 @@
         recommendedFirst: true,
         activePreset: '',
 
-        // DATA
+        // DATA (friendly, non‑technical copy)
         services: {
-          web: { short:'Web', name: 'Web & App Development', oneTime: { base: 300, duration: '3–7 days', includes: ['Initial consultation & project setup','Basic responsive landing page','Wireframed UI/UX','Light copy edits'] }, addons: [
-            {id:'web-mvp', label:'Basic App Prototype (MVP)', price:500, desc:'iOS/Android prototype (chatbots or simple tools)'},
-            {id:'web-seo', label:'SEO Setup', price:150, desc:'Keyword research & on‑page optimization'},
-            {id:'web-auto', label:'Automations', price:100, desc:'Email, leads, or social workflows'},
-            {id:'web-api', label:'API Integrations', price:250, desc:'Payments, maps, analytics'},
-            {id:'web-shop', label:'Custom E‑commerce Features', price:300, desc:'Basic shop setup'}
+          web: { short:'Web', name: 'Web & App Development', oneTime: { base: 300, duration: '3–7 days', includes: ['Kickoff call & setup','Mobile‑friendly landing page','Simple, clean layout (wireframed)','Light copy help'] }, addons: [
+            {id:'web-seo',   label:'Be Found on Google (SEO Basics)', price:150, desc:'We set the right keywords, titles, and speed checks so locals can find you.'},
+            {id:'web-auto',  label:'Auto Follow‑Ups (Forms → Email/DM)', price:100, desc:'Leads get instant replies so no one slips through the cracks.'},
+            {id:'web-api',   label:'Connect Payments & Maps', price:250, desc:'Stripe checkout, Google Maps or analytics connected for you.'},
+            {id:'web-shop',  label:'Online Store Starter', price:300, desc:'Simple products, checkout, and basics to sell right away.'},
+            {id:'web-mvp',   label:'Clickable App Demo (MVP)', price:500, desc:'A tappable prototype for iOS/Android—great for testing ideas.'},
+            // New, plain‑language extras
+            {id:'web-copy',  label:'We Write Your Website Copy', price:120, desc:'You talk, we write. Clear words that sell your offer.'},
+            {id:'web-speed', label:'Speed & Security Tune‑Up', price:150, desc:'Faster loads + basic protection to keep things smooth.'},
+            {id:'web-forms', label:'Smart Contact & Quote Forms', price:150, desc:'Easy forms that send to your inbox and spreadsheet.'},
+            {id:'web-analytics-setup', label:'Analytics Setup (See What Works)', price:100, desc:'Simple dashboard so you know what pages get results.'}
           ]},
-          video: { short:'Video', name: 'Video & Audio Production', oneTime: { base: 600, duration: '7–14 days', includes: ['Consultation & project setup','1–2 minute basic video (music, commercial, or reels)','Simple shoot & edit with cuts/effects/voiceover','Coastal/local vibe where applicable'] }, addons: [
-            {id:'vid-audio', label:'Audio Production', price:200, desc:'Noise reduction, subtitles, advanced mixing'},
-            {id:'vid-adv', label:'Advanced Video Upgrade', price:800, desc:'Extended length, complex edits, multi‑scene'},
-            {id:'vid-drone-p', label:'Drone Shoots — Personal', price:300, desc:'Dynamic footage with basic drone'},
-            {id:'vid-drone-pro', label:'Drone Shoots — Professional', price:1500, desc:'High‑end footage with certified operator'},
-            {id:'vid-edit', label:'Extended Editing', price:300, desc:'Series setup or additional polishes'}
+
+          video: { short:'Video', name: 'Video & Audio Production', oneTime: { base: 600, duration: '7–14 days', includes: ['Kickoff & plan','1–2 min video (music, ad, or reels)','Simple shoot + clean edit','Coastal/local vibes when needed'] }, addons: [
+            {id:'vid-audio',     label:'Clean Audio + Captions', price:200, desc:'Noise fixed, words on screen. Easier to watch, better reach.'},
+            {id:'vid-adv',       label:'Longer / More Complex Edit', price:800, desc:'More scenes, story, or advanced effects.'},
+            {id:'vid-drone-p',   label:'Drone B‑roll (Basic)', price:300, desc:'Dynamic aerial shots for flavor.'},
+            {id:'vid-drone-pro', label:'Drone Cinematics (Pro)', price:1500, desc:'Licensed pro pilot & high‑end footage.'},
+            {id:'vid-edit',      label:'Extra Editing Polish', price:300, desc:'Extra pass for pacing, cuts, titles.'},
+            // New
+            {id:'vid-script',    label:'Script & Shotlist Done‑For‑You', price:150, desc:'We plan the lines and the shots so shoot day is easy.'},
+            {id:'vid-color',     label:'Pro Color Grade', price:150, desc:'That crisp, cinematic look.'},
+            {id:'vid-square',    label:'Multiple Sizes (9:16, 1:1, 16:9)', price:120, desc:'Perfect crops for TikTok/IG/YouTube.'},
+            {id:'vid-thumbs',    label:'Thumbnail Pack (x3)', price:100, desc:'Scroll‑stopping covers for your video.'},
+            {id:'vid-raw',       label:'Raw Footage Delivery', price:60,  desc:'We hand you the files to keep forever.'}
           ]},
-          events: { short:'Events', name: 'Event Planning & Coordination', oneTime: { base: 1000, duration: 'Plan 2–6 weeks; event‑day support', includes: ['Initial consultation','Basic coordination for small events','Venue scouting & simple timelines','Day‑of support'] }, addons: [
-            {id:'ev-ven', label:'Venue & Vendor Coordination', price:500, desc:'Full timelines, logistics handled expertly'},
-            {id:'ev-digital', label:'Digital Event Pages', price:200, desc:'RSVPs, invites, lightweight attendee app'},
-            {id:'ev-media', label:'Media Coverage', price:300, desc:'Videographers/photographers for clips'},
-            {id:'ev-auto', label:'Automations', price:150, desc:'Reminders & predictions for smooth flow'},
-            {id:'ev-hybrid', label:'Hybrid/Virtual Setup', price:400, desc:'Streaming for wider reach'}
+
+          events: { short:'Events', name: 'Event Planning & Coordination', oneTime: { base: 1000, duration: 'Plan 2–6 weeks; event‑day support', includes: ['Kickoff & scope','Basic coordination','Venue options & simple timeline','Day‑of support'] }, addons: [
+            {id:'ev-ven',    label:'Full Vendor & Venue Handling', price:500, desc:'We handle calls, quotes, and timelines with vendors.'},
+            {id:'ev-digital',label:'RSVP Page & Tickets', price:200, desc:'A simple event page with guest list tools.'},
+            {id:'ev-media',  label:'Highlight Video & Photos', price:300, desc:'Short recap video + photo moments.'},
+            {id:'ev-auto',   label:'Guest Reminders & Check‑In', price:150, desc:'Texts/emails & easy arrival flow.'},
+            {id:'ev-hybrid', label:'Live Stream Setup', price:400, desc:'Make it hybrid to reach more people.'},
+            // New
+            {id:'ev-host',   label:'Pro Host / MC', price:250, desc:'Keep the energy up and timeline tight.'},
+            {id:'ev-runshow',label:'Run‑of‑Show & Floor Plan', price:150, desc:'Minute‑by‑minute game plan + layout.'},
+            {id:'ev-sponsor',label:'Sponsor Kit & Outreach', price:200, desc:'Deck + outreach templates to land sponsors.'},
+            {id:'ev-security',label:'Security & Permits Guide', price:120, desc:'What to file, who to call, and when.'},
+            {id:'ev-vip',    label:'VIP & Backstage Management', price:200, desc:'Green room, meet‑and‑greet, and access control.'}
           ]},
-          ugc: { short:'UGC', name: 'UGC & Local Clipping Campaigns', oneTime: { base: 450, duration: '7–21 days', includes: ['Consultation & setup','30,000‑view campaign (1–2 platforms)','Post‑campaign view verification','Creator fit & compliance summary'] }, addons: [
-            {id:'ugc-repurpose', label:'Repurposed Asset Pack', price:200, desc:'Adapt clips into ads, posts, or email graphics'},
-            {id:'ugc-leads', label:'Lead Gen Integration', price:250, desc:'Simple funnel/landing page to capture contacts'},
-            {id:'ugc-enhance', label:'Content Enhancement', price:150, desc:'Overlays, CTAs, or music to boost engagement'},
-            {id:'ugc-captions', label:'Caption & Description Pack', price:100, desc:'Optimized captions/descriptions per clip'},
-            {id:'ugc-brand', label:'Branded Customization Kit', price:150, desc:'Logos, watermarks, end‑slates across clips'},
-            {id:'ugc-views-10k', label:'Additional 10k Views', price:150, desc:'Scale your reach by +10,000 verified views'},
-            {id:'ugc-views-20k', label:'Additional 20k Views', price:300, desc:'Add +20,000 verified views to the campaign'},
-            {id:'ugc-views-70k', label:'Additional 70k Views', price:1050, desc:'Add +70,000 verified views for major pushes'}
+
+          ugc: { short:'UGC', name: 'UGC & Local Clipping Campaigns', oneTime: { base: 450, duration: '7–21 days', includes: ['Kickoff & setup','30,000‑view creator campaign (1–2 platforms)','Verified views report','Creator fit & compliance summary'] }, addons: [
+            {id:'ugc-repurpose', label:'Ad‑Ready Pack (Cut‑downs + Text)', price:200, desc:'We turn clips into ready‑to‑run ads & posts.'},
+            {id:'ugc-leads',     label:'Lead Capture Page', price:250, desc:'Simple page to turn viewers into contacts.'},
+            {id:'ugc-enhance',   label:'Eye‑Candy Overlays & Music', price:150, desc:'On‑brand text, stickers, and beats.'},
+            {id:'ugc-captions',  label:'SEO Captions & Hashtags', price:100, desc:'We write what gets found & tapped.'},
+            {id:'ugc-brand',     label:'Logos, Watermarks & End‑slates', price:150, desc:'Everything looks like YOUR brand.'},
+            {id:'ugc-views-10k', label:'Additional 10k Views', price:150, desc:'Add ~10,000 verified views.'},
+            {id:'ugc-views-20k', label:'Additional 20k Views', price:300, desc:'Add ~20,000 verified views.'},
+            {id:'ugc-views-70k', label:'Additional 70k Views', price:1050, desc:'Add ~70,000 verified views.'},
+            // New
+            {id:'ugc-creator-match', label:'Handpicked Creator Match', price:100, desc:'We shortlist the best local creators for your niche.'},
+            {id:'ugc-studio',        label:'Studio Polish on Clips', price:150, desc:'We re‑cut creator clips with pro touch.'},
+            {id:'ugc-comment',       label:'Comment Reply Pack', price:100, desc:'Smart replies you can paste to boost reach.'},
+            {id:'ugc-tracking',      label:'Tracking & Report Upgrade', price:120, desc:'Deeper insights on what’s working.'}
           ]}
         },
+
+        // Monthly substitutes where they differ
         monthlyOverrides: {
-          web: { base: 500, includes: ['Monthly consultation','Basic site/app maintenance (updates & bug fixes)'], addons: [
-            {match:'web-seo', label:'Monthly SEO Boosts', price:150, desc:'Ongoing audits & content optimization'},
-            {match:'web-auto', label:'Automation Expansions', price:100, desc:'New workflows & integrations as needed'},
-            {match:'web-adv', label:'Advanced Features', price:200, desc:'Personalization, sentiment, predictive'},
-            {match:'web-dash', label:'Custom Dashboards', price:250, desc:'Real‑time metrics for traffic & engagement'},
-            {match:'web-mvp', label:'App Upgrades', price:500, desc:'Ongoing prototype enhancements'}
+          web: { base: 500, includes: ['Monthly check‑ins','Basic updates & bug fixes'], addons: [
+            {match:'web-seo',   label:'Monthly SEO Boosts', price:150, desc:'Regular tune‑ups to keep ranking.'},
+            {match:'web-auto',  label:'Automation Expansions', price:100, desc:'Add or improve lead workflows.'},
+            {match:'web-adv',   label:'Advanced Features', price:200, desc:'Personalization, sentiment, predictive tools.'},
+            {match:'web-dash',  label:'Custom Dashboards', price:250, desc:'Live traffic & engagement panels.'},
+            {match:'web-mvp',   label:'App Upgrades', price:500, desc:'Keep evolving the prototype.'},
+            // New mapped
+            {match:'web-copy',  label:'Ongoing Copy Updates', price:120, desc:'We keep pages fresh & clear.'},
+            {match:'web-speed', label:'Speed & Security Care', price:150, desc:'Performance checks & patching.'},
+            {match:'web-forms', label:'Lead Form Tuning', price:100, desc:'Fix drop‑offs and improve replies.'},
+            {match:'web-analytics-setup', label:'Monthly Analytics Snapshot', price:120, desc:'Simple report of what worked.'}
           ]},
+
           video: { base: 1200, includes: ['Monthly consultation','3 basic videos with enhancements'], addons: [
-            {match:'vid-audio', label:'Audio Refresh', price:250, desc:'Ongoing mixing/subtitles for series'},
-            {match:'vid-adv', label:'Advanced Video Series', price:1000, desc:'Extended or complex ongoing productions'},
-            {match:'vid-drone-p', label:'Drone Shoots — Personal', price:300, desc:'Added to monthly videos'},
-            {match:'vid-drone-pro', label:'Drone Shoots — Professional', price:1500, desc:'High‑end additions'},
-            {match:'vid-edit', label:'Custom Production', price:500, desc:'Multi‑clip or specialized effects'}
+            {match:'vid-audio',     label:'Audio Refresh', price:250, desc:'Clean mix + captions each month.'},
+            {match:'vid-adv',       label:'Advanced Video Series', price:1000, desc:'Recurring complex pieces.'},
+            {match:'vid-drone-p',   label:'Drone B‑roll (Monthly)', price:300, desc:'Aerials added to your schedule.'},
+            {match:'vid-drone-pro', label:'Pro Drone Add‑on', price:1500, desc:'Top‑tier drone work monthly.'},
+            {match:'vid-edit',      label:'Custom Production', price:500, desc:'Multi‑clip or special effects.'},
+            // New mapped
+            {match:'vid-script',    label:'Monthly Script & Shotlists', price:150, desc:'We plan your content calendar.'},
+            {match:'vid-color',     label:'Pro Color Grade', price:150, desc:'Crisp look on every video.'},
+            {match:'vid-square',    label:'All Social Sizes', price:120, desc:'Delivered for TikTok/IG/YouTube.'},
+            {match:'vid-thumbs',    label:'Thumbnail Pack (x3)', price:100, desc:'Fresh hooks each month.'},
+            {match:'vid-raw',       label:'Raw Footage Library', price:60,  desc:'We archive & share files.'}
           ]},
-          events: { base: 1200, includes: ['Monthly consultation','Coordination for recurring small events (basic logistics)'], addons: [
-            {match:'ev-ven', label:'Ongoing Coordination', price:600, desc:'Multiple events/month, full logistics'},
-            {match:'ev-digital', label:'Digital Upkeep', price:200, desc:'Event sites/apps & automated invites'},
-            {match:'ev-media', label:'Media Integration', price:300, desc:'Consistent video/photo coverage'},
-            {match:'ev-auto', label:'Enhancements', price:150, desc:'Attendee analytics & personalization'},
-            {match:'ev-hybrid', label:'Scalable Support', price:400, desc:'Hybrid add‑ons for larger scope'}
+
+          events: { base: 1200, includes: ['Monthly consultation','Recurring small‑event coordination'], addons: [
+            {match:'ev-ven',    label:'Ongoing Coordination', price:600, desc:'Multiple events / month.'},
+            {match:'ev-digital',label:'Digital Upkeep', price:200, desc:'Event sites & automated invites.'},
+            {match:'ev-media',  label:'Media Integration', price:300, desc:'Consistent photo/video coverage.'},
+            {match:'ev-auto',   label:'Enhancements', price:150, desc:'Analytics & personalization.'},
+            {match:'ev-hybrid', label:'Scalable Support', price:400, desc:'Hybrid add‑ons as needed.'},
+            // New mapped
+            {match:'ev-host',   label:'Host / MC (Recurring)', price:250, desc:'Keep shows tight and lively.'},
+            {match:'ev-runshow',label:'Run‑of‑Show Updates', price:150, desc:'We handle the planning docs.'},
+            {match:'ev-sponsor',label:'Sponsor Program', price:200, desc:'Materials & outreach monthly.'},
+            {match:'ev-security',label:'Permits & Safety Checks', price:120, desc:'Never miss a requirement.'},
+            {match:'ev-vip',    label:'VIP/Backstage Management', price:200, desc:'White‑glove experience.'}
           ]},
-          ugc: { base: 600, includes: ['Monthly consultation','Recurring 30,000‑view campaigns (1–2 platforms) + monthly report'], addons: [
-            {match:'ugc-repurpose', label:'Repurposed Asset Pack', price:200, desc:'Monthly adaptations into ads/posts/emails'},
-            {match:'ugc-leads', label:'Lead Gen Integration', price:250, desc:'Monthly funnel optimizations'},
-            {match:'ugc-enhance', label:'Content Enhancement', price:150, desc:'Ongoing overlays/CTAs/music'},
-            {match:'ugc-captions', label:'Caption & Description Pack', price:100, desc:'Monthly optimizations for discoverability'},
-            {match:'ugc-brand', label:'Branded Customization Kit', price:150, desc:'Logos/watermarks/end‑slates each month'},
-            {match:'ugc-views-10k', label:'+10k Views (Monthly)', price:150, desc:'Add 10,000 verified views / month'},
-            {match:'ugc-views-20k', label:'+20k Views (Monthly)', price:300, desc:'Add 20,000 verified views / month'},
-            {match:'ugc-views-70k', label:'+70k Views (Monthly)', price:1050, desc:'Add 70,000 verified views / month'}
+
+          ugc: { base: 600, includes: ['Monthly consultation','30k‑view campaigns + monthly report'], addons: [
+            {match:'ugc-repurpose', label:'Ad‑Ready Pack (Monthly)', price:200, desc:'Fresh edits for ads & posts.'},
+            {match:'ugc-leads',     label:'Lead Gen Improvements', price:250, desc:'We keep tuning the funnel.'},
+            {match:'ugc-enhance',   label:'Ongoing Eye‑Candy Edits', price:150, desc:'Overlays, CTAs, and music.'},
+            {match:'ugc-captions',  label:'SEO Captions Monthly', price:100, desc:'Keep discoverability high.'},
+            {match:'ugc-brand',     label:'Branding Pack Monthly', price:150, desc:'Logos/watermarks/end‑slates.'},
+            {match:'ugc-views-10k', label:'+10k Views (Monthly)', price:150, desc:'Add 10k verified views.'},
+            {match:'ugc-views-20k', label:'+20k Views (Monthly)', price:300, desc:'Add 20k verified views.'},
+            {match:'ugc-views-70k', label:'+70k Views (Monthly)', price:1050, desc:'Add 70k verified views.'},
+            // New mapped
+            {match:'ugc-creator-match', label:'Creator Matching', price:100, desc:'We keep your roster sharp.'},
+            {match:'ugc-studio',        label:'Studio Polish', price:150, desc:'Cleaner, tighter clips monthly.'},
+            {match:'ugc-comment',       label:'Comment Reply Pack', price:100, desc:'We prep responses for you.'},
+            {match:'ugc-tracking',      label:'Tracking Upgrade', price:120, desc:'Deeper monthly insights.'}
           ]}
         },
 
@@ -668,6 +725,7 @@
         addonIcon(id){
           const simple = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 7h10v10H7z"/></svg>';
           const map = {
+            // Web
             'web-mvp':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16v12H4z"/><path d="M4 10h16"/></svg>',
             'web-seo':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-3-3"/></svg>',
             'web-auto':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12h16"/><path d="M12 4v16"/></svg>',
@@ -675,16 +733,33 @@
             'web-shop':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 7h12l-1 10H7z"/><path d="M7 7l2-3h6l2 3"/></svg>',
             'web-adv':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12h16"/><path d="M12 4v16"/></svg>',
             'web-dash':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16"/><path d="M4 12h10"/><path d="M4 18h7"/></svg>',
+            'web-copy':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 4h12v16H6z"/><path d="M8 8h8M8 12h6M8 16h7"/></svg>',
+            'web-speed':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 12a9 9 0 10-18 0 9 9 0 0018 0z"/><path d="M12 7v5l3 3"/></svg>',
+            'web-forms':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M7 9h10M7 13h6"/></svg>',
+            'web-analytics-setup':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 18V6"/><path d="M8 18v-6"/><path d="M12 18v-10"/><path d="M16 18v-3"/><path d="M20 18v-8"/></svg>',
+            // Video
             'vid-audio':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 10v4a4 4 0 004 4h8"/><path d="M12 6v7"/></svg>',
             'vid-adv':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="7" width="14" height="10" rx="2"/><path d="M17 12l4-2v4z"/></svg>',
             'vid-drone-p':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M3 12h6M15 12h6M12 3v6M12 15v6"/></svg>',
             'vid-drone-pro':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7h6l3 3 3-3h6M3 17h6l3-3 3 3h6"/></svg>',
             'vid-edit':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 17l6-6 3 3 7-7"/></svg>',
+            'vid-script':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 4h12v16H6z"/><path d="M8 8h8M8 12h7M8 16h6"/></svg>',
+            'vid-color':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8"/></svg>',
+            'vid-square':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>',
+            'vid-thumbs':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 8h10v8H7z"/><path d="M10 8v-2h4v2"/></svg>',
+            'vid-raw':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5v14"/><path d="M5 12h14"/></svg>',
+            // Events
             'ev-ven':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7h18v10H3z"/><path d="M7 7V3M17 7V3"/></svg>',
             'ev-digital':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="6" width="16" height="12" rx="2"/></svg>',
             'ev-media':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 17l4-4 4 4 4-4 4 4"/></svg>',
             'ev-auto':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12h16"/><path d="M12 4v16"/></svg>',
             'ev-hybrid':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="16" r="3"/></svg>',
+            'ev-host':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3"/><path d="M4 20c2-4 14-4 16 0"/></svg>',
+            'ev-runshow':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 4h12v16H6z"/><path d="M8 8h8M8 12h7M8 16h6"/></svg>',
+            'ev-sponsor':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="12" r="3"/><circle cx="16" cy="12" r="3"/></svg>',
+            'ev-security':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l8 4v6a8 8 0 01-16 0V7z"/></svg>',
+            'ev-vip':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 8l5 8 5-8"/></svg>',
+            // UGC
             'ugc-repurpose':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 6v12"/><path d="M6 12h12"/></svg>',
             'ugc-leads':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16v12H4z"/><path d="M8 10h8M8 14h6"/></svg>',
             'ugc-enhance':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2v20"/><path d="M2 12h20"/></svg>',
@@ -692,9 +767,22 @@
             'ugc-brand':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="4"/></svg>',
             'ugc-views-10k':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="6"/><path d="M12 6v12M6 12h12"/></svg>',
             'ugc-views-20k':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16"/></svg>',
-            'ugc-views-70k':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12s4-6 9-6 9 6 9 6-4 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2"/></svg>'
+            'ugc-views-70k':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12s4-6 9-6 9 6 9 6-4 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2"/></svg>',
+            'ugc-creator-match':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="16" r="3"/><path d="M10 10l4 4"/></svg>',
+            'ugc-studio':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>',
+            'ugc-comment':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16v10H7l-3 3z"/></svg>',
+            'ugc-tracking':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 18V6"/><path d="M8 18v-6"/><path d="M12 18v-10"/><path d="M16 18v-3"/><path d="M20 18v-8"/></svg>'
           };
           return map[id] || simple;
+        },
+        addonBadge(id){
+          const b = {
+            'web-seo':'Quick Win','web-auto':'Hands‑off','web-api':'High Impact','web-shop':'Revenue','web-mvp':'Prototype','web-copy':'Done‑for‑you','web-speed':'Speed','web-forms':'Leads','web-analytics-setup':'Insight',
+            'vid-audio':'Accessibility','vid-adv':'Premium','vid-drone-p':'Wow','vid-drone-pro':'Cinematic','vid-edit':'Polish','vid-script':'Plan','vid-color':'Look','vid-square':'Everywhere','vid-thumbs':'Hook','vid-raw':'Archive',
+            'ev-ven':'Stress‑free','ev-digital':'Modern','ev-media':'Content','ev-auto':'Smooth','ev-hybrid':'Reach','ev-host':'Energy','ev-runshow':'Clarity','ev-sponsor':'Revenue','ev-security':'Safety','ev-vip':'White‑glove',
+            'ugc-repurpose':'Ads‑Ready','ugc-leads':'Leads','ugc-enhance':'Engaging','ugc-captions':'Searchable','ugc-brand':'Branded','ugc-views-10k':'+10k','ugc-views-20k':'+20k','ugc-views-70k':'+70k','ugc-creator-match':'Best Fit','ugc-studio':'Pro','ugc-comment':'Engage','ugc-tracking':'Insight'
+          };
+          return b[id] || '';
         },
 
         // PRESET APPLIER
@@ -702,7 +790,6 @@
           const p = this.presets[name]; if(!p) return;
           this.setPlan(p.plan);
           this.activeServices = Object.keys(p.services);
-          // seed selections for each service based on bundle kind
           for(const key of this.activeServices){
             const kind = p.services[key];
             const prev = this.serviceKey; this.serviceKey = key; this.selectBundle(kind); this.serviceKey = prev;
@@ -799,10 +886,38 @@
   const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
   const PRICE_TABLE = {
-    web: { oneTimeBase: 30000, monthlyBase: 50000, addons: { 'web-mvp':{ot:50000,mo:50000}, 'web-seo':{ot:15000,mo:15000}, 'web-auto':{ot:10000,mo:10000}, 'web-api':{ot:25000,mo:25000}, 'web-shop':{ot:30000,mo:30000}, 'web-adv':{ot:null,mo:20000}, 'web-dash':{ot:null,mo:25000} } },
-    video:{ oneTimeBase: 60000, monthlyBase:120000, addons: { 'vid-audio':{ot:20000,mo:25000}, 'vid-adv':{ot:80000,mo:100000}, 'vid-drone-p':{ot:30000,mo:30000}, 'vid-drone-pro':{ot:150000,mo:150000}, 'vid-edit':{ot:30000,mo:50000} } },
-    events:{ oneTimeBase:100000, monthlyBase:120000, addons: { 'ev-ven':{ot:50000,mo:60000}, 'ev-digital':{ot:20000,mo:20000}, 'ev-media':{ot:30000,mo:30000}, 'ev-auto':{ot:15000,mo:15000}, 'ev-hybrid':{ot:40000,mo:40000} } },
-    ugc:  { oneTimeBase: 45000, monthlyBase: 60000, addons: { 'ugc-repurpose':{ot:20000,mo:20000}, 'ugc-leads':{ot:25000,mo:25000}, 'ugc-enhance':{ot:15000,mo:15000}, 'ugc-captions':{ot:10000,mo:10000}, 'ugc-brand':{ot:15000,mo:15000}, 'ugc-views-10k':{ot:15000,mo:15000}, 'ugc-views-20k':{ot:30000,mo:30000}, 'ugc-views-70k':{ot:105000,mo:105000} } }
+    web: {
+      oneTimeBase: 30000, monthlyBase: 50000,
+      addons: {
+        'web-mvp':{ot:50000,mo:50000}, 'web-seo':{ot:15000,mo:15000}, 'web-auto':{ot:10000,mo:10000}, 'web-api':{ot:25000,mo:25000}, 'web-shop':{ot:30000,mo:30000}, 'web-adv':{ot:null,mo:20000}, 'web-dash':{ot:null,mo:25000},
+        // new web
+        'web-copy':{ot:12000,mo:12000}, 'web-speed':{ot:15000,mo:15000}, 'web-forms':{ot:15000,mo:10000}, 'web-analytics-setup':{ot:10000,mo:12000}
+      }
+    },
+    video:{
+      oneTimeBase: 60000, monthlyBase:120000,
+      addons: {
+        'vid-audio':{ot:20000,mo:25000}, 'vid-adv':{ot:80000,mo:100000}, 'vid-drone-p':{ot:30000,mo:30000}, 'vid-drone-pro':{ot:150000,mo:150000}, 'vid-edit':{ot:30000,mo:50000},
+        // new video
+        'vid-script':{ot:15000,mo:15000}, 'vid-color':{ot:15000,mo:15000}, 'vid-square':{ot:12000,mo:12000}, 'vid-thumbs':{ot:10000,mo:10000}, 'vid-raw':{ot:6000,mo:6000}
+      }
+    },
+    events:{
+      oneTimeBase:100000, monthlyBase:120000,
+      addons: {
+        'ev-ven':{ot:50000,mo:60000}, 'ev-digital':{ot:20000,mo:20000}, 'ev-media':{ot:30000,mo:30000}, 'ev-auto':{ot:15000,mo:15000}, 'ev-hybrid':{ot:40000,mo:40000},
+        // new events
+        'ev-host':{ot:25000,mo:25000}, 'ev-runshow':{ot:15000,mo:15000}, 'ev-sponsor':{ot:20000,mo:20000}, 'ev-security':{ot:12000,mo:12000}, 'ev-vip':{ot:20000,mo:20000}
+      }
+    },
+    ugc:  {
+      oneTimeBase: 45000, monthlyBase: 60000,
+      addons: {
+        'ugc-repurpose':{ot:20000,mo:20000}, 'ugc-leads':{ot:25000,mo:25000}, 'ugc-enhance':{ot:15000,mo:15000}, 'ugc-captions':{ot:10000,mo:10000}, 'ugc-brand':{ot:15000,mo:15000}, 'ugc-views-10k':{ot:15000,mo:15000}, 'ugc-views-20k':{ot:30000,mo:30000}, 'ugc-views-70k':{ot:105000,mo:105000},
+        // new ugc
+        'ugc-creator-match':{ot:10000,mo:10000}, 'ugc-studio':{ot:15000,mo:15000}, 'ugc-comment':{ot:10000,mo:10000}, 'ugc-tracking':{ot:12000,mo:12000}
+      }
+    }
   };
 
   module.exports = async (req, res) => {
