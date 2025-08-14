@@ -3,8 +3,31 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>1 Coast Media — Packages & Checkout</title>
-  <meta name="description" content="Premium Web & App, Video/Audio, Events, and UGC services with transparent pricing and smooth checkout." />
+<title>1CoastMedia — Digital • Web • Creative • Events</title>
+<meta name="description" content="1CoastMedia helps Gulf Coast creators and brands with Web & App, Video/Audio, Events, and UGC. Transparent pricing. Fast turnarounds. Results-driven." />
+<link rel="canonical" href="https://1coastmedia.vercel.app/" />
+
+<!-- Favicons / app icons -->
+<link rel="icon" type="image/jpeg" href="/assets/brand/1coastmedia_logo_B_badge_2048.jpg" />
+<link rel="apple-touch-icon" href="/assets/brand/1coastmedia_logo_B_badge_2048.jpg" />
+<meta name="theme-color" content="#0b1220" />
+
+<!-- Open Graph -->
+<meta property="og:site_name" content="1CoastMedia" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://1coastmedia.vercel.app/" />
+<meta property="og:title" content="1CoastMedia — Gulf Coast Digital, Web, Creative & Events" />
+<meta property="og:description" content="Pick a base service, stack add-ons anywhere, or build from scratch. One-time for quick wins, monthly for momentum." />
+<meta property="og:image" content="https://1coastmedia.vercel.app/assets/brand/1coastmedia_wordmark_horizontal_3000.jpg" />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:image:alt" content="1CoastMedia wordmark" />
+
+<!-- Twitter (many SMS apps use this too) -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="1CoastMedia — Gulf Coast Digital, Web, Creative & Events" />
+<meta name="twitter:description" content="Premium Web & App, Video/Audio, Events, and UGC services. Transparent pricing. Fast turnarounds." />
+<meta name="twitter:image" content="https://1coastmedia.vercel.app/assets/brand/1coastmedia_wordmark_horizontal_3000.jpg" />
+
 
   <!-- Where to POST (we'll create/fix in Step 2) -->
   <meta name="checkout-endpoint" content="/api/checkout" />
@@ -66,14 +89,17 @@
   <header class="sticky top-0 z-50 backdrop-blur bg-white/80 border-b border-slate-200/70">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <a href="#top" class="inline-flex items-center gap-2">
-        <span class="inline-grid place-items-center h-9 w-9 rounded-xl bg-white ring-1 ring-slate-200">
-          <!-- clean SVG (no duplicate attributes) -->
-          <svg viewBox="0 0 24 24" class="h-5 w-5 text-slate-700" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-            <path d="M12 2l3 6 6 .9-4.5 4.4 1 6.3L12 17l-5.5 2.6 1-6.3L3 8.9 9 8z"/>
-          </svg>
-        </span>
-        <span class="font-extrabold tracking-tight">1 Coast Media</span>
-      </a>
+  <span class="inline-grid place-items-center h-9 w-9 rounded-xl bg-white ring-1 ring-slate-200 overflow-hidden">
+    <img
+      src="/assets/brand/1coastmedia_logo_A_primary_mark_2048.jpg"
+      alt="1CoastMedia logo"
+      class="h-9 w-9 object-cover"
+      loading="eager"
+      fetchpriority="high"
+    />
+  </span>
+  <span class="font-extrabold tracking-tight">1CoastMedia</span>
+</a>
       <nav class="hidden md:flex items-center gap-6 text-sm">
         <a href="#services" class="hover:text-slate-900 text-slate-600 f-ring">Base Services</a>
         <button @click="openAddons('web')" class="hover:text-slate-900 text-slate-600 f-ring">Explore Add-Ons</button>
