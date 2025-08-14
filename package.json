@@ -1,9 +1,10 @@
 {
-  "name": "1coastmedia-site",
+  "name": "1coastmedia",
   "private": true,
+  "license": "MIT",
   "type": "commonjs",
-  "engines": { "node": ">=18" },
+  "engines": { "node": "18.x" },
   "dependencies": {
-    "stripe": "^16.0.0"
+    "stripe": "^14.0.0"
   }
 }
