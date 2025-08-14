@@ -557,7 +557,7 @@
 
         init(){
           try{
-  const r = await fetch('/api/catalog');
+  const r = await fetch('/api/admin?r=catalog');
   if(r.ok){
     const j = await r.json();
     if(Array.isArray(j.services) && j.services.length){
