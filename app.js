@@ -2,6 +2,16 @@
 // Public catalog (no auth)
 const CATALOG_URL = '/api/admin?r=catalog';
 
+/* ---------- Quote encode/decode (used by Save/Email Quote) ---------- */
+function encodeQuote(obj){
+  try { return btoa(unescape(encodeURIComponent(JSON.stringify(obj)))); }
+  catch { return ''; }
+}
+function decodeQuote(s){
+  try { return JSON.parse(decodeURIComponent(escape(atob(s)))); }
+  catch { return null; }
+}
+
 export function landingApp(){
   return {
     // --- STATE ---
@@ -9,6 +19,7 @@ export function landingApp(){
     plan: 'oneTime',
     addonQuery: '',
     sortBy: 'popular',
+
     // Fallback catalog so the site never renders blank
     services: [
       { key:'web', name:'Web & App', blurb:'Launch a clean, mobile-first site fast.', base:{oneTime:300, monthly:500}, includes:['Kickoff & setup','Landing page (3–5 sections)','Light copy help'], addOns:[
@@ -79,6 +90,7 @@ export function landingApp(){
         { id:'ugc-hooks', label:'A/B Hooks Pack', desc:'5 alt hooks to test.', short:'Test faster', price:{oneTime:140, monthly:140}, badge:'Test' },
       ]},
     ],
+
     addonIndex:{},
     openDescs:{},
     cartServices:[],
@@ -91,7 +103,11 @@ export function landingApp(){
     isSubmitting:false,
     contact:{ name:'', email:'', company:'', phone:'', notes:'' },
 
+    /* ---------- lifecycle ---------- */
     async init(){
+      // expose Alpine instance for global helpers
+      window.App = this;
+
       // Build index from fallback
       this.rebuildIndex();
 
@@ -112,18 +128,25 @@ export function landingApp(){
         console.warn('Catalog fetch error', e);
       }
 
-      // Restore cart
+      // Restore cart from localStorage (legacy key)
       try{
         const saved = JSON.parse(localStorage.getItem('coast_cart')||'{}');
-        if(saved.services) this.cartServices = saved.services;
-        if(saved.addons)   this.cartAddons  = saved.addons;
-        if(saved.plan)     this.plan        = saved.plan;
-        if(saved.contact)  this.contact     = { ...this.contact, ...saved.contact };
+        this.hydrateFromSaved(saved);
       }catch{}
+
+      // If we have a quote param, hydrate from it
+      const q = new URLSearchParams(location.search).get('quote');
+      if (q) {
+        const decoded = decodeQuote(q);
+        if (decoded?.cart) this.hydrateFromSaved(decoded.cart);
+      }
 
       // Sticky CTA
       const onScroll = () => { this.stickyCta = window.scrollY > 640 };
       onScroll(); window.addEventListener('scroll', onScroll);
+
+      // Wire Save / Email Quote buttons (if present in DOM)
+      wireConversionButtons();
     },
 
     rebuildIndex(){
@@ -133,7 +156,7 @@ export function landingApp(){
       }, {});
     },
 
-    // --- COMPUTEDS ---
+    /* ---------- computeds ---------- */
     get total(){
       const baseSum = this.cartServices.reduce((s, key) => s + (this.services.find(x => x.key === key)?.base?.[this.plan] || 0), 0);
       const addonSum = this.cartAddons.reduce((s, id) => s + (this.addonIndex[id]?.price?.[this.plan] || 0), 0);
@@ -150,14 +173,34 @@ export function landingApp(){
       return items;
     },
 
-    // --- HELPERS ---
+    /* ---------- helpers ---------- */
     serviceName(key){ return (this.services.find(s => s.key === key) || {}).name || key; },
     serviceBase(key){ return (this.services.find(s => s.key === key) || {}).base?.[this.plan] || 0; },
     fmtUSD(v){ return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v); },
-    save(){ localStorage.setItem('coast_cart', JSON.stringify({ services:this.cartServices, addons:this.cartAddons, plan:this.plan, contact:this.contact })); },
+    save(){
+      localStorage.setItem('coast_cart', JSON.stringify(this.getCartSnapshot()));
+    },
     emailValid(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e||''); },
 
-    // --- UI actions ---
+    // snapshot of current cart (used by Save/Quote)
+    getCartSnapshot(){
+      return {
+        services: this.cartServices.slice(),
+        addons: this.cartAddons.slice(),
+        plan: this.plan,
+        contact: { ...this.contact }
+      };
+    },
+    // apply saved/quoted cart to UI
+    hydrateFromSaved(saved){
+      if(!saved) return;
+      if(Array.isArray(saved.services)) this.cartServices = [...new Set(saved.services)];
+      if(Array.isArray(saved.addons))   this.cartAddons  = [...new Set(saved.addons)];
+      if(saved.plan && (saved.plan==='oneTime' || saved.plan==='monthly')) this.plan = saved.plan;
+      if(saved.contact) this.contact = { ...this.contact, ...saved.contact };
+    },
+
+    /* ---------- UI actions ---------- */
     setPlan(p){ this.plan = p; this.save(); },
     toggleService(key){ const i=this.cartServices.indexOf(key); if(i>-1) this.cartServices.splice(i,1); else this.cartServices.push(key); this.save(); },
     toggleAddon(id){
@@ -191,7 +234,7 @@ export function landingApp(){
     clearAll(){ this.cartServices = []; this.cartAddons = []; this.save(); },
     flash(text){ this.toast = { text, show:true }; setTimeout(()=> this.toast.show=false, 1400); },
 
-    // --- Checkout ---
+    /* ---------- Checkout ---------- */
     async beginCheckout(){
       try{
         if(this.isSubmitting) return;
@@ -234,6 +277,93 @@ export function landingApp(){
       }
     }
   }
+}
+
+/* ---------- Wire Save Cart + Email Quote buttons (global) ---------- */
+function wireConversionButtons(){
+  // Buttons (if present in DOM)
+  const btnSave   = document.getElementById('btn-save-cart');
+  const btnQuote  = document.getElementById('btn-email-quote');
+  const btnClear2 = document.getElementById('btn-clear-cart-2'); // optional extra clear button
+
+  // Modal elements
+  const modal     = document.getElementById('quote-modal');
+  const closeBtn  = document.getElementById('quote-close');
+  const cancelBtn = document.getElementById('quote-cancel');
+  const sendBtn   = document.getElementById('quote-send');
+  const copyBtn   = document.getElementById('quote-copy');
+  const linkInp   = document.getElementById('quote-link');
+  const emailInp  = document.getElementById('quote-email');
+  const noteInp   = document.getElementById('quote-note');
+
+  const toast = (msg) => window.App?.flash ? window.App.flash(msg) : alert(msg);
+
+  function makeQuoteLink(){
+    const snap = window.App?.getCartSnapshot ? window.App.getCartSnapshot() : { services:[], addons:[], plan:'monthly' };
+    const code = encodeQuote({ v:2, cart: snap, ts: Date.now() });
+    const url = new URL(location.href);
+    url.searchParams.set('quote', code);
+    return url.toString();
+  }
+  function openModal(){
+    if(!modal) return;
+    if(linkInp) linkInp.value = makeQuoteLink();
+    modal.classList.remove('hidden');
+    setTimeout(()=> emailInp?.focus(), 0);
+  }
+  function closeModal(){
+    modal?.classList.add('hidden');
+  }
+
+  btnSave?.addEventListener('click', () => {
+    try {
+      // ensure the latest state is persisted to localStorage
+      const snap = window.App?.getCartSnapshot ? window.App.getCartSnapshot() : null;
+      if (snap) localStorage.setItem('coast_cart', JSON.stringify(snap));
+      toast('Cart saved');
+    } catch { toast('Could not save'); }
+  });
+
+  btnQuote?.addEventListener('click', openModal);
+  closeBtn?.addEventListener('click', closeModal);
+  cancelBtn?.addEventListener('click', closeModal);
+
+  copyBtn?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(linkInp.value);
+      toast('Link copied');
+    } catch { toast('Copy failed'); }
+  });
+
+  sendBtn?.addEventListener('click', () => {
+    const email = (emailInp?.value || '').trim();
+    const link  = linkInp?.value || makeQuoteLink();
+    const note  = (noteInp?.value || '').trim();
+
+    const subject = encodeURIComponent('1CoastMedia — Your Quote');
+    const body = encodeURIComponent(
+`Here’s your quote link:
+
+${link}
+
+${note ? `Note: ${note}\n\n` : ''}You can reopen this anytime. When you’re ready, click "Review & Checkout".`
+    );
+
+    const href = `mailto:${encodeURIComponent(email)}?subject=${subject}&body=${body}`;
+    window.location.href = href;
+
+    // Non-blocking: record a light lead
+    fetch('/api/forms/leads', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ email, message:'Requested quote email', meta:{ link, note } })
+    }).catch(()=>{});
+
+    closeModal();
+  });
+
+  // optional: extra clear button near checkout bar
+  btnClear2?.addEventListener('click', () => window.App?.clearAll && window.App.clearAll());
 }
 
 // Expose to Alpine
