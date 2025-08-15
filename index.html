@@ -38,7 +38,7 @@
   <!-- Stripe publishable key (client fallback) -->
   <meta name="stripe-publishable-key" content="pk_live_51O4Qh0KoF1Q8iKteAbGsSkEj65fg0tSGOG6dcJCcLyvz0PHC5y8jEAkMDfDFfCTdEeRyPcOtZ7O13MBNZkDhBMR900NqzTN4LN" />
 
-  <!-- TEMP: Tailwind CDN (swap to build later) -->
+  <!-- Tailwind (CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>tailwind.config = { theme:{ extend:{} } };</script>
 
@@ -47,6 +47,10 @@
 
   <!-- Stripe.js (for sessionId fallback) -->
   <script src="https://js.stripe.com/v3/"></script>
+
+  <!-- PDF & DOCX generators -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script defer src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
 
   <style>
     :root{--ink:#0b1220;--indigo:#4f46e5;--cyan:#06b6d4;--emerald:#10b981}
@@ -139,7 +143,6 @@
       </div>
     </div>
 
-    <!-- Wordmark in hero -->
     <img
       src="/assets/1coastmedia_wordmark_horizontal_3000.jpg"
       alt="1CoastMedia wordmark"
@@ -147,7 +150,6 @@
       width="3000" height="512"
     />
 
-    <!-- trust strip -->
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-6">
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 opacity-80">
         <div class="card p-3 text-center text-xs">Tourism & Events</div>
@@ -220,8 +222,8 @@
         <div class="flex gap-2 flex-wrap justify-end">
           <button @click="openAddons(activeService)" class="tap rounded-xl ring-1 ring-slate-200 bg-white px-4 py-2 text-sm font-semibold f-ring">Add-Ons</button>
 
-          <!-- NEW: Save, Email, Clear, Review -->
-          <button @click="saveCart()" class="rounded-xl ring-1 ring-slate-200 bg-white text-slate-700 px-4 py-2 text-sm f-ring">Save Cart</button>
+          <!-- New actions -->
+          <button @click="downloadQuoteFile()" class="rounded-xl ring-1 ring-slate-200 bg-white text-slate-700 px-4 py-2 text-sm f-ring">Save Quote</button>
           <button @click="openQuote()" class="rounded-xl ring-1 ring-slate-200 bg-white text-slate-700 px-4 py-2 text-sm f-ring">Email Quote</button>
 
           <button @click="clearAll()"
@@ -238,15 +240,12 @@
 
   <!-- Explore Add-Ons -->
   <div x-show="addonsOpen" x-transition.opacity class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
-    <!-- Backdrop -->
     <button @click="addonsOpen=false" class="absolute inset-0 bg-slate-900/50" aria-label="Close overlay"></button>
 
-    <!-- Modal -->
     <section
       class="relative w-full sm:max-w-6xl rounded-2xl bg-white text-slate-900 shadow-2xl ring-1 ring-slate-200 flex flex-col modal-shell overflow-hidden"
       role="dialog" aria-modal="true" aria-labelledby="addonsTitle"
     >
-      <!-- Header (non-scrolling) -->
       <div class="p-5 border-b border-slate-200 flex items-center justify-between shrink-0">
         <h3 id="addonsTitle" class="text-lg font-bold">Explore Add-Ons</h3>
         <button @click="addonsOpen=false" class="h-9 w-9 grid place-items-center rounded-md hover:bg-slate-50 f-ring" aria-label="Close">
@@ -254,9 +253,7 @@
         </button>
       </div>
 
-      <!-- Scrollable content area -->
       <div class="p-5 grid lg:grid-cols-4 gap-4 flex-1 overflow-y-auto scroll-touch touch-pan-y">
-        <!-- Filters -->
         <aside class="lg:col-span-1 space-y-3">
           <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-3">
             <label class="text-xs text-slate-500">Service</label>
@@ -286,7 +283,6 @@
           </div>
         </aside>
 
-        <!-- Add-on list -->
         <div class="lg:col-span-3">
           <div class="flex items-center justify-between gap-2 flex-wrap">
             <div class="text-sm text-slate-600">Selected add-ons: <strong x-text="cartAddons.length"></strong></div>
@@ -412,7 +408,6 @@
             </div>
           </div>
 
-          <!-- Contact block -->
           <div class="mt-5 grid md:grid-cols-5 gap-3">
             <div class="md:col-span-2">
               <label class="text-xs text-slate-500" for="c-name">Name</label>
@@ -573,6 +568,7 @@
         quoteEmail:'',
         quoteNote:'',
         quoteLink:'',
+        quoteFormat:'pdf', // 'pdf' | 'docx'
 
         // --- INIT ---
         async init(){
@@ -602,6 +598,10 @@
 
           // Load shared quote from URL ?share=
           this.tryLoadShared();
+
+          // Prefill quote modal bits
+          this.quoteEmail = this.contact.email || '';
+          this.quoteLink = this.buildShareLink();
 
           // Sticky CTA
           const onScroll = () => { this.stickyCta = window.scrollY > 640 };
@@ -691,12 +691,16 @@
         openBuilder(){ this.builderOpen = true; },
         clearAll(){ this.cartServices = []; this.cartAddons = []; this.save(); this.flash('Cleared cart'); },
 
-        // --- Save Cart (download .json) ---
-        saveCart(){
-          const payload = {
+        // ---------- QUOTE: data builders ----------
+        buildQuotePayload(){
+          return {
             generatedAt: new Date().toISOString(),
             plan: this.plan,
-            services: this.cartServices.map(k => ({ key:k, name:this.serviceName(k), price:this.serviceBase(k) })),
+            services: this.cartServices.map(k => ({
+              key: k,
+              name: this.serviceName(k),
+              price: this.serviceBase(k)
+            })),
             addons: this.cartAddons.map(id => ({
               id,
               label: this.addonIndex[id]?.label,
@@ -704,27 +708,54 @@
               serviceName: this.serviceName(this.addonIndex[id]?.service),
               price: this.addonIndex[id]?.price?.[this.plan] || 0
             })),
-            total: this.total
+            total: this.total,
+            contact: { name: this.contact.name, email: this.contact.email }
           };
-          const blob = new Blob([JSON.stringify(payload,null,2)], { type:'application/json' });
-          const stamp = new Date().toISOString().replace(/[-:T]/g,'').slice(0,12);
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(blob);
-          a.download = `1coast-quote-${stamp}.json`;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          URL.revokeObjectURL(a.href);
-          this.flash('Saved cart file');
+        },
+        buildQuoteHTML(){
+          const payload = this.buildQuotePayload();
+          const fmt = n => this.fmtUSD(n);
+          const planLabel = this.plan === 'monthly' ? 'Monthly' : 'One-time';
+          const itemsBases = payload.services.map(s =>
+            `<tr><td>${s.name}</td><td style="text-align:right">${fmt(s.price)}</td></tr>`
+          ).join('');
+          const itemsAddons = payload.addons.map(a =>
+            `<tr><td>${a.label} — <span style="color:#64748b">${a.serviceName}</span></td><td style="text-align:right">${fmt(a.price)}</td></tr>`
+          ).join('');
+
+          return `
+          <div style="font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; color:#0f172a; max-width:720px; margin:auto">
+            <h1 style="font-size:20px; font-weight:800; margin:0 0 8px">1CoastMedia — Quote</h1>
+            <div style="font-size:12px; color:#64748b; margin-bottom:12px">
+              Generated: ${new Date(payload.generatedAt).toLocaleString()} • Plan: ${planLabel}
+            </div>
+
+            <h2 style="font-size:15px; font-weight:700; margin:16px 0 6px">Base Services</h2>
+            <table style="width:100%; border-collapse:collapse; font-size:13px">
+              <tbody>${itemsBases || `<tr><td style="color:#64748b">None selected</td><td></td></tr>`}</tbody>
+            </table>
+
+            <h2 style="font-size:15px; font-weight:700; margin:16px 0 6px">Add-ons</h2>
+            <table style="width:100%; border-collapse:collapse; font-size:13px">
+              <tbody>${itemsAddons || `<tr><td style="color:#64748b">None selected</td><td></td></tr>`}</tbody>
+            </table>
+
+            <hr style="border:none; border-top:1px solid #e2e8f0; margin:16px 0" />
+
+            <div style="display:flex; justify-content:space-between; font-size:14px; font-weight:800">
+              <div>Estimated total ${this.plan==='monthly' ? '(per month)' : ''}</div>
+              <div>${fmt(payload.total)}</div>
+            </div>
+
+            ${this.quoteNote ? `<div style="margin-top:12px; font-size:12px"><b>Note:</b> ${this.quoteNote}</div>` : ''}
+
+            <div style="margin-top:14px; font-size:11px; color:#64748b">
+              This quote is a non-binding estimate. Final scope and timeline will be confirmed on kickoff.
+            </div>
+          </div>`;
         },
 
-        // --- Email Quote (modal + share link) ---
-        openQuote(){
-          this.quoteEmail = this.contact.email || '';
-          this.quoteNote = '';
-          this.quoteLink = this.buildShareLink();
-          this.quoteOpen = true;
-        },
+        // ---------- QUOTE: share link & modal controls ----------
         buildShareLink(){
           const state = {
             v:1,
@@ -734,9 +765,9 @@
             c:{ name:this.contact.name, email:this.contact.email }
           };
           const json = JSON.stringify(state);
-          const b64 = btoa(unescape(encodeURIComponent(json)))   // base64url
+          const b64 = btoa(unescape(encodeURIComponent(json)))
                         .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-          const url = new URL(window.location.href);
+          const url = new URL(window.location.origin + window.location.pathname);
           url.searchParams.set('share', b64);
           return url.toString();
         },
@@ -747,12 +778,117 @@
             () => this.flash('Copy failed')
           );
         },
-        sendQuoteEmail(){
+        openQuote(){
+          this.quoteEmail = this.contact.email || '';
+          this.quoteNote = '';
+          this.quoteLink = this.buildShareLink();
+          this.quoteFormat = this.quoteFormat || 'pdf';
+          this.quoteOpen = true;
+        },
+
+        // ---------- QUOTE: file generation ----------
+        async downloadQuoteFile(){
+          const stamp = new Date().toISOString().replace(/[-:T]/g,'').slice(0,14);
+          const filenameBase = `1coast-quote-${stamp}`;
+          if(this.quoteFormat === 'docx'){
+            await this.generateDocx(`${filenameBase}.docx`);
+          }else{
+            await this.generatePDF(`${filenameBase}.pdf`);
+          }
+          this.flash(`Saved ${this.quoteFormat.toUpperCase()} quote`);
+        },
+        async generatePDF(filename='quote.pdf'){
+          const src = document.createElement('div');
+          src.innerHTML = this.buildQuoteHTML();
+          document.body.appendChild(src);
+          const opt = {
+            margin:       10,
+            filename,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+          };
+          try{
+            await html2pdf().from(src).set(opt).save();
+          }finally{
+            src.remove();
+          }
+        },
+        async generateDocx(filename='quote.docx'){
+          const d = window.docx;
+          if(!d){ console.warn('docx library missing'); return; }
+          const payload = this.buildQuotePayload();
+          const planLabel = this.plan === 'monthly' ? 'Monthly' : 'One-time';
+          const fmt = n => this.fmtUSD(n);
+
+          const paras = [];
+          paras.push(new d.Paragraph({ text:'1CoastMedia — Quote', heading:d.HeadingLevel.HEADING_1 }));
+          paras.push(new d.Paragraph({ text:`Generated: ${new Date(payload.generatedAt).toLocaleString()} • Plan: ${planLabel}` }));
+          paras.push(new d.Paragraph({ text:'' }));
+
+          paras.push(new d.Paragraph({ text:'Base Services', heading:d.HeadingLevel.HEADING_2 }));
+          if(payload.services.length === 0){
+            paras.push(new d.Paragraph({ text:'None selected', italics:true }));
+          }else{
+            payload.services.forEach(s =>
+              paras.push(new d.Paragraph({ children:[
+                new d.TextRun({ text:`• ${s.name}`, bold:true }),
+                new d.TextRun({ text:` — ${fmt(s.price)}` })
+              ]}))
+            );
+          }
+          paras.push(new d.Paragraph({ text:'' }));
+
+          paras.push(new d.Paragraph({ text:'Add-ons', heading:d.HeadingLevel.HEADING_2 }));
+          if(payload.addons.length === 0){
+            paras.push(new d.Paragraph({ text:'None selected', italics:true }));
+          }else{
+            payload.addons.forEach(a =>
+              paras.push(new d.Paragraph({ children:[
+                new d.TextRun({ text:`• ${a.label}`, bold:true }),
+                new d.TextRun({ text:` — ${a.serviceName} — ${fmt(a.price)}` })
+              ]}))
+            );
+          }
+          paras.push(new d.Paragraph({ text:'' }));
+
+          paras.push(new d.Paragraph({ children:[
+            new d.TextRun({ text:`Estimated total ${this.plan==='monthly' ? '(per month)' : ''}: `, bold:true }),
+            new d.TextRun({ text:fmt(payload.total), bold:true })
+          ]}));
+
+          if(this.quoteNote){
+            paras.push(new d.Paragraph({ text:'' }));
+            paras.push(new d.Paragraph({ children:[
+              new d.TextRun({ text:'Note: ', bold:true }),
+              new d.TextRun({ text:this.quoteNote })
+            ]}));
+          }
+
+          paras.push(new d.Paragraph({ text:'' }));
+          paras.push(new d.Paragraph({ children:[
+            new d.TextRun({ text:'This quote is a non-binding estimate. Final scope and timeline will be confirmed on kickoff.', italics:true, size:20, color:'6b7280' })
+          ]}));
+
+          const doc = new d.Document({ sections:[{ properties:{}, children: paras }] });
+          const blob = await d.Packer.toBlob(doc);
+
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(a.href);
+        },
+
+        // ---------- QUOTE: email ----------
+        handleOpenEmailDraft(){
           if(!this.emailValid(this.quoteEmail)){ this.flash('Enter a valid email'); return; }
-          const subj = `Your 1CoastMedia quote — ${this.plan==='monthly'?'monthly plan':'one-time'}`;
-          const body = [
-            `Here’s your saved quote link:`,
-            this.quoteLink,
+
+          const lines = [
+            `Here’s your saved 1CoastMedia quote link:`,
+            this.quoteLink || this.buildShareLink(),
             ``,
             `Summary:`,
             ...this.cartServices.map(k => `• ${this.serviceName(k)} — ${this.fmtUSD(this.serviceBase(k))}`),
@@ -760,12 +896,24 @@
             ``,
             `Estimated total ${this.plan==='monthly'?'(per month)':''}: ${this.fmtUSD(this.total)}`,
             this.quoteNote ? `\nNote: ${this.quoteNote}` : ''
-          ].join('\n');
-          const href = `mailto:${encodeURIComponent(this.quoteEmail)}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`;
-          window.location.href = href;
+          ];
+          const subj = `Your 1CoastMedia quote — ${this.plan==='monthly'?'monthly plan':'one-time'}`;
+          const href = `mailto:${encodeURIComponent(this.quoteEmail)}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(lines.join('\n'))}`;
+
+          // Trigger mail app, then auto-download selected format
+          const a = document.createElement('a');
+          a.href = href;
+          a.style.display = 'none';
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => a.remove(), 0);
+
+          setTimeout(() => this.downloadQuoteFile(), 350);
+
           this.flash('Opening your email app…');
           this.quoteOpen = false;
         },
+
         tryLoadShared(){
           const sp = new URLSearchParams(window.location.search);
           const token = sp.get('share');
@@ -834,54 +982,66 @@
     }
   </script>
 
-  <!-- Quote Modal (Alpine-driven) -->
-  <div x-show="quoteOpen" x-transition.opacity class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+  <!-- Quote Modal (PDF / DOCX + Email) -->
+  <div x-show="quoteOpen" x-transition.opacity class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4">
     <!-- backdrop -->
     <button @click="quoteOpen=false" class="absolute inset-0 bg-slate-900/60" aria-label="Close"></button>
 
     <!-- panel -->
-    <div @keydown.escape.window="quoteOpen=false"
-         class="relative mx-auto w-[min(720px,92vw)] rounded-2xl bg-white shadow-xl ring-1 ring-slate-200">
+    <section class="relative mx-auto w-[min(720px,92vw)] rounded-2xl bg-white shadow-xl ring-1 ring-slate-200 modal-shell overflow-hidden flex flex-col">
       <div class="flex items-center justify-between px-5 py-4 border-b">
-        <h3 class="text-lg font-semibold">Email this quote to yourself</h3>
+        <h3 class="text-lg font-semibold">Send or Save Your Quote</h3>
         <button @click="quoteOpen=false" class="h-9 w-9 grid place-items-center rounded hover:bg-slate-100">✕</button>
       </div>
 
-      <div class="px-5 pt-4 pb-5 space-y-4 max-h-[70vh] overflow-auto">
+      <div class="px-5 pt-4 pb-5 space-y-4 overflow-y-auto scroll-touch touch-pan-y">
         <p class="text-sm text-slate-600">
-          We’ll generate a private link to your cart and open your email app with a pre-filled draft.
+          We’ll create a <b>PDF or Word (.docx)</b> with your selections. You can also email yourself a private link to revisit this quote later.
         </p>
 
-        <div>
-          <label class="block text-xs text-slate-500 mb-1">Your email</label>
-          <input x-model.trim="quoteEmail" type="email" placeholder="you@example.com"
-                 class="w-full rounded-lg border border-slate-200 px-3 py-2">
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">Your email</label>
+            <input type="email" x-model.trim="quoteEmail" placeholder="you@example.com"
+                   class="w-full rounded-lg border border-slate-200 px-3 py-2">
+            <p class="text-[11px] text-slate-500 mt-1">Used for the email draft only.</p>
+          </div>
+
+          <div>
+            <label class="block text-xs text-slate-500 mb-1">File format</label>
+            <div class="flex items-center gap-4 mt-1">
+              <label class="inline-flex items-center gap-2 text-sm">
+                <input type="radio" x-model="quoteFormat" value="pdf"> PDF
+              </label>
+              <label class="inline-flex items-center gap-2 text-sm">
+                <input type="radio" x-model="quoteFormat" value="docx"> Word (.docx)
+              </label>
+            </div>
+          </div>
         </div>
 
         <div>
           <label class="block text-xs text-slate-500 mb-1">Optional note</label>
-          <textarea x-model.trim="quoteNote" rows="3" placeholder="Anything you want to remember…"
+          <textarea rows="3" x-model.trim="quoteNote" placeholder="Anything you want to remember…"
                     class="w-full rounded-lg border border-slate-200 px-3 py-2"></textarea>
         </div>
 
         <div>
           <label class="block text-xs text-slate-500 mb-1">Shareable quote link</label>
           <div class="flex gap-2">
-            <input :value="quoteLink" readonly
-                   class="flex-1 rounded-lg border border-slate-200 px-3 py-2 bg-slate-50">
-            <button @click="copyQuoteLink()"
-                    class="rounded-lg px-3 py-2 ring-1 ring-slate-200 bg-white text-sm">Copy</button>
+            <input readonly :value="quoteLink" class="flex-1 rounded-lg border border-slate-200 px-3 py-2 bg-slate-50">
+            <button @click="copyQuoteLink()" class="rounded-lg px-3 py-2 ring-1 ring-slate-200 bg-white text-sm">Copy</button>
           </div>
-          <p class="text-[11px] text-slate-500 mt-1">Anyone with this link can see your selections (no personal info).</p>
+          <p class="text-[11px] text-slate-500 mt-1">Anyone with this link can view your selections (no personal info).</p>
         </div>
       </div>
 
-      <div class="px-5 py-4 border-t flex justify-end gap-2">
+      <div class="px-5 py-4 border-t flex flex-wrap justify-end gap-2">
         <button @click="quoteOpen=false" class="rounded-lg px-3 py-2 ring-1 ring-slate-200 bg-white">Cancel</button>
-        <button @click="sendQuoteEmail()"
-                class="rounded-lg px-4 py-2 bg-indigo-600 text-white font-medium">Open Email Draft</button>
+        <button @click="downloadQuoteFile()" class="rounded-lg px-3 py-2 ring-1 ring-slate-200 bg-white">Save {{ quoteFormat.toUpperCase() }}</button>
+        <button @click="handleOpenEmailDraft()" class="rounded-lg px-4 py-2 bg-indigo-600 text-white font-medium">Open Email Draft</button>
       </div>
-    </div>
+    </section>
   </div>
 </body>
 </html>
