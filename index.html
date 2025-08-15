@@ -563,27 +563,48 @@
 
       // --- INIT ---
       async init(){
-        // Build the addon index from fallback
+  // 1) Start with your hard-coded fallback (already on this.services)
+  this.rebuildIndex();
+
+  // 2) Try to hydrate from DB
+  try {
+    const r = await fetch('/api/admin?r=catalog', { cache: 'no-store' });
+    if (r.ok) {
+      const j = await r.json();
+      if (Array.isArray(j.services) && j.services.length > 0) {
+        this.services = j.services;
+
+        // IMPORTANT: pick a valid active service from the DB
+        this.activeService = this.services[0]?.key || this.activeService;
+
+        // Rebuild indexes now that services changed
         this.rebuildIndex();
 
-        // Try to hydrate from DB (won't overwrite if API is empty/broken)
-        try {
-          const r = await fetch(CATALOG_URL, { cache:'no-store' });
-          if (r.ok) {
-            const j = await r.json();
-            if (Array.isArray(j.services) && j.services.length) {
-              this.services = j.services;
-              this.rebuildIndex();
-              console.info('Catalog: using DB data ('+j.services.length+' services).');
-            } else {
-              console.info('Catalog API empty; using fallback.');
-            }
-          } else {
-            console.warn('Catalog request failed ('+r.status+'); using fallback.');
-          }
-        } catch (e) {
-          console.warn('Catalog fetch error; using fallback.', e);
-        }
+        console.info('Catalog loaded from DB:', this.services.length, 'services');
+      } else {
+        console.info('Catalog API returned empty; keeping fallback.');
+      }
+    } else {
+      console.warn('Catalog fetch failed', r.status, '— keeping fallback.');
+    }
+  } catch (e) {
+    console.warn('Catalog fetch error — keeping fallback.', e);
+  }
+
+  // 3) Restore cart/contact
+  try{
+    const saved = JSON.parse(localStorage.getItem('coast_cart')||'{}');
+    if(saved.services) this.cartServices = saved.services;
+    if(saved.addons)   this.cartAddons  = saved.addons;
+    if(saved.plan)     this.plan        = saved.plan;
+    if(saved.contact)  this.contact     = { ...this.contact, ...saved.contact };
+  }catch{}
+
+  // 4) Sticky CTA
+  const onScroll = () => { this.stickyCta = window.scrollY > 640 };
+  onScroll(); window.addEventListener('scroll', onScroll);
+},
+
 
         // Restore cart
         try{
