@@ -223,30 +223,35 @@
       </div>
 
       <!-- Reorder services -->
-      <section>
-        <div class="flex items-center justify-between mb-2">
-          <div>
-            <h3 class="text-lg font-semibold">Reorder Base Services (drag & drop)</h3>
-            <p class="text-xs text-slate-500">This controls the tile order on the homepage.</p>
-          </div>
-          <div class="flex gap-2">
-            <button id="refreshOrderBtn"
-                    class="rounded-lg ring-1 ring-slate-200 bg-white px-3 py-2 text-sm"
-                    @click="loadCatalog()">Reload</button>
-            <button id="saveOrderBtn"
-                    class="rounded-lg bg-indigo-600 text-white px-4 py-2 font-semibold disabled:opacity-50"
-                    :disabled="!dirtyOrder"
-                    @click="saveCatalog()"
-                    x-text="dirtyOrder ? 'Save Order' : 'Saved'"></button>
-          </div>
-        </div>
+<section class="mt-8">
+  <div class="flex items-center justify-between mb-2">
+    <div>
+      <h3 class="text-lg font-semibold">Reorder Base Services (drag & drop)</h3>
+      <p class="text-xs text-slate-500">This controls the tile order on the homepage.</p>
+    </div>
+    <div class="flex gap-2">
+      <button id="refreshOrderBtn"
+              class="rounded-lg ring-1 ring-slate-200 bg-white px-3 py-2 text-sm">
+        Reload
+      </button>
+      <button id="saveOrderBtn"
+              class="rounded-lg bg-indigo-600 text-white px-4 py-2 font-semibold disabled:opacity-50"
+              disabled>
+        Saved
+      </button>
+    </div>
+  </div>
 
-        <!-- Scrollable container for long lists -->
-        <div id="orderScroll" class="max-h-[70vh] overflow-y-auto overscroll-contain pr-1">
-          <ul id="orderList" class="grid gap-2"></ul>
-        </div>
-      </section>
-    </section>
+  <!-- Scrollable container for long lists -->
+  <div id="orderScroll" class="max-h-[70vh] overflow-y-auto overscroll-contain pr-1">
+    <ul id="orderList" class="grid gap-2"></ul>
+  </div>
+
+  <p class="mt-2 text-xs text-slate-500">
+    Tip: Drag with the dotted handle or use the ↑ / ↓ buttons on each row.
+  </p>
+</section>
+
 
     <!-- CUSTOMERS -->
     <section x-show="tab==='customers'" x-transition>
@@ -721,5 +726,159 @@ function adminApp(){
   }
 }
 </script>
+  <script>
+(() => {
+  const listEl    = document.getElementById('orderList');
+  const scrollEl  = document.getElementById('orderScroll');
+  const saveBtn   = document.getElementById('saveOrderBtn');
+  const refreshBtn= document.getElementById('refreshOrderBtn');
+
+  if (!listEl || !scrollEl || !saveBtn || !refreshBtn) return;
+
+  // Local working copy in the PUBLIC "catalog" shape (key, name, blurb, base{oneTime,monthly}…)
+  let services = [];
+  let sortableMounted = false;
+
+  const gripSvg = `
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <circle cx="6"  cy="7"  r="1.5"></circle><circle cx="12" cy="7"  r="1.5"></circle><circle cx="18" cy="7"  r="1.5"></circle>
+      <circle cx="6"  cy="12" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="18" cy="12" r="1.5"></circle>
+      <circle cx="6"  cy="17" r="1.5"></circle><circle cx="12" cy="17" r="1.5"></circle><circle cx="18" cy="17" r="1.5"></circle>
+    </svg>`;
+
+  function esc(s){return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;");}
+
+  function setDirty(isDirty){
+    saveBtn.disabled = !isDirty;
+    saveBtn.textContent = isDirty ? 'Save Order' : 'Saved';
+  }
+
+  function render(){
+    listEl.innerHTML = '';
+    for (const s of services){
+      const li = document.createElement('li');
+      li.dataset.key = s.key;
+      li.className = 'group flex items-center gap-3 px-3 py-2 rounded-xl ring-1 ring-slate-200 bg-white hover:bg-slate-50';
+      li.innerHTML = `
+        <button type="button"
+                class="drag-handle h-10 w-10 grid place-items-center rounded-lg bg-slate-100 ring-1 ring-slate-200 text-slate-600"
+                aria-label="Drag to reorder">
+          ${gripSvg}
+        </button>
+        <div class="item-body flex-1 min-w-0 select-none">
+          <div class="font-medium truncate">${esc(s.name||'Untitled')}</div>
+          <div class="text-xs text-slate-500 truncate">${esc(s.blurb||'')}</div>
+        </div>
+        <div class="text-sm font-semibold text-slate-700 shrink-0">$${(s.base?.oneTime ?? 0)}</div>
+        <div class="flex gap-1 ml-2">
+          <button type="button" class="js-up rounded-md px-2 py-1 ring-1 ring-slate-200 text-xs" title="Move up">↑</button>
+          <button type="button" class="js-down rounded-md px-2 py-1 ring-1 ring-slate-200 text-xs" title="Move down">↓</button>
+        </div>
+      `;
+      listEl.appendChild(li);
+    }
+  }
+
+  function keysFromDOM(){
+    return Array.from(listEl.children).map(el => el.dataset.key);
+  }
+
+  function bumpByKey(key, delta){
+    const i = services.findIndex(x => x.key === key);
+    const j = i + delta;
+    if (i < 0 || j < 0 || j >= services.length) return false;
+    const [item] = services.splice(i,1);
+    services.splice(j,0,item);
+    return true;
+  }
+
+  function mountSortable(){
+    if (sortableMounted || !window.Sortable) return;
+    Sortable.create(listEl, {
+      handle: '.drag-handle, .item-body',   // bigger hit area
+      animation: 180,
+      easing: 'cubic-bezier(.2,.7,.3,1)',
+      ghostClass: 'drag-ghost',
+      dragClass: 'drag-dragging',
+      scroll: true,
+      scrollSensitivity: 80,
+      scrollSpeed: 14,
+      bubbleScroll: true,
+      onEnd() {
+        const order = keysFromDOM();
+        services.sort((a,b)=> order.indexOf(a.key) - order.indexOf(b.key));
+        setDirty(true);
+      }
+    });
+    sortableMounted = true;
+  }
+
+  // Arrow buttons via event delegation (works after re-render)
+  listEl.addEventListener('click', (e) => {
+    const up = e.target.closest('.js-up');
+    const down = e.target.closest('.js-down');
+    if (!up && !down) return;
+    const li = e.target.closest('li');
+    const key = li?.dataset?.key;
+    if (!key) return;
+
+    const moved = bumpByKey(key, up ? -1 : +1);
+    if (!moved) return;
+
+    render();
+    setDirty(true);
+
+    // keep the moved item in view & focus the same button
+    const selector = up ? '.js-up' : '.js-down';
+    const newLi = Array.from(listEl.children).find(el => el.dataset.key === key);
+    newLi?.querySelector(selector)?.focus();
+    newLi?.scrollIntoView({ block: 'nearest' });
+  });
+
+  async function loadCatalog(){
+    const r = await fetch('/api/admin?r=catalog', { cache:'no-store' });
+    if (!r.ok) throw new Error('Failed to load catalog');
+    const j = await r.json();
+    services = Array.isArray(j.services) ? j.services.slice() : [];
+    render();
+    mountSortable();
+    setDirty(false);
+  }
+
+  async function saveOrder(){
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving…';
+    try{
+      // sanitize (no dups / empties)
+      const seen = new Set();
+      services = services.filter(s => s?.key && !seen.has(s.key) && seen.add(s.key));
+
+      const res = await fetch('/api/admin?r=save-catalog', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ services })
+      });
+      const j = await res.json().catch(()=> ({}));
+      if (!res.ok) throw new Error(j?.error || 'Save failed');
+
+      setDirty(false);
+    }catch(e){
+      console.error(e);
+      alert(e.message || 'Save failed');
+      setDirty(true);
+    }finally{
+      if (saveBtn.disabled) { saveBtn.disabled = false; }
+      if (saveBtn.textContent !== 'Saved') { saveBtn.textContent = 'Save Order'; }
+    }
+  }
+
+  refreshBtn.addEventListener('click', () => loadCatalog().catch(err => alert(err.message||'Reload failed')) );
+  saveBtn.addEventListener('click', saveOrder);
+
+  // Initial boot
+  loadCatalog().catch(err => console.error(err));
+})();
+</script>
+
 </body>
 </html>
