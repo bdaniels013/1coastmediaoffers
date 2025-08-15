@@ -1,88 +1,111 @@
+// api/stripe/checkout.js
 import Stripe from 'stripe';
-import { sql } from '@vercel/postgres';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: '2023-10-16',
+});
+
+function toCents(n) {
+  const v = Number(n || 0);
+  return Math.round(v * 100);
+}
 
 export default async function handler(req, res) {
   try {
-    if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+    if (req.method !== 'POST') {
+      res.setHeader('Allow', 'POST');
+      return res.status(405).json({ error: 'Method Not Allowed' });
+    }
+
     const { plan, cart, contact } = req.body || {};
-    if (!Array.isArray(cart) || cart.length === 0) return res.status(400).json({ error: 'Cart empty' });
 
-    // Provisional order (we finalize on webhook)
-    const totalCents = cart.reduce((sum, item) => {
-      const base = Math.round((item.base || 0) * 100);
-      const addons = (item.addons || []).reduce((a, x) => a + Math.round((x.price || 0) * 100), 0);
-      return sum + base + addons;
-    }, 0);
+    // Basic validation
+    if (!plan || !Array.isArray(cart) || cart.length === 0) {
+      return res.status(400).json({ error: 'Invalid cart or plan' });
+    }
 
-    const { rows: customerRows } = await sql`
-      INSERT INTO customers (name, email, phone, company, notes)
-      VALUES (${contact?.name || null}, ${contact?.email || null}, ${contact?.phone || null}, ${contact?.company || null}, ${contact?.notes || null})
-      ON CONFLICT (email) DO UPDATE SET
-        name = COALESCE(EXCLUDED.name, customers.name),
-        phone = COALESCE(EXCLUDED.phone, customers.phone),
-        company = COALESCE(EXCLUDED.company, customers.company),
-        notes = COALESCE(EXCLUDED.notes, customers.notes)
-      RETURNING *;
-    `;
-    const customer = customerRows[0];
+    // Derive mode from plan
+    const mode = plan === 'monthly' ? 'subscription' : 'payment';
 
-    const { rows: orderRows } = await sql`
-      INSERT INTO orders (plan, status, currency, total_cents, customer_id, contact_name, contact_email, contact_phone, contact_company, notes)
-      VALUES (${plan}, 'created', 'usd', ${totalCents}, ${customer.id}, ${contact?.name || null}, ${contact?.email || null}, ${contact?.phone || null}, ${contact?.company || null}, ${contact?.notes || null})
-      RETURNING *;
-    `;
-    const order = orderRows[0];
-
-    // Record event
-    await sql`INSERT INTO events (type, data) VALUES ('checkout_start', ${JSON.stringify({ order_id: order.id, plan })}::jsonb);`;
-
-    // Build Stripe line items
+    // Build line items. We only include non-empty fields (Stripe dislikes empty strings).
     const line_items = [];
-    cart.forEach(item => {
-      line_items.push({
-        quantity: 1,
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: `${item.service.toUpperCase()} — Base (${plan === 'oneTime' ? 'One-time' : 'Monthly'})`,
-            description: item.notes?.slice(0, 400) || undefined,
-            metadata: { service: item.service, type: 'base', plan }
-          },
-          unit_amount: Math.round(item.base * 100),
-          ...(plan === 'monthly' ? { recurring: { interval: 'month' } } : {})
-        }
-      });
-      (item.addons || []).forEach(a => {
+
+    for (const svc of cart) {
+      const svcKey = svc?.service || 'service';
+      const baseAmount = toCents(svc?.base);
+
+      if (baseAmount > 0) {
         line_items.push({
-          quantity: 1,
           price_data: {
             currency: 'usd',
             product_data: {
-              name: `${item.service.toUpperCase()} — ${a.name}`,
-              metadata: { service: item.service, type: 'addon', plan, addon_id: a.id }
+              // Prefer a human name if frontend sends it; else fall back to key
+              name: `Base: ${svc.name || svcKey}`,
             },
-            unit_amount: Math.round(a.price * 100),
-            ...(plan === 'monthly' ? { recurring: { interval: 'month' } } : {})
-          }
+            // If monthly, create a recurring price on the fly
+            ...(mode === 'subscription'
+              ? { recurring: { interval: 'month' }, unit_amount: baseAmount }
+              : { unit_amount: baseAmount }),
+          },
+          quantity: 1,
         });
-      });
-    });
+      }
+
+      for (const add of svc?.addons || []) {
+        const addAmount = toCents(add?.price);
+        if (addAmount <= 0) continue;
+
+        line_items.push({
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: `Add-on: ${add?.name || 'Line item'}`,
+              // DO NOT send empty description strings
+              ...(add?.desc ? { description: String(add.desc).slice(0, 500) } : {}),
+            },
+            ...(mode === 'subscription'
+              ? { recurring: { interval: 'month' }, unit_amount: addAmount }
+              : { unit_amount: addAmount }),
+          },
+          quantity: 1,
+        });
+      }
+    }
+
+    if (line_items.length === 0) {
+      return res.status(400).json({ error: 'Cart is empty' });
+    }
+
+    // Figure out your site origin for return URLs
+    const origin =
+      req.headers.origin ||
+      (req.headers.host ? `https://${req.headers.host}` : 'https://1coastmedia.com');
 
     const session = await stripe.checkout.sessions.create({
-      mode: plan === 'oneTime' ? 'payment' : 'subscription',
+      mode,
       line_items,
-      success_url: 'https://1coastmedia.com/?status=success',
-      cancel_url: 'https://1coastmedia.com/?status=cancelled',
-      customer_email: contact?.email || undefined,
-      metadata: { plan, order_id: order.id }
+      success_url: `${origin}/?success=1`,
+      cancel_url: `${origin}/?canceled=1`,
+      // A little metadata to recognize the order later
+      metadata: {
+        plan,
+        email: contact?.email || '',
+        name: contact?.name || '',
+        company: contact?.company || '',
+        phone: contact?.phone || '',
+        notes: contact?.notes || '',
+      },
+      // Optional niceties:
+      allow_promotion_codes: false,
+      automatic_tax: { enabled: false },
     });
 
-    await sql`UPDATE orders SET stripe_session_id = ${session.id} WHERE id = ${order.id};`;
-    return res.status(200).json({ url: session.url });
+    // Prefer URL redirect (cleanest)
+    return res.status(200).json({ url: session.url, id: session.id });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: err.message || 'Server error' });
+    console.error('Checkout error:', err);
+    const message =
+      err?.raw?.message || err?.message || 'Failed to create checkout session';
+    return res.status(500).json({ error: message });
   }
 }
