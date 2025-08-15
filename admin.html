@@ -118,32 +118,33 @@
       </div>
     </section>
 
-    <!-- Catalog (Services & Add-ons CRUD) -->
-    <section class="grid md:grid-cols-2 gap-6">
-      <section class="mt-8 rounded-xl border border-slate-200 bg-white p-5">
-  <div class="flex items-center justify-between gap-3">
-    <h2 class="text-lg font-semibold">Reorder Base Services (drag & drop)</h2>
-    <div class="text-sm text-slate-500">This controls the tile order on the homepage.</div>
+   <!-- Catalog Order (drag to reorder) -->
+<section class="mt-8">
+  <div class="flex items-center justify-between mb-3">
+    <h3 class="text-lg font-semibold">Catalog order</h3>
+    <div class="flex gap-2">
+      <button id="refreshOrderBtn"
+              class="rounded-lg ring-1 ring-slate-200 bg-white px-3 py-2 text-sm"
+              onclick="window.reloadCatalogOrder?.()">
+        Reload
+      </button>
+      <button id="saveOrderBtn"
+              class="rounded-lg bg-indigo-600 text-white px-4 py-2 font-semibold disabled:opacity-50"
+              onclick="window.saveCatalogOrder?.()"
+              disabled>
+        Saved
+      </button>
+    </div>
   </div>
 
-  <ul id="svc-sort"
-      class="mt-4 divide-y divide-slate-200 rounded-lg border border-slate-200 bg-slate-50/60">
-    <!-- rows injected by script -->
-  </ul>
+  <!-- List is far easier to drag on touch than a table -->
+  <ul id="orderList" class="grid gap-2"></ul>
 
-  <div class="mt-4 flex items-center justify-end gap-2">
-    <button id="reloadOrder"
-            class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold">
-      Reset from DB
-    </button>
-    <button id="saveOrder"
-            class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
-      Save Order
-    </button>
-  </div>
-
-  <p id="orderToast" class="mt-2 text-xs text-slate-500"></p>
+  <p class="mt-2 text-xs text-slate-500">
+    Tip: Drag the dotted handle. You can also use ↑ / ↓ buttons on each row.
+  </p>
 </section>
+
 
       <!-- Services -->
       <div class="card p-4">
