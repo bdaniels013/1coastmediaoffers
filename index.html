@@ -219,6 +219,14 @@
         <div class="text-sm text-slate-600">Est. total: <strong x-text="fmtUSD(total)"></strong><span class="text-slate-500" x-show="plan==='monthly'">/mo</span></div>
         <div class="flex gap-2">
           <button @click="openAddons(activeService)" class="tap rounded-xl ring-1 ring-slate-200 bg-white px-4 py-2 text-sm font-semibold f-ring">Add-Ons</button>
+          
+          <button
+  @click="clearAll()"
+  class="tap rounded-xl ring-1 ring-rose-200 bg-white text-rose-700 px-4 py-2 text-sm font-semibold f-ring hover:bg-rose-50"
+  title="Remove all selected base services and add-ons">
+  Clear Cart
+</button>
+          
           <button @click="openBuilder()" class="tap rounded-xl bg-indigo-600 text-white px-4 py-2 text-sm font-semibold f-ring hover:bg-indigo-700">Review & Checkout</button>
         </div>
       </div>
