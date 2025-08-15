@@ -3,31 +3,27 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-
 <title>Admin • 1CoastMedia</title>
+
 <link rel="icon" href="/assets/1coastmedia_logo_A_primary_mark_2048.jpg" />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
 
-<!-- Tailwind (admin page only) -->
+<!-- Tailwind (admin-only) -->
 <script src="https://cdn.tailwindcss.com"></script>
 <script>tailwind.config={theme:{extend:{}}};</script>
 
-<!-- Alpine (UI state) -->
+<!-- Alpine (state) -->
 <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-<!-- Sortable for drag & drop -->
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js" defer></script>
+<!-- Sortable (drag & drop) -->
+<script defer src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 
 <style>
-  :root{--ink:#0b1220}
+  [x-cloak]{display:none !important}
   body{font-family:Inter,ui-sans-serif,system-ui}
   .card{background:#fff;border:1px solid rgba(15,23,42,.08);border-radius:1rem;box-shadow:0 10px 28px rgba(2,6,23,.06)}
-  .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(2,6,23,.5);z-index:50}
-  .modal>div{max-width:720px;width:100%}
   .input{width:100%;border:1px solid rgba(15,23,42,.12);border-radius:.5rem;padding:.6rem .8rem}
   .label{font-size:.75rem;color:#64748b}
-
-  /* Drag visuals */
   .drag-handle{cursor:grab;touch-action:none;user-select:none}
   .drag-handle:active{cursor:grabbing}
   .drag-ghost{opacity:.6;transform:rotate(.5deg) scale(.995)}
@@ -35,12 +31,12 @@
 </style>
 </head>
 
-<body class="bg-slate-50" x-data="adminApp()" x-init="init()">
+<body class="bg-slate-50" x-data="adminApp()" x-init="init()" x-cloak>
   <!-- Top bar -->
   <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200">
     <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <img src="/assets/1coastmedia_logo_A_primary_mark_2048.jpg" alt="1CoastMedia" class="h-8 w-8 rounded" />
+        <img src="/assets/1coastmedia_logo_A_primary_mark_2048.jpg" class="h-8 w-8 rounded" alt="1CoastMedia"/>
         <div class="font-extrabold tracking-tight">1CoastMedia — Admin</div>
       </div>
       <div class="text-sm text-slate-600">
@@ -50,20 +46,21 @@
     </div>
   </header>
 
+  <!-- Error banner -->
+  <div x-show="globalError" class="bg-rose-50 text-rose-700 border-y border-rose-200">
+    <div class="max-w-7xl mx-auto px-4 py-2 text-sm">
+      <strong>Error:</strong> <span x-text="globalError"></span>
+    </div>
+  </div>
+
   <!-- Login -->
   <section class="max-w-md mx-auto p-6" x-show="!authed" x-transition>
     <div class="card p-6">
       <h1 class="text-xl font-bold">Admin login</h1>
-      <p class="text-sm text-slate-500 mt-1">Use the credentials set in your Vercel env vars.</p>
+      <p class="text-sm text-slate-500 mt-1">Use the credentials set in Vercel env vars.</p>
       <div class="mt-4 space-y-3">
-        <div>
-          <label class="label">Username</label>
-          <input x-model="login.username" class="input" />
-        </div>
-        <div>
-          <label class="label">Password</label>
-          <input x-model="login.password" type="password" class="input" />
-        </div>
+        <div><label class="label">Username</label><input x-model="login.username" class="input" /></div>
+        <div><label class="label">Password</label><input x-model="login.password" type="password" class="input" /></div>
         <button @click="doLogin" class="w-full mt-2 rounded bg-indigo-600 text-white font-semibold px-4 py-2">Sign in</button>
       </div>
       <p class="text-xs text-rose-600 mt-3" x-text="error"></p>
@@ -78,9 +75,7 @@
       <div class="flex gap-2">
         <button class="px-3 py-1.5 rounded bg-emerald-600 text-white text-sm" @click="syncFromSite" :disabled="busy">
           <span x-show="!busy">Sync catalog from site</span>
-          <span x-show="busy" class="inline-flex items-center gap-2">
-            <span class="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> Working…
-          </span>
+          <span x-show="busy" class="inline-flex items-center gap-2"><span class="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> Working…</span>
         </button>
         <button class="px-3 py-1.5 rounded bg-slate-900 text-white text-sm" @click="refreshAll">Refresh</button>
       </div>
@@ -96,20 +91,10 @@
 
     <!-- Orders -->
     <section>
-      <div class="flex items-center justify-between mb-2">
-        <h2 class="text-lg font-bold">Recent Orders</h2>
-      </div>
+      <div class="flex items-center justify-between mb-2"><h2 class="text-lg font-bold">Recent Orders</h2></div>
       <div class="card overflow-auto">
         <table class="min-w-full text-sm">
-          <thead class="bg-slate-100 text-slate-600">
-            <tr>
-              <th class="text-left p-2">Date</th>
-              <th class="text-left p-2">Customer</th>
-              <th class="text-left p-2">Plan</th>
-              <th class="text-left p-2">Status</th>
-              <th class="text-left p-2">Total</th>
-            </tr>
-          </thead>
+          <thead class="bg-slate-100 text-slate-600"><tr><th class="text-left p-2">Date</th><th class="text-left p-2">Customer</th><th class="text-left p-2">Plan</th><th class="text-left p-2">Status</th><th class="text-left p-2">Total</th></tr></thead>
           <tbody>
             <template x-for="o in orders" :key="o.id">
               <tr class="border-t">
@@ -120,30 +105,31 @@
                 <td class="p-2" x-text="fmtUSD(o.total_cents)"></td>
               </tr>
             </template>
+            <tr x-show="orders.length===0"><td colspan="5" class="p-3 text-center text-slate-500">No orders yet.</td></tr>
           </tbody>
         </table>
       </div>
     </section>
 
-    <!-- Reorder (drag & drop) -->
-    <section class="mt-8">
+    <!-- Reorder -->
+    <section>
       <div class="flex items-center justify-between mb-3">
         <div>
           <h3 class="text-lg font-semibold">Homepage order</h3>
-          <p class="text-xs text-slate-500 mt-0.5">Drag the handle • or use ↑/↓ buttons • order persists to DB and updates your site.</p>
+          <p class="text-xs text-slate-500">Drag the handle or use ↑/↓. Click “Save Order”.</p>
         </div>
         <div class="flex gap-2">
-          <button id="refreshOrderBtn" class="rounded-lg ring-1 ring-slate-200 bg-white px-3 py-2 text-sm">Reload</button>
-          <button id="saveOrderBtn" class="rounded-lg bg-indigo-600 text-white px-4 py-2 font-semibold disabled:opacity-50" disabled>Saved</button>
+          <button id="reloadOrder" class="rounded-lg ring-1 ring-slate-200 bg-white px-3 py-2 text-sm">Reload</button>
+          <button id="saveOrder" class="rounded-lg bg-indigo-600 text-white px-4 py-2 font-semibold disabled:opacity-50" disabled>Saved</button>
         </div>
       </div>
-
-      <div class="card p-3 max-h-[60vh] overflow-auto" id="reorderScroll">
+      <div class="card p-3 max-h-[60vh] overflow-auto">
         <ul id="orderList" class="grid gap-2"></ul>
       </div>
+      <p id="orderNote" class="mt-2 text-xs text-slate-500"></p>
     </section>
 
-    <!-- Services CRUD -->
+    <!-- Services -->
     <div class="card p-4">
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-lg font-bold">Base Services</h2>
@@ -162,10 +148,11 @@
             </div>
           </div>
         </template>
+        <div x-show="services.length===0" class="text-sm text-slate-500">No services found.</div>
       </div>
     </div>
 
-    <!-- Add-ons CRUD -->
+    <!-- Add-ons -->
     <div class="card p-4">
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-lg font-bold">Add-ons</h2>
@@ -173,9 +160,7 @@
           <label class="text-xs text-slate-500">Filter</label>
           <select class="input !py-1 !h-8 !text-sm !w-44" x-model="addonFilter">
             <option value="">All services</option>
-            <template x-for="s in services" :key="'f-'+s.id">
-              <option :value="s.id" x-text="s.id"></option>
-            </template>
+            <template x-for="s in services" :key="'f-'+s.id"><option :value="s.id" x-text="s.id"></option></template>
           </select>
           <button class="px-3 py-1.5 text-sm rounded bg-slate-900 text-white" @click="openAddon()">+ New</button>
         </div>
@@ -195,146 +180,209 @@
             </div>
           </div>
         </template>
+        <div x-show="filteredAddons.length===0" class="text-sm text-slate-500">No add-ons.</div>
       </div>
     </div>
   </main>
 
   <!-- SERVICE MODAL -->
-  <div class="modal" x-show="modals.service" x-transition>
-    <div class="card p-5">
-      <div class="flex items-center justify-between">
-        <h3 class="text-lg font-bold" x-text="serviceForm.id ? 'Edit Service' : 'New Service'"></h3>
-        <button class="h-9 w-9 rounded hover:bg-slate-100 grid place-items-center" @click="modals.service=false">✕</button>
-      </div>
+  <div class="fixed inset-0 bg-slate-900/50 z-50 hidden" :class="{'!block':modals.service}" x-transition>
+    <div class="card p-5 max-w-2xl w-full mx-auto my-8 bg-white">
+      <div class="flex items-center justify-between"><h3 class="text-lg font-bold" x-text="serviceForm.id ? 'Edit Service' : 'New Service'"></h3><button class="h-9 w-9 rounded hover:bg-slate-100 grid place-items-center" @click="modals.service=false">✕</button></div>
       <div class="grid md:grid-cols-2 gap-3 mt-3">
-        <div>
-          <label class="label">Key (e.g. web)</label>
-          <input class="input" x-model.trim="serviceForm.id" :disabled="!!serviceForm._lockId" />
-        </div>
-        <div>
-          <label class="label">Name</label>
-          <input class="input" x-model.trim="serviceForm.name" />
-        </div>
-        <div class="md:col-span-2">
-          <label class="label">Blurb</label>
-          <input class="input" x-model.trim="serviceForm.blurb" />
-        </div>
-        <div>
-          <label class="label">Base (One-time) USD</label>
-          <input type="number" class="input" x-model.number="serviceForm.base_one_time_usd" />
-        </div>
-        <div>
-          <label class="label">Base (Monthly) USD</label>
-          <input type="number" class="input" x-model.number="serviceForm.base_monthly_usd" />
-        </div>
-        <div class="md:col-span-2">
-          <label class="label">Includes (comma separated)</label>
-          <input class="input" x-model.trim="serviceForm.includes_csv" placeholder="Kickoff & setup, Landing page (3–5 sections), Light copy help" />
-        </div>
+        <div><label class="label">Key (e.g. web)</label><input class="input" x-model.trim="serviceForm.id" :disabled="!!serviceForm._lockId"/></div>
+        <div><label class="label">Name</label><input class="input" x-model.trim="serviceForm.name"/></div>
+        <div class="md:col-span-2"><label class="label">Blurb</label><input class="input" x-model.trim="serviceForm.blurb"/></div>
+        <div><label class="label">Base (One-time) USD</label><input type="number" class="input" x-model.number="serviceForm.base_one_time_usd"/></div>
+        <div><label class="label">Base (Monthly) USD</label><input type="number" class="input" x-model.number="serviceForm.base_monthly_usd"/></div>
+        <div class="md:col-span-2"><label class="label">Includes (comma separated)</label><input class="input" x-model.trim="serviceForm.includes_csv" placeholder="Kickoff & setup, Landing page (3–5 sections), Light copy help"/></div>
       </div>
-      <div class="mt-4 flex justify-end gap-2">
-        <button class="px-3 py-2 rounded border" @click="modals.service=false">Cancel</button>
-        <button class="px-3 py-2 rounded bg-indigo-600 text-white" @click="saveService">Save</button>
-      </div>
+      <div class="mt-4 flex justify-end gap-2"><button class="px-3 py-2 rounded border" @click="modals.service=false">Cancel</button><button class="px-3 py-2 rounded bg-indigo-600 text-white" @click="saveService">Save</button></div>
       <p class="text-xs text-rose-600 mt-2" x-text="formError"></p>
     </div>
   </div>
 
   <!-- ADDON MODAL -->
-  <div class="modal" x-show="modals.addon" x-transition>
-    <div class="card p-5">
-      <div class="flex items-center justify-between">
-        <h3 class="text-lg font-bold" x-text="addonForm.id ? 'Edit Add-on' : 'New Add-on'"></h3>
-        <button class="h-9 w-9 rounded hover:bg-slate-100 grid place-items-center" @click="modals.addon=false">✕</button>
-      </div>
+  <div class="fixed inset-0 bg-slate-900/50 z-50 hidden" :class="{'!block':modals.addon}" x-transition>
+    <div class="card p-5 max-w-2xl w-full mx-auto my-8 bg-white">
+      <div class="flex items-center justify-between"><h3 class="text-lg font-bold" x-text="addonForm.id ? 'Edit Add-on' : 'New Add-on'"></h3><button class="h-9 w-9 rounded hover:bg-slate-100 grid place-items-center" @click="modals.addon=false">✕</button></div>
       <div class="grid md:grid-cols-2 gap-3 mt-3">
-        <div>
-          <label class="label">ID (e.g. web-seo)</label>
-          <input class="input" x-model.trim="addonForm.id" :disabled="!!addonForm._lockId" />
-        </div>
-        <div>
-          <label class="label">Service</label>
+        <div><label class="label">ID (e.g. web-seo)</label><input class="input" x-model.trim="addonForm.id" :disabled="!!addonForm._lockId"/></div>
+        <div><label class="label">Service</label>
           <select class="input" x-model="addonForm.service_id">
-            <template x-for="s in services" :key="'sopt-'+s.id">
-              <option :value="s.id" x-text="s.id"></option>
-            </template>
+            <template x-for="s in services" :key="'sopt-'+s.id"><option :value="s.id" x-text="s.id"></option></template>
           </select>
         </div>
-        <div>
-          <label class="label">Label</label>
-          <input class="input" x-model.trim="addonForm.label" />
-        </div>
-        <div>
-          <label class="label">Badge</label>
-          <input class="input" x-model.trim="addonForm.badge" />
-        </div>
-        <div class="md:col-span-2">
-          <label class="label">Short</label>
-          <input class="input" x-model.trim="addonForm.short" />
-        </div>
-        <div class="md:col-span-2">
-          <label class="label">Description</label>
-          <textarea class="input" x-model.trim="addonForm.description"></textarea>
-        </div>
-        <div>
-          <label class="label">One-time USD</label>
-          <input type="number" class="input" x-model.number="addonForm.price_one_time_usd" />
-        </div>
-        <div>
-          <label class="label">Monthly USD</label>
-          <input type="number" class="input" x-model.number="addonForm.price_monthly_usd" />
-        </div>
-        <div class="flex items-center gap-2">
-          <input id="popular" type="checkbox" x-model="addonForm.popular" />
-          <label for="popular" class="text-sm">Popular</label>
-        </div>
+        <div><label class="label">Label</label><input class="input" x-model.trim="addonForm.label"/></div>
+        <div><label class="label">Badge</label><input class="input" x-model.trim="addonForm.badge"/></div>
+        <div class="md:col-span-2"><label class="label">Short</label><input class="input" x-model.trim="addonForm.short"/></div>
+        <div class="md:col-span-2"><label class="label">Description</label><textarea class="input" x-model.trim="addonForm.description"></textarea></div>
+        <div><label class="label">One-time USD</label><input type="number" class="input" x-model.number="addonForm.price_one_time_usd"/></div>
+        <div><label class="label">Monthly USD</label><input type="number" class="input" x-model.number="addonForm.price_monthly_usd"/></div>
+        <div class="flex items-center gap-2"><input id="popular" type="checkbox" x-model="addonForm.popular"/><label for="popular" class="text-sm">Popular</label></div>
       </div>
-      <div class="mt-4 flex justify-end gap-2">
-        <button class="px-3 py-2 rounded border" @click="modals.addon=false">Cancel</button>
-        <button class="px-3 py-2 rounded bg-indigo-600 text-white" @click="saveAddon">Save</button>
-      </div>
+      <div class="mt-4 flex justify-end gap-2"><button class="px-3 py-2 rounded border" @click="modals.addon=false">Cancel</button><button class="px-3 py-2 rounded bg-indigo-600 text-white" @click="saveAddon">Save</button></div>
       <p class="text-xs text-rose-600 mt-2" x-text="formError"></p>
     </div>
   </div>
 
-  <!-- Toast -->
-  <div x-show="toast.show" x-transition class="fixed bottom-4 left-1/2 -translate-x-1/2 bg-slate-900 text-white rounded px-4 py-2 shadow">
-    <span x-text="toast.text"></span>
-  </div>
-
 <script>
-/** all admin requests send cookies */
-const api = (r, init = {}) =>
+/* ---------- Helpers ---------- */
+const api = (r, init={}) =>
   fetch(`/api/admin?r=${encodeURIComponent(r)}`, { credentials:'include', ...init });
 
 function adminApp(){
   return {
-    // state
-    authed:false, me:null, error:'', formError:'', busy:false,
+    authed:false, me:null, error:'', globalError:'', formError:'', busy:false,
     login:{username:'',password:''},
+
     kpis:{revenue_cents:0,orders:0,customers:0,pageviews:0},
     orders:[], customers:[], leads:[], services:[], addons:[], addonFilter:'',
-    modals:{service:false, addon:false}, toast:{show:false,text:''},
 
-    // computed
-    get filteredAddons(){
-      if(!this.addonFilter) return this.addons;
-      return this.addons.filter(a => a.service_id === this.addonFilter);
-    },
-
-    // forms
     serviceForm:{id:'', _lockId:false, name:'', blurb:'', base_one_time_usd:0, base_monthly_usd:0, includes_csv:''},
     addonForm:{id:'', _lockId:false, service_id:'', label:'', description:'', short:'', badge:'', popular:false, price_one_time_usd:0, price_monthly_usd:0},
 
-    // one-click seed from current site
-    siteCatalog: {
-      services: [
+    get filteredAddons(){ return this.addonFilter ? this.addons.filter(a=>a.service_id===this.addonFilter) : this.addons; },
+
+    async init(){
+      await this.checkAuth();
+      if(this.authed){ await this.refreshAll(); }
+      initReorder(); // safe to call anytime; it will wait for login/data
+    },
+
+    async checkAuth(){
+      try{
+        const r = await api('me');
+        if(!r.ok) throw new Error('Not authenticated');
+        const j = await r.json();
+        this.me = j.user; this.authed = true; this.globalError = '';
+      }catch(e){
+        this.authed = false;
+        // keep login visible; don’t hard-fail
+      }
+    },
+
+    async doLogin(){
+      try{
+        this.error=''; this.globalError='';
+        const r = await api('login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(this.login)});
+        if(!r.ok){ this.error='Invalid login'; return; }
+        this.authed = true; this.me = this.login.username; this.login={username:'',password:''};
+        await this.refreshAll();
+        if(window.reloadOrder) window.reloadOrder(); // load reorder list
+      }catch(e){ this.error=e.message || 'Login failed'; }
+    },
+
+    async logout(){ await api('logout'); location.reload(); },
+
+    async refreshAll(){
+      try{
+        const [m,o,c,l,s,a] = await Promise.all([
+          api('metrics').then(r=>r.ok?r.json():Promise.reject(r)),
+          api('orders').then(r=>r.ok?r.json():Promise.reject(r)),
+          api('customers').then(r=>r.ok?r.json():Promise.reject(r)),
+          api('leads').then(r=>r.ok?r.json():Promise.reject(r)),
+          api('services').then(r=>r.ok?r.json():Promise.reject(r)),
+          api('addons').then(r=>r.ok?r.json():Promise.reject(r)),
+        ]);
+        this.kpis=m; this.orders=o; this.customers=c; this.leads=l; this.services=s; this.addons=a; this.globalError='';
+      }catch(e){
+        this.globalError = 'Failed to load dashboard data. Check /api/admin routes & auth.';
+      }
+    },
+
+    // money (expects cents)
+    fmtUSD(c){ return (Number(c||0)/100).toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}); },
+
+    // Service CRUD
+    openService(s=null){
+      this.formError='';
+      if(s){
+        this.serviceForm = {
+          id:s.id, _lockId:true, name:s.name||'', blurb:s.blurb||'',
+          base_one_time_usd: Math.round((s.base_one_time_cents||0)/100),
+          base_monthly_usd: Math.round((s.base_monthly_cents||0)/100),
+          includes_csv: (s.includes||[]).join(', ')
+        };
+      }else{
+        this.serviceForm = {id:'', _lockId:false, name:'', blurb:'', base_one_time_usd:0, base_monthly_usd:0, includes_csv:''};
+      }
+      this.modals = { ...this.modals, service:true };
+    },
+    async saveService(){
+      try{
+        const f=this.serviceForm;
+        if(!f.id || !f.name){ this.formError='Key and Name are required'; return; }
+        const payload={
+          id:f.id.trim(), name:f.name.trim(), blurb:f.blurb||'',
+          base_one_time_cents: Math.round(Number(f.base_one_time_usd||0)*100),
+          base_monthly_cents: Math.round(Number(f.base_monthly_usd||0)*100),
+          includes: f.includes_csv.split(',').map(x=>x.trim()).filter(Boolean)
+        };
+        const method = f._lockId ? 'PUT' : 'POST';
+        const r = await api('services',{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+        if(!r.ok){ const e=await r.json().catch(()=>({})); throw new Error(e.error||'Save failed'); }
+        this.modals.service=false; await this.refreshAll();
+        if(window.reloadOrder) window.reloadOrder();
+      }catch(e){ this.formError=e.message; }
+    },
+    async delService(id){
+      if(!confirm('Delete service '+id+'? This also deletes its add-ons.')) return;
+      const r = await api('services' + '&id=' + encodeURIComponent(id),{method:'DELETE'});
+      if(!r.ok){ alert('Delete failed'); return; }
+      await this.refreshAll();
+      if(window.reloadOrder) window.reloadOrder();
+    },
+
+    // Addon CRUD
+    openAddon(a=null){
+      this.formError='';
+      const firstService = this.services[0]?.id || '';
+      if(a){
+        this.addonForm = {
+          id:a.id,_lockId:true,service_id:a.service_id,label:a.label||'',
+          description:a.description||'', short:a.short||'', badge:a.badge||'',
+          popular:!!a.popular,
+          price_one_time_usd: Math.round((a.price_one_time_cents||0)/100),
+          price_monthly_usd: Math.round((a.price_monthly_cents||0)/100)
+        };
+      }else{
+        this.addonForm = {id:'',_lockId:false,service_id:firstService,label:'',description:'',short:'',badge:'',popular:false,price_one_time_usd:0,price_monthly_usd:0};
+      }
+      this.modals = { ...this.modals, addon:true };
+    },
+    async saveAddon(){
+      try{
+        const f=this.addonForm;
+        if(!f.id || !f.service_id || !f.label){ this.formError='ID, Service, Label are required'; return; }
+        const payload={
+          id:f.id.trim(), service_id:f.service_id, label:f.label.trim(),
+          description:f.description||'', short:f.short||'', badge:f.badge||'',
+          popular: !!f.popular,
+          price_one_time_cents: Math.round(Number(f.price_one_time_usd||0)*100),
+          price_monthly_cents: Math.round(Number(f.price_monthly_usd||0)*100)
+        };
+        const r = await api('addons',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+        if(!r.ok){ const e=await r.json().catch(()=>({})); throw new Error(e.error||'Save failed'); }
+        this.modals.addon=false; await this.refreshAll();
+      }catch(e){ this.formError=e.message; }
+    },
+    async delAddon(id){
+      if(!confirm('Delete add-on '+id+'?')) return;
+      const r = await api('addons' + '&id=' + encodeURIComponent(id),{method:'DELETE'});
+      if(!r.ok){ alert('Delete failed'); return; }
+      await this.refreshAll();
+    },
+
+    // optional: seed from site’s current offerings
+    siteCatalog:{
+      services:[
         { key:'web', name:'Web & App', blurb:'Launch a clean, mobile-first site fast.', base:{oneTime:300, monthly:500}, includes:['Kickoff & setup','Landing page (3–5 sections)','Light copy help'] },
         { key:'video', name:'Video / Audio', blurb:'Short, on-brand edits that convert.', base:{oneTime:600, monthly:1200}, includes:['Kickoff & plan','1–2 min edit','Clean edit, coastal vibe'] },
         { key:'events', name:'Events', blurb:'Plan smooth, run tight, look great.', base:{oneTime:1000, monthly:1200}, includes:['Scope & timeline','Basic coordination','Day-of support'] },
         { key:'ugc', name:'UGC', blurb:'Creators + clips that actually get seen.', base:{oneTime:450, monthly:600}, includes:['Kickoff & setup','30k verified views','Simple report'] },
       ],
-      addons: [
+      addons:[
         ['web','web-seo','SEO Basics','Titles, speed checks, findable.','Quick search wins','Quick win',true,150,150],
         ['web','web-auto','Lead Automations','Instant replies to leads.','Never miss a lead','Hands-off',true,100,100],
         ['web','web-api','Payments & Maps','Stripe checkout + maps.','High-impact add','High impact',false,250,250],
@@ -352,248 +400,63 @@ function adminApp(){
         ['web','web-section','Custom Section','1 bespoke section block.','Tailored UI','Custom',false,120,120],
         ['web','web-photos','Photo Sourcing','Handpicked stock + edits.','Better visuals','Visuals',false,90,90],
         ['web','web-brandkit','Brand Kit','Fonts, colors, components.','Consistent look','Brand',false,200,150],
-        ['video','vid-audio','Clean Audio + Captions','Noise fix + captions.','Watchable anywhere','Accessibility',true,200,250],
-        ['video','vid-adv','Advanced Edit / Series','More story, motion, polish.','Flagship content','Premium',true,800,1000],
-        ['video','vid-drone-p','Drone B-roll (Basic)','Dynamic aerial flavor.','Wow factor','Wow',false,300,300],
-        ['video','vid-drone-pro','Drone Cinematics (Pro)','Licensed pilot + pro gear.','Top-tier aerials','Cinematic',false,1500,1500],
-        ['video','vid-extra','Extra Edit Pass','More refinements + cuts.','Sharper pacing','Polish',false,300,500],
-        ['video','vid-script','Script & Shotlist','Plan lines + shots.','Shoot with ease','Plan',false,150,150],
-        ['video','vid-color','Pro Color Grade','Crisp, cinematic look.','Standout look','Look',false,150,150],
-        ['video','vid-sizes','All Social Sizes','9:16, 1:1, 16:9 outputs.','Every platform','Everywhere',false,120,120],
-        ['video','vid-thumbs','Thumbnail Pack (x3)','Scroll-stopping covers.','Higher CTR','Hook',false,100,100],
-        ['video','vid-raw','Raw Footage Delivery','We hand you the files.','Own the source','Archive',false,60,60],
-        ['video','vid-voice','Voiceover','Pro VO talent included.','Narration','Pro',false,220,220],
-        ['video','vid-tele','Teleprompter','Confident on-camera lines.','Confidence','Assist',false,90,90],
-        ['video','vid-studio','Studio Day','Lighting, backdrops, sound.','Controlled set','Studio',false,700,700],
-        ['video','vid-multi','Multi-location Shoot','Up to 3 locations.','More variety','Scope',false,400,400],
-        ['video','vid-cast','Talent Casting','Find on-brand talent.','Right faces','Talent',false,300,300],
-        ['events','ev-ven','Vendor/Venue Handling','We wrangle calls.','Stress-free','Stress-free',true,500,600],
-        ['events','ev-digital','RSVP/Tickets Page','Modern guest flow.','Smooth RSVPs','Modern',false,200,200],
-        ['events','ev-media','Highlight Media','Recap video + photos.','Shareworthy','Content',false,300,300],
-        ['events','ev-auto','Guest Automations','Reminders + check-in.','No bottlenecks','Smooth',false,150,150],
-        ['events','ev-hybrid','Livestream Setup','Hybrid reach, simple.','Reach more','Reach',false,400,400],
-        ['events','ev-host','Host / MC','Energy + timing control.','Keep pace','Energy',false,250,250],
-        ['events','ev-runshow','Run-of-Show','Minute-by-minute plan.','Clarity','Clarity',false,150,150],
-        ['events','ev-sponsor','Sponsor Kit + Outreach','Deck + outreach.','New revenue','Revenue',false,200,200],
-        ['events','ev-security','Permits & Security Guide','Who to call + when.','Safer event','Safety',false,120,120],
-        ['events','ev-vip','VIP/Backstage Mgmt','Green room + access.','White-glove','VIP',false,200,200],
-        ['events','ev-photobooth','Photo Booth','Branded photos on site.','Fun moments','Fun',false,350,350],
-        ['events','ev-ticketing','Ticketing Integration','Stripe/Square, QR.','Faster gates','Revenue',false,220,220],
-        ['ugc','ugc-repurpose','Ads-Ready Pack','Cut-downs + hooks.','Convert more','Ads-ready',true,200,200],
-        ['ugc','ugc-leads','Lead Capture Page','Turn views to contacts.','Capture demand','Leads',false,250,250],
-        ['ugc','ugc-enhance','Eye-Candy Overlays','On-brand text, beats.','More watch time','Engaging',false,150,150],
-        ['ugc','ugc-captions','SEO Captions','Be found & tapped.','Search hits','Search',false,100,100],
-        ['ugc','ugc-brand','Branding Pack','Logos, end-slates.','Brand recall','Brand',false,150,150],
-        ['ugc','ugc-views-10k','+10k Views','~10,000 verified views.','+10k reach','+10k',false,150,150],
-        ['ugc','ugc-views-20k','+20k Views','~20,000 verified views.','+20k reach','+20k',false,300,300],
-        ['ugc','ugc-views-70k','+70k Views','~70,000 verified views.','+70k reach','+70k',false,1050,1050],
-        ['ugc','ugc-creator','Creator Matching','Shortlist best locals.','Best fit','Match',false,100,100],
-        ['ugc','ugc-studio','Studio Polish','Re-cut with pro touch.','Pro finish','Pro',false,150,150],
-        ['ugc','ugc-comment','Comment Reply Pack','Smart replies to boost.','Engage more','Engage',false,100,100],
-        ['ugc','ugc-tracking','Tracking Upgrade','Deeper insights.','Better decisions','Insight',false,120,120],
-        ['ugc','ugc-white','Whitelisting Rights','Run creator posts as ads.','Run as ads','Rights',false,220,220],
-        ['ugc','ugc-usage','Usage Rights Extension','Extend paid usage.','More time','Rights',false,180,180],
-        ['ugc','ugc-hooks','A/B Hooks Pack','5 alt hooks to test.','Test faster','Test',false,140,140],
       ]
     },
 
-    // init
-    async init(){
-      await this.checkAuth();
-      if(this.authed){
-        await this.refreshAll();
-      }
-      // boot the reorder widget after Alpine rendered DOM
-      initReorderWidget();
-    },
-
-    // auth
-    async checkAuth(){
-      try{ const r=await api('me'); if(!r.ok) throw 0; const j=await r.json(); this.me=j.user; this.authed=true; }
-      catch{ this.authed=false; }
-    },
-    async doLogin(){
-      this.error='';
-      const r=await api('login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(this.login)});
-      if(!r.ok){ this.error='Invalid login'; return; }
-      this.authed=true; this.me=this.login.username; this.login={username:'',password:''}; await this.refreshAll();
-      // reload reorder data on login
-      if(window.reloadCatalogOrder) window.reloadCatalogOrder();
-    },
-    async logout(){ await api('logout'); location.reload(); },
-
-    // loaders
-    async refreshAll(){
-      const [m,o,c,l,s,a]=await Promise.all([
-        api('metrics').then(r=>r.json()).catch(()=>({revenue_cents:0,orders:0,customers:0,pageviews:0})),
-        api('orders').then(r=>r.json()).catch(()=>[]),
-        api('customers').then(r=>r.json()).catch(()=>[]),
-        api('leads').then(r=>r.json()).catch(()=>[]),
-        api('services').then(r=>r.json()).catch(()=>[]),
-        api('addons').then(r=>r.json()).catch(()=>[]),
-      ]);
-      this.kpis=m; this.orders=o; this.customers=c; this.leads=l; this.services=s; this.addons=a;
-    },
-
-    // toast
-    flash(t){ this.toast={show:true,text:t}; setTimeout(()=>this.toast.show=false,1400); },
-
-    // money (expects cents)
-    fmtUSD(c){ return (Number(c||0)/100).toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}); },
-
-    // Service CRUD
-    openService(s=null){
-      this.formError='';
-      if(s){
-        this.serviceForm = {
-          id:s.id, _lockId:true, name:s.name||'', blurb:s.blurb||'',
-          base_one_time_usd: Math.round((s.base_one_time_cents||0)/100),
-          base_monthly_usd: Math.round((s.base_monthly_cents||0)/100),
-          includes_csv: (s.includes||[]).join(', ')
-        };
-      } else {
-        this.serviceForm = {id:'', _lockId:false, name:'', blurb:'', base_one_time_usd:0, base_monthly_usd:0, includes_csv:''};
-      }
-      this.modals.service=true;
-    },
-    async saveService(){
-      try{
-        const f=this.serviceForm;
-        if(!f.id || !f.name){ this.formError='Key and Name are required'; return; }
-        const payload={
-          id:f.id.trim(),
-          name:f.name.trim(),
-          blurb:f.blurb||'',
-          base_one_time_cents: Math.round(Number(f.base_one_time_usd||0)*100),
-          base_monthly_cents: Math.round(Number(f.base_monthly_usd||0)*100),
-          includes: f.includes_csv.split(',').map(x=>x.trim()).filter(Boolean)
-        };
-        const method = f._lockId ? 'PUT' : 'POST';
-        const r = await api('services',{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-        if(!r.ok){ const e=await r.json().catch(()=>({})); throw new Error(e.error||'Save failed'); }
-        this.modals.service=false; this.flash('Service saved'); await this.refreshAll();
-        if(window.reloadCatalogOrder) window.reloadCatalogOrder();
-      }catch(e){ this.formError=e.message; }
-    },
-    async delService(id){
-      if(!confirm('Delete service '+id+'? This also deletes its add-ons.')) return;
-      const r=await api('services' + '&id=' + encodeURIComponent(id),{method:'DELETE'});
-      if(!r.ok){ alert('Delete failed'); return; }
-      this.flash('Service deleted'); await this.refreshAll();
-      if(window.reloadCatalogOrder) window.reloadCatalogOrder();
-    },
-
-    // Addon CRUD
-    openAddon(a=null){
-      this.formError='';
-      const firstService = this.services[0]?.id || '';
-      if(a){
-        this.addonForm = {
-          id:a.id,_lockId:true,service_id:a.service_id,label:a.label||'',
-          description:a.description||'', short:a.short||'', badge:a.badge||'',
-          popular:!!a.popular,
-          price_one_time_usd: Math.round((a.price_one_time_cents||0)/100),
-          price_monthly_usd: Math.round((a.price_monthly_cents||0)/100)
-        };
-      } else {
-        this.addonForm = {id:'',_lockId:false,service_id:firstService,label:'',description:'',short:'',badge:'',popular:false,price_one_time_usd:0,price_monthly_usd:0};
-      }
-      this.modals.addon=true;
-    },
-    async saveAddon(){
-      try{
-        const f=this.addonForm;
-        if(!f.id || !f.service_id || !f.label){ this.formError='ID, Service, Label are required'; return; }
-        const payload={
-          id:f.id.trim(), service_id:f.service_id, label:f.label.trim(),
-          description:f.description||'', short:f.short||'', badge:f.badge||'',
-          popular: !!f.popular,
-          price_one_time_cents: Math.round(Number(f.price_one_time_usd||0)*100),
-          price_monthly_cents: Math.round(Number(f.price_monthly_usd||0)*100)
-        };
-        const r=await api('addons',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-        if(!r.ok){ const e=await r.json().catch(()=>({})); throw new Error(e.error||'Save failed'); }
-        this.modals.addon=false; this.flash('Add-on saved'); await this.refreshAll();
-      }catch(e){ this.formError=e.message; }
-    },
-    async delAddon(id){
-      if(!confirm('Delete add-on '+id+'?')) return;
-      const r=await api('addons' + '&id=' + encodeURIComponent(id),{method:'DELETE'});
-      if(!r.ok){ alert('Delete failed'); return; }
-      this.flash('Add-on deleted'); await this.refreshAll();
-    },
-
-    // seed from site’s current offerings (optional helper)
     async syncFromSite(){
       try{
-        this.busy=true;
+        this.busy = true;
         for(const s of this.siteCatalog.services){
-          const payload={
-            id:s.key, name:s.name, blurb:s.blurb||'',
-            base_one_time_cents: Math.round((s.base?.oneTime||0)*100),
-            base_monthly_cents: Math.round((s.base?.monthly||0)*100),
-            includes: s.includes||[]
-          };
-          const r=await api('services',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-          if(!r.ok){ const e=await r.json().catch(()=>({})); throw new Error(e.error||'Service upsert failed: '+s.key); }
+          const payload={ id:s.key, name:s.name, blurb:s.blurb||'', base_one_time_cents:Math.round((s.base?.oneTime||0)*100), base_monthly_cents:Math.round((s.base?.monthly||0)*100), includes:s.includes||[] };
+          const r = await api('services',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+          if(!r.ok) throw new Error('Service upsert failed: '+s.key);
         }
         for(const a of this.siteCatalog.addons){
           const [service_id,id,label,description,short,badge,popular,oneTime,monthly]=a;
-          const payload={
-            id, service_id, label, description, short, badge, popular:!!popular,
-            price_one_time_cents: Math.round((oneTime||0)*100),
-            price_monthly_cents: Math.round((monthly||0)*100)
-          };
-          const r=await api('addons',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-          if(!r.ok){ const e=await r.json().catch(()=>({})); throw new Error(e.error||'Add-on upsert failed: '+id); }
+          const payload={ id,service_id,label,description,short,badge,popular:!!popular, price_one_time_cents:Math.round((oneTime||0)*100), price_monthly_cents:Math.round((monthly||0)*100) };
+          const r = await api('addons',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+          if(!r.ok) throw new Error('Add-on upsert failed: '+id);
         }
-        this.flash('Catalog synced from site');
         await this.refreshAll();
-        if(window.reloadCatalogOrder) window.reloadCatalogOrder();
-      }catch(e){
-        alert(e.message||'Sync failed');
-      }finally{
-        this.busy=false;
-      }
+        if(window.reloadOrder) window.reloadOrder();
+      }catch(e){ this.globalError = e.message || 'Sync failed'; }
+      finally{ this.busy=false; }
     },
   }
 }
-</script>
 
-<!-- Reorder widget (pure JS; credentials included) -->
-<script>
-function initReorderWidget(){
-  const listEl    = document.getElementById('orderList');
-  const saveBtn   = document.getElementById('saveOrderBtn');
-  const reloadBtn = document.getElementById('refreshOrderBtn');
-
-  if(!listEl || !saveBtn || !reloadBtn) return; // safety
-
-  const gripSvg = `
-    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-      <circle cx="6"  cy="7"  r="1.5"></circle><circle cx="12" cy="7"  r="1.5"></circle><circle cx="18" cy="7"  r="1.5"></circle>
-      <circle cx="6"  cy="12" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="18" cy="12" r="1.5"></circle>
-      <circle cx="6"  cy="17" r="1.5"></circle><circle cx="12" cy="17" r="1.5"></circle><circle cx="18" cy="17" r="1.5"></circle>
-    </svg>`;
+/* ---------- Reorder widget (self-contained) ---------- */
+function initReorder(){
+  const listEl = document.getElementById('orderList');
+  const saveBtn = document.getElementById('saveOrder');
+  const reloadBtn = document.getElementById('reloadOrder');
+  const noteEl = document.getElementById('orderNote');
+  if(!listEl || !saveBtn || !reloadBtn) return;
 
   let services = [];
+  let sortableReady = false;
 
-  function escapeHtml(s){return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;");}
+  function say(msg, ok=true){ if(!noteEl) return; noteEl.textContent = msg; noteEl.style.color = ok ? '#64748b' : '#b91c1c'; }
+
+  function esc(s){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;'); }
 
   function render(){
     listEl.innerHTML='';
-    services.forEach((s,i)=>{
+    services.forEach(s=>{
       const li=document.createElement('li');
+      li.dataset.key=s.key;
       li.className='group flex items-center gap-3 px-3 py-2 rounded-xl ring-1 ring-slate-200 bg-white hover:bg-slate-50';
-      li.dataset.key = s.key;
-
       li.innerHTML=`
         <button type="button" class="drag-handle h-10 w-10 grid place-items-center rounded-lg bg-slate-100 ring-1 ring-slate-200 text-slate-600" aria-label="Drag to reorder">
-          ${gripSvg}
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <circle cx="6"  cy="7"  r="1.5"></circle><circle cx="12" cy="7"  r="1.5"></circle><circle cx="18" cy="7"  r="1.5"></circle>
+            <circle cx="6"  cy="12" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="18" cy="12" r="1.5"></circle>
+            <circle cx="6"  cy="17" r="1.5"></circle><circle cx="12" cy="17" r="1.5"></circle><circle cx="18" cy="17" r="1.5"></circle>
+          </svg>
         </button>
         <div class="flex-1 min-w-0">
-          <div class="font-medium truncate">${escapeHtml(s.name||'Untitled')}</div>
-          <div class="text-xs text-slate-500 truncate">${escapeHtml(s.blurb||'')}</div>
+          <div class="font-medium truncate">${esc(s.name||'Untitled')}</div>
+          <div class="text-xs text-slate-500 truncate">${esc(s.blurb||'')}</div>
         </div>
         <div class="text-sm font-semibold text-slate-700 shrink-0">$${(s.base?.oneTime ?? 0)}</div>
         <div class="hidden sm:flex gap-1 ml-2">
@@ -603,25 +466,22 @@ function initReorderWidget(){
       `;
       listEl.appendChild(li);
     });
-
-    // Click arrows
     listEl.querySelectorAll('.bump-up').forEach(btn=>btn.addEventListener('click',e=>bump(e,-1)));
     listEl.querySelectorAll('.bump-down').forEach(btn=>btn.addEventListener('click',e=>bump(e,+1)));
   }
 
-  function bump(e, delta){
+  function bump(e,delta){
     const li=e.currentTarget.closest('li'); const key=li?.dataset?.key;
-    if(!key) return;
-    const i=services.findIndex(s=>s.key===key); const j=i+delta;
+    const i=services.findIndex(x=>x.key===key); const j=i+delta;
     if(i<0||j<0||j>=services.length) return;
-    const [item]=services.splice(i,1); services.splice(j,0,item);
+    const [it]=services.splice(i,1); services.splice(j,0,it);
     render(); setDirty(true);
   }
 
-  // Drag & drop (initialized once)
-  let sortableInit=false;
+  function setDirty(d){ saveBtn.disabled=!d; saveBtn.textContent=d?'Save Order':'Saved'; }
+
   function ensureSortable(){
-    if(sortableInit || !window.Sortable) return;
+    if(sortableReady || !window.Sortable) return;
     Sortable.create(listEl,{
       handle:'.drag-handle',
       animation:180,
@@ -636,50 +496,40 @@ function initReorderWidget(){
         setDirty(true);
       }
     });
-    sortableInit=true;
-  }
-
-  function setDirty(isDirty){
-    saveBtn.disabled=!isDirty;
-    saveBtn.textContent=isDirty?'Save Order':'Saved';
+    sortableReady=true;
   }
 
   async function loadCatalog(){
-    const r=await fetch('/api/admin?r=catalog',{credentials:'include',cache:'no-store'});
-    if(!r.ok) throw new Error('Failed to load catalog');
-    const j=await r.json();
-    services = Array.isArray(j.services) ? j.services.slice() : [];
-    render(); ensureSortable(); setDirty(false);
+    try{
+      say('Loading…');
+      const r=await fetch('/api/admin?r=catalog',{credentials:'include',cache:'no-store'});
+      if(!r.ok){ if(r.status===401){ say('Please login to reorder.', false); } else { say('Failed to load catalog ('+r.status+').', false); } return; }
+      const j=await r.json();
+      services = Array.isArray(j.services) ? j.services.slice() : [];
+      render(); ensureSortable(); setDirty(false);
+      say(services.length? 'Drag to reorder, then save.' : 'No services in catalog.');
+    }catch(e){ console.error(e); say('Catalog error: '+(e.message||e), false); }
   }
 
   async function saveOrder(){
     try{
       saveBtn.disabled=true; saveBtn.textContent='Saving…';
-      // keep only stable fields; order is defined by array position
-      const payload = { services: services.map(s => ({ key:s.key, name:s.name, blurb:s.blurb, base:s.base, includes:s.includes||[], addOns:s.addOns||[] })) };
-      const res=await fetch('/api/admin?r=save-catalog',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        credentials:'include',
-        body:JSON.stringify(payload)
-      });
-      const j=await res.json().catch(()=> ({}));
-      if(!res.ok) throw new Error(j.error||'Save failed');
-      setDirty(false);
-    }catch(e){
-      console.error(e); alert(e.message||'Save failed'); setDirty(true);
-    }
+      const payload={ services: services.map(s=>({ key:s.key, name:s.name, blurb:s.blurb, base:s.base, includes:s.includes||[], addOns:s.addOns||[] })) };
+      const r=await fetch('/api/admin?r=save-catalog',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify(payload)});
+      const j=await r.json().catch(()=> ({}));
+      if(!r.ok) throw new Error(j.error||'Save failed');
+      setDirty(false); say('Order saved.');
+    }catch(e){ console.error(e); say('Save failed: '+(e.message||e), false); setDirty(true); }
   }
 
-  reloadBtn.addEventListener('click',()=>loadCatalog().catch(e=>{console.error(e);alert('Reload failed');}));
-  saveBtn.addEventListener('click',saveOrder);
+  reloadBtn.addEventListener('click', loadCatalog);
+  saveBtn.addEventListener('click', saveOrder);
 
-  // expose to Alpine (optional)
-  window.reloadCatalogOrder = () => loadCatalog().catch(()=>{});
-  window.saveCatalogOrder   = () => saveOrder();
+  // Expose for post-login reload
+  window.reloadOrder = loadCatalog;
 
-  // initial load
-  loadCatalog().catch(()=>{ /* stay quiet until login */ });
+  // Load after page ready (and after Sortable has had a chance to attach)
+  window.addEventListener('load', () => { ensureSortable(); loadCatalog(); });
 }
 </script>
 </body>
