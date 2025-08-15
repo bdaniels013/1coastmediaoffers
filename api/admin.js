@@ -294,6 +294,37 @@ if (resource === 'catalog' && req.method === 'GET') {
             price_monthly_cents = EXCLUDED.price_monthly_cents,
             updated_at = NOW()
         `;
+        // POST /api/admin?r=save-catalog
+if (r === 'save-catalog') {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // Enforce admin session (reuse your existing helper)
+  const user = await requireAdmin(req, res);
+  if (!user) return; // helper already sent 401/403
+
+  const { services } = req.body || {};
+  if (!Array.isArray(services)) {
+    return res.status(400).json({ error: 'services must be an array' });
+  }
+
+  // ⬇️ WRITE THE NEW ORDER TO THE SAME PLACE YOUR GET "catalog" READS FROM
+  // If your file already has a helper like setCatalog(services), call it here.
+  // Otherwise, if you're using Postgres with a single JSON row, something like:
+  //
+  //   await sql`
+  //     insert into site_catalog(id, services)
+  //     values (1, ${JSON.stringify(services)}::jsonb)
+  //     on conflict (id) do update set services = excluded.services, updated_at = now()
+  //   `;
+  //
+  // Replace the line below with your existing persistence call:
+  await saveCatalogToDB(services);  // <-- use your actual function
+
+  return res.status(200).json({ ok: true });
+}
+
         return res.status(200).json({ ok: true });
       }
       if (req.method === 'DELETE') {
