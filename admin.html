@@ -118,17 +118,25 @@
       <div class="flex items-center justify-between mb-3">
         <div>
           <h3 class="text-lg font-semibold">Homepage order</h3>
-          <p class="text-xs text-slate-500">Drag the handle or use ↑/↓. Click “Save Order”.</p>
+          <p class="text-xs text-slate-500">Drag the handle, use ↑/↓/Home/End, or tap the buttons. Click “Save Order”.</p>
         </div>
         <div class="flex gap-2">
           <button id="orderReload" class="rounded-lg ring-1 ring-slate-200 bg-white px-3 py-2 text-sm">Reload</button>
           <button id="orderSave" class="rounded-lg bg-indigo-600 text-white px-4 py-2 font-semibold disabled:opacity-50" disabled>Saved</button>
         </div>
       </div>
+
       <div class="card p-3 max-h-[60vh] overflow-auto">
         <ul id="orderList" class="grid gap-2"></ul>
       </div>
+
       <p id="orderMsg" class="mt-2 text-xs text-slate-500"></p>
+
+      <!-- Floating Save button -->
+      <button id="orderSaveFab"
+              class="hidden fixed bottom-6 right-6 rounded-full px-5 py-3 bg-indigo-600 text-white font-semibold shadow-lg shadow-indigo-600/30">
+        Save Order
+      </button>
     </section>
 
     <!-- Services -->
@@ -235,10 +243,15 @@
   </div>
 
 <script>
-/* ====================== CORE STATE (Alpine) ====================== */
-const API = (r, init={}) =>
-  fetch(`/api/admin?r=${encodeURIComponent(r)}`, { credentials: 'include', ...init });
+/* ====================== API HELPERS ====================== */
+const apiURL = (r, params={}) => {
+  const sp = new URLSearchParams({ r, ...params });
+  return '/api/admin?' + sp.toString();
+};
+const API = (r, init={}, params={}) =>
+  fetch(apiURL(r, params), { credentials: 'include', ...init });
 
+/* ====================== CORE STATE (Alpine) ====================== */
 function adminApp(){
   return {
     /* --- state --- */
@@ -253,13 +266,12 @@ function adminApp(){
     get filteredAddons(){ return this.addonFilter ? this.addons.filter(a=>a.service_id===this.addonFilter) : this.addons; },
 
     async boot(){
-      // Wait for DOM (ensures reorder widget nodes exist)
       if (document.readyState === 'loading') {
         await new Promise(r => document.addEventListener('DOMContentLoaded', r, { once:true }));
       }
       await this.checkAuth();
       if (this.authed) { await this.refreshAll(); }
-      // initialize reorder widget (it’s safe pre/post login)
+      // initialize reorder widget
       initReorderWidget();
     },
 
@@ -279,7 +291,6 @@ function adminApp(){
         if(!r.ok){ this.error='Invalid login'; return; }
         this.authed = true; this.me = this.login.username; this.login={username:'',password:''};
         await this.refreshAll();
-        // after login, load reorder list
         if (window.orderWidget?.reload) window.orderWidget.reload();
       }catch(e){ this.error = e.message || 'Login failed'; }
     },
@@ -340,7 +351,7 @@ function adminApp(){
     },
     async delService(id){
       if(!confirm('Delete service '+id+'? This also deletes its add-ons.')) return;
-      const r = await API('services'+'&id='+encodeURIComponent(id),{ method:'DELETE' });
+      const r = await API('services', { method:'DELETE' }, { id });
       if(!r.ok){ alert('Delete failed'); return; }
       await this.refreshAll();
       if (window.orderWidget?.reload) window.orderWidget.reload();
@@ -381,7 +392,7 @@ function adminApp(){
     },
     async delAddon(id){
       if(!confirm('Delete add-on '+id+'?')) return;
-      const r = await API('addons'+'&id='+encodeURIComponent(id),{ method:'DELETE' });
+      const r = await API('addons', { method:'DELETE' }, { id });
       if(!r.ok){ alert('Delete failed'); return; }
       await this.refreshAll();
     },
@@ -439,87 +450,141 @@ function adminApp(){
 
 <script>
 /* ====================== REORDER WIDGET (Catalog) ======================
-   Uses /api/admin?r=catalog (GET) -> { services:[ {key,name,blurb,base,includes,addOns} ] }
-        /api/admin?r=save-catalog (POST) with { services:[...] } to persist order
-   It is self-contained and robust even if you aren’t logged in (will prompt you).
+   GET  /api/admin?r=catalog      -> { services:[ {key,name,blurb,base,includes,addOns} ] }
+   POST /api/admin?r=save-catalog -> { services:[...] }
 */
 function initReorderWidget(){
-  const listEl   = document.getElementById('orderList');
-  const saveBtn  = document.getElementById('orderSave');
-  const reloadBtn= document.getElementById('orderReload');
-  const msgEl    = document.getElementById('orderMsg');
+  const listEl     = document.getElementById('orderList');
+  const saveBtn    = document.getElementById('orderSave');
+  const reloadBtn  = document.getElementById('orderReload');
+  const msgEl      = document.getElementById('orderMsg');
+  const saveFabBtn = document.getElementById('orderSaveFab');
   if(!listEl || !saveBtn || !reloadBtn) return;
 
-  let services = [];       // working array in the PUBLIC shape the homepage expects
+  let services = [];     // working array (public homepage shape)
   let sortableInit = false;
 
-  function say(msg, ok=true){ msgEl.textContent = msg; msgEl.style.color = ok ? '#64748b' : '#b91c1c'; }
-  const esc = s => String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;");
+  const esc = s => String(s)
+    .replaceAll('&','&amp;').replaceAll('<','&lt;')
+    .replaceAll('>','&gt;').replaceAll('"','&quot;')
+    .replaceAll("'","&#039;");
 
-  function setDirty(d){ saveBtn.disabled=!d; saveBtn.textContent = d ? 'Save Order' : 'Saved'; }
+  function say(msg, ok=true){
+    msgEl.textContent = msg;
+    msgEl.style.color = ok ? '#64748b' : '#b91c1c';
+  }
+
+  function setDirty(d){
+    saveBtn.disabled = !d;
+    saveBtn.textContent = d ? 'Save Order' : 'Saved';
+    if (saveFabBtn){
+      saveFabBtn.classList.toggle('hidden', !d);
+      saveFabBtn.textContent = d ? 'Save Order' : 'Saved';
+    }
+  }
 
   function render(){
-    listEl.innerHTML='';
-    services.forEach(s=>{
-      const li=document.createElement('li');
-      li.dataset.key=s.key;
-      li.className='group flex items-center gap-3 px-3 py-2 rounded-xl ring-1 ring-slate-200 bg-white hover:bg-slate-50';
-      li.innerHTML=`
-        <button type="button" class="drag-handle h-10 w-10 grid place-items-center rounded-lg bg-slate-100 ring-1 ring-slate-200 text-slate-600" aria-label="Drag to reorder">
+    listEl.innerHTML = '';
+    services.forEach((s) => {
+      const li = document.createElement('li');
+      li.dataset.key = s.key;
+      li.className = 'group flex items-center gap-3 px-3 py-2 rounded-xl ring-1 ring-slate-200 bg-white hover:bg-slate-50';
+      li.tabIndex = 0; // focusable for keyboard
+
+      li.innerHTML = `
+        <button type="button"
+                class="drag-handle h-10 w-10 grid place-items-center rounded-lg bg-slate-100 ring-1 ring-slate-200 text-slate-600"
+                aria-label="Drag to reorder (long-press on mobile)">
           <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
             <circle cx="6" cy="7" r="1.5"></circle><circle cx="12" cy="7" r="1.5"></circle><circle cx="18" cy="7" r="1.5"></circle>
             <circle cx="6" cy="12" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="18" cy="12" r="1.5"></circle>
             <circle cx="6" cy="17" r="1.5"></circle><circle cx="12" cy="17" r="1.5"></circle><circle cx="18" cy="17" r="1.5"></circle>
           </svg>
         </button>
+
         <div class="flex-1 min-w-0">
           <div class="font-medium truncate">${esc(s.name||'Untitled')}</div>
           <div class="text-xs text-slate-500 truncate">${esc(s.blurb||'')}</div>
         </div>
-        <div class="text-sm font-semibold text-slate-700 shrink-0">$${(s.base?.oneTime ?? 0)}</div>
-        <div class="hidden sm:flex gap-1 ml-2">
-          <button type="button" class="bump-up rounded-md px-2 py-1 ring-1 ring-slate-200 text-xs">↑</button>
-          <button type="button" class="bump-down rounded-md px-2 py-1 ring-1 ring-slate-200 text-xs">↓</button>
+
+        <div class="text-sm font-semibold text-slate-700 shrink-0 mr-1">$${(s.base?.oneTime ?? 0)}</div>
+
+        <div class="flex gap-1 ml-2">
+          <button type="button" class="btn-top rounded-md px-2 py-1 ring-1 ring-slate-200 text-xs" title="Move to top">⤒</button>
+          <button type="button" class="btn-up rounded-md px-2 py-1 ring-1 ring-slate-200 text-xs" title="Move up">↑</button>
+          <button type="button" class="btn-down rounded-md px-2 py-1 ring-1 ring-slate-200 text-xs" title="Move down">↓</button>
+          <button type="button" class="btn-bottom rounded-md px-2 py-1 ring-1 ring-slate-200 text-xs" title="Move to bottom">⤓</button>
         </div>
       `;
       listEl.appendChild(li);
     });
-    // arrow bump handlers
-    listEl.querySelectorAll('.bump-up').forEach(btn=>btn.addEventListener('click',e=>bump(e,-1)));
-    listEl.querySelectorAll('.bump-down').forEach(btn=>btn.addEventListener('click',e=>bump(e,+1)));
   }
 
-  function bump(e, delta){
-    const li = e.currentTarget.closest('li');
-    const key = li?.dataset?.key;
-    const i = services.findIndex(x=>x.key===key);
-    const j = i + delta;
-    if(i<0 || j<0 || j>=services.length) return;
+  function moveIndex(i, j){
+    if (i === j || i < 0 || j < 0 || i >= services.length || j >= services.length) return;
     const [item] = services.splice(i,1);
     services.splice(j,0,item);
     render();
     setDirty(true);
-    // keep item visible
     listEl.children[j]?.scrollIntoView({ block:'nearest' });
+    listEl.children[j]?.focus({ preventScroll:true });
+  }
+
+  function keyMoveHandler(e){
+    const li = e.target.closest('li');
+    if (!li) return;
+    const key = li.dataset.key;
+    const i   = services.findIndex(x=>x.key===key);
+    if (i === -1) return;
+
+    if (e.key === 'ArrowUp'){
+      e.preventDefault();
+      moveIndex(i, Math.max(0, i-1));
+    } else if (e.key === 'ArrowDown'){
+      e.preventDefault();
+      moveIndex(i, Math.min(services.length-1, i+1));
+    } else if (e.key === 'Home'){
+      e.preventDefault();
+      moveIndex(i, 0);
+    } else if (e.key === 'End'){
+      e.preventDefault();
+      moveIndex(i, services.length-1);
+    }
+  }
+
+  function clickHandler(e){
+    const li = e.target.closest('li');
+    if (!li) return;
+    const key = li.dataset.key;
+    const i   = services.findIndex(x=>x.key===key);
+    if (i === -1) return;
+
+    if (e.target.closest('.btn-up'))     return moveIndex(i, i-1);
+    if (e.target.closest('.btn-down'))   return moveIndex(i, i+1);
+    if (e.target.closest('.btn-top'))    return moveIndex(i, 0);
+    if (e.target.closest('.btn-bottom')) return moveIndex(i, services.length-1);
   }
 
   function ensureSortable(){
-    if(sortableInit || !window.Sortable) return;
-    Sortable.create(listEl,{
+    if (sortableInit || !window.Sortable) return;
+    Sortable.create(listEl, {
       handle: '.drag-handle',
       animation: 180,
       easing: 'cubic-bezier(.2,.7,.3,1)',
       ghostClass: 'drag-ghost',
       dragClass: 'drag-dragging',
-      forceFallback: true,           // better on some mobile browsers
-      fallbackTolerance: 3,
-      scroll: true,                  // *** auto-scroll while dragging ***
+      chosenClass: 'ring-2 ring-indigo-300',
+      forceFallback: true,          // better on some mobile browsers
+      delay: 120,                   // long-press to drag on touch
+      delayOnTouchOnly: true,
+      touchStartThreshold: 4,
+      scroll: true,                 // auto-scroll while dragging
       scrollSensitivity: 60,
       scrollSpeed: 14,
       bubbleScroll: true,
       onEnd(){
-        const keys = [...listEl.children].map(el=>el.dataset.key);
-        services.sort((a,b)=> keys.indexOf(a.key) - keys.indexOf(b.key));
+        const keys = [...listEl.children].map(el => el.dataset.key);
+        services.sort((a,b) => keys.indexOf(a.key) - keys.indexOf(b.key));
         setDirty(true);
       }
     });
@@ -537,40 +602,58 @@ function initReorderWidget(){
       }
       const j = await r.json();
       services = Array.isArray(j.services) ? j.services.slice() : [];
-      render(); ensureSortable(); setDirty(false);
-      say(services.length ? 'Drag to reorder, then save.' : 'No services in catalog.');
+      render();
+      ensureSortable();
+      setDirty(false);
+      say(services.length ? 'Drag / use keys / buttons, then save.' : 'No services in catalog.');
     }catch(e){
-      console.error(e); say('Catalog error: '+(e.message||e), false);
+      console.error(e);
+      say('Catalog error: '+(e.message||e), false);
     }
   }
 
   async function saveOrder(){
     try{
-      saveBtn.disabled=true; saveBtn.textContent='Saving…';
-      // Persist the entire service array in the same shape the homepage expects
-      const payload = { services: services.map(s => ({
-        key:s.key, name:s.name, blurb:s.blurb, base:s.base,
-        includes:Array.isArray(s.includes)?s.includes:[], addOns:Array.isArray(s.addOns)?s.addOns:[]
-      }))};
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving…';
+      if (saveFabBtn){ saveFabBtn.disabled = true; saveFabBtn.textContent = 'Saving…'; }
+
+      const payload = {
+        services: services.map(s => ({
+          key:s.key, name:s.name, blurb:s.blurb, base:s.base,
+          includes:Array.isArray(s.includes)?s.includes:[],
+          addOns:Array.isArray(s.addOns)?s.addOns:[]
+        }))
+      };
       const r = await fetch('/api/admin?r=save-catalog', {
-        method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include', body:JSON.stringify(payload)
+        method:'POST', headers:{'Content-Type':'application/json'},
+        credentials:'include', body:JSON.stringify(payload)
       });
       const j = await r.json().catch(()=> ({}));
       if(!r.ok) throw new Error(j.error || 'Save failed');
-      setDirty(false); say('Order saved.');
+
+      setDirty(false);
+      say('Order saved. Homepage will reflect the new order.');
     }catch(e){
-      console.error(e); say('Save failed: '+(e.message||e), false); setDirty(true);
+      console.error(e);
+      say('Save failed: '+(e.message||e), false);
+      setDirty(true);
+    }finally{
+      if (saveFabBtn){ saveFabBtn.disabled = false; saveFabBtn.textContent = 'Save Order'; }
     }
   }
 
-  // wire
+  // Wire once (delegated)
+  listEl.addEventListener('click', clickHandler);
+  listEl.addEventListener('keydown', keyMoveHandler);
   reloadBtn.addEventListener('click', loadCatalog);
   saveBtn.addEventListener('click', saveOrder);
+  if (saveFabBtn) saveFabBtn.addEventListener('click', saveOrder);
 
-  // expose small API for Alpine to call after login or CRUD
+  // Expose for Alpine
   window.orderWidget = { reload: loadCatalog };
 
-  // boot after full load so Sortable is present and the container can measure for scroll
+  // Boot after full load (ensures Sortable is ready)
   window.addEventListener('load', () => { ensureSortable(); loadCatalog(); });
 }
 </script>
