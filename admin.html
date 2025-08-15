@@ -674,5 +674,159 @@ function adminApp(){
 })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+  <script>
+(() => {
+  const listEl = document.getElementById('orderList');
+  const saveBtn = document.getElementById('saveOrderBtn');
+  const refreshBtn = document.getElementById('refreshOrderBtn');
+
+  // Local working copy of services in the public shape your homepage expects
+  let services = [];
+
+  // Grip icon (large hit target)
+  const gripSvg = `
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <circle cx="6"  cy="7"  r="1.5"></circle><circle cx="12" cy="7"  r="1.5"></circle><circle cx="18" cy="7"  r="1.5"></circle>
+      <circle cx="6"  cy="12" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="18" cy="12" r="1.5"></circle>
+      <circle cx="6"  cy="17" r="1.5"></circle><circle cx="12" cy="17" r="1.5"></circle><circle cx="18" cy="17" r="1.5"></circle>
+    </svg>`;
+
+  // ------------- render -------------
+
+  function render() {
+    listEl.innerHTML = '';
+    services.forEach((s) => {
+      const li = document.createElement('li');
+      li.className = 'group flex items-center gap-3 px-3 py-2 rounded-xl ring-1 ring-slate-200 bg-white hover:bg-slate-50';
+      li.dataset.key = s.key;
+      li.innerHTML = `
+        <button type="button"
+                class="drag-handle h-10 w-10 grid place-items-center rounded-lg bg-slate-100 ring-1 ring-slate-200 text-slate-600"
+                aria-label="Drag to reorder">
+          ${gripSvg}
+        </button>
+        <div class="flex-1 min-w-0">
+          <div class="font-medium truncate">${escapeHtml(s.name || 'Untitled')}</div>
+          <div class="text-xs text-slate-500 truncate">${escapeHtml(s.blurb || '')}</div>
+        </div>
+        <div class="text-sm font-semibold text-slate-700 shrink-0">$${(s.base?.oneTime ?? 0)}</div>
+        <div class="hidden sm:flex gap-1 ml-2">
+          <button type="button" class="reorder-up rounded-md px-2 py-1 ring-1 ring-slate-200 text-xs">↑</button>
+          <button type="button" class="reorder-down rounded-md px-2 py-1 ring-1 ring-slate-200 text-xs">↓</button>
+        </div>
+      `;
+      listEl.appendChild(li);
+    });
+
+    // Keyboard / click reordering
+    listEl.querySelectorAll('.reorder-up').forEach(btn =>
+      btn.addEventListener('click', (e) => bump(e, -1))
+    );
+    listEl.querySelectorAll('.reorder-down').forEach(btn =>
+      btn.addEventListener('click', (e) => bump(e, +1))
+    );
+  }
+
+  function bump(e, delta) {
+    const li = e.currentTarget.closest('li');
+    const key = li?.dataset?.key;
+    if (!key) return;
+    const i = services.findIndex(s => s.key === key);
+    const j = i + delta;
+    if (i < 0 || j < 0 || j >= services.length) return;
+    const [item] = services.splice(i,1);
+    services.splice(j,0,item);
+    render();
+    setDirty(true);
+  }
+
+  // ------------- drag -------------
+
+  function initSortable() {
+    Sortable.create(listEl, {
+      handle: '.drag-handle',
+      animation: 180,
+      easing: 'cubic-bezier(.2,.7,.3,1)',
+      fallbackOnBody: true,
+      swapThreshold: 0.65,
+      ghostClass: 'drag-ghost',
+      dragClass: 'drag-dragging',
+      onEnd() {
+        // DOM -> array order
+        const keys = Array.from(listEl.children).map(el => el.dataset.key);
+        services.sort((a,b) => keys.indexOf(a.key) - keys.indexOf(b.key));
+        setDirty(true);
+      }
+    });
+  }
+
+  // ------------- data -------------
+
+  function escapeHtml(s) {
+    return String(s)
+      .replaceAll('&','&amp;')
+      .replaceAll('<','&lt;')
+      .replaceAll('>','&gt;')
+      .replaceAll('"','&quot;')
+      .replaceAll("'",'&#039;');
+  }
+
+  async function loadCatalog() {
+    // use admin snapshot (public) — you’re already logged in for saving
+    const r = await fetch('/api/admin?r=catalog', { cache: 'no-store' });
+    if (!r.ok) throw new Error('Failed to load catalog');
+    const j = await r.json();
+    if (!Array.isArray(j.services)) throw new Error('Bad catalog shape');
+    services = j.services.slice();
+    render();
+    // Only create Sortable once
+    if (!listEl._sortableInit) {
+      initSortable();
+      listEl._sortableInit = true;
+    }
+    setDirty(false);
+  }
+
+  function setDirty(isDirty) {
+    if (!saveBtn) return;
+    saveBtn.disabled = !isDirty;
+    saveBtn.textContent = isDirty ? 'Save Order' : 'Saved';
+  }
+
+  // ------------- actions -------------
+
+  window.reloadCatalogOrder = () => loadCatalog().catch(err => {
+    console.error(err);
+    alert(err.message || 'Reload failed');
+  });
+
+  window.saveCatalogOrder = async () => {
+    try {
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving…';
+
+      const res = await fetch('/api/admin?r=save-catalog', {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify({ services })
+      });
+      const j = await res.json().catch(()=> ({}));
+      if (!res.ok) throw new Error(j.error || 'Save failed');
+
+      setDirty(false);
+    } catch (e) {
+      console.error(e);
+      alert(e.message || 'Save failed');
+      setDirty(true);
+    }
+  };
+
+  // boot
+  loadCatalog().catch(err => {
+    console.error(err);
+    // Render nothing but keep the page usable
+  });
+})();
+</script>
 </body>
 </html>
