@@ -110,9 +110,70 @@ module.exports = async (req, res) => {
     const resource = req.query.r;
 
     // -------- PUBLIC ROUTES --------
-    if (resource === 'catalog' && req.method === 'GET') {
-      return await getCatalog(res);
+    // --- replace just the catalog section inside /api/admin.js ---
+
+// PUBLIC ROUTE: GET /api/admin?r=catalog
+if (resource === 'catalog' && req.method === 'GET') {
+  // Pull raw rows
+  const servicesRes = await safeQuery(sql`
+    SELECT id, name, blurb, base_one_time_cents, base_monthly_cents, includes
+    FROM services
+    ORDER BY name ASC
+  `);
+
+  const addonsRes = await safeQuery(sql`
+    SELECT id, service_id, label, description, short, badge, popular,
+           price_one_time_cents, price_monthly_cents
+    FROM addons
+    ORDER BY label ASC
+  `);
+
+  // Build a quick index of add-ons by parent service_id
+  const addonsByService = {};
+  for (const a of addonsRes.rows || []) {
+    const sid = String(a.service_id);
+    if (!addonsByService[sid]) addonsByService[sid] = [];
+    addonsByService[sid].push({
+      id: String(a.id),
+      label: a.label || '',
+      desc: a.description || '',
+      short: a.short || '',
+      badge: a.badge || '',
+      popular: !!a.popular,
+      // prices in DOLLARS (frontend expects dollars, not cents)
+      price: {
+        oneTime: Math.round((a.price_one_time_cents || 0) / 100),
+        monthly: Math.round((a.price_monthly_cents || 0) / 100),
+      }
+    });
+  }
+
+  // Coerce DB rows into the exact shape the UI expects
+  const services = (servicesRes.rows || []).map((s) => {
+    // includes may be jsonb (object/array) or text — coerce safely
+    let inc = [];
+    if (Array.isArray(s.includes)) inc = s.includes;
+    else if (typeof s.includes === 'string') {
+      try { inc = JSON.parse(s.includes) || []; } catch { inc = []; }
     }
+
+    const key = String(s.id); // use the DB id as the stable key (can be uuid, slug, etc.)
+    return {
+      key,
+      name: s.name || 'Untitled',
+      blurb: s.blurb || '',
+      base: {
+        oneTime: Math.round((s.base_one_time_cents || 0) / 100),
+        monthly: Math.round((s.base_monthly_cents || 0) / 100),
+      },
+      includes: inc,
+      addOns: addonsByService[key] || []
+    };
+  });
+
+  return res.status(200).json({ services });
+}
+
 
     if (resource === 'login' && req.method === 'POST') {
       const { username, password } = req.body || {};
