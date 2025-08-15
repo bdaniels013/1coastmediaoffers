@@ -797,10 +797,22 @@
           }
           this.flash(`Saved ${this.quoteFormat.toUpperCase()} quote`);
         },
+
+        // FIXED: prevent blank PDFs by rendering from a real, off-screen node
         async generatePDF(filename='quote.pdf'){
           const src = document.createElement('div');
           src.innerHTML = this.buildQuoteHTML();
+          Object.assign(src.style, {
+            position: 'fixed',
+            left: '-10000px',
+            top: '0',
+            width: '720px',
+            maxWidth: '720px',
+            background: '#ffffff',
+            zIndex: '-1'
+          });
           document.body.appendChild(src);
+
           const opt = {
             margin:       10,
             filename,
@@ -808,87 +820,126 @@
             html2canvas:  { scale: 2, useCORS: true },
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
           };
+
           try{
-            await html2pdf().from(src).set(opt).save();
+            await html2pdf().set(opt).from(src).save();
+          }catch(e){
+            console.error('PDF generation failed:', e);
+            this.flash('PDF failed to generate');
           }finally{
-            src.remove();
+            // keep the node briefly for engines where save() isn’t strictly awaitable
+            setTimeout(()=> src.remove(), 1200);
           }
         },
+
+        // FIXED: robust DOCX creation & download
         async generateDocx(filename='quote.docx'){
           const d = window.docx;
-          if(!d){ console.warn('docx library missing'); return; }
-          const payload = this.buildQuotePayload();
+          if(!d){
+            console.warn('docx library not loaded');
+            this.flash('Word generator not loaded');
+            return;
+          }
+
+          const payload   = this.buildQuotePayload();
           const planLabel = this.plan === 'monthly' ? 'Monthly' : 'One-time';
-          const fmt = n => this.fmtUSD(n);
+          const fmt       = n => this.fmtUSD(n);
 
           const paras = [];
           paras.push(new d.Paragraph({ text:'1CoastMedia — Quote', heading:d.HeadingLevel.HEADING_1 }));
           paras.push(new d.Paragraph({ text:`Generated: ${new Date(payload.generatedAt).toLocaleString()} • Plan: ${planLabel}` }));
           paras.push(new d.Paragraph({ text:'' }));
 
+          // Base services
           paras.push(new d.Paragraph({ text:'Base Services', heading:d.HeadingLevel.HEADING_2 }));
           if(payload.services.length === 0){
             paras.push(new d.Paragraph({ text:'None selected', italics:true }));
           }else{
-            payload.services.forEach(s =>
-              paras.push(new d.Paragraph({ children:[
-                new d.TextRun({ text:`• ${s.name}`, bold:true }),
-                new d.TextRun({ text:` — ${fmt(s.price)}` })
-              ]}))
-            );
+            payload.services.forEach(s => {
+              paras.push(new d.Paragraph({
+                children: [
+                  new d.TextRun({ text:`• ${s.name}`, bold:true }),
+                  new d.TextRun({ text:` — ${fmt(s.price)}` })
+                ]
+              }));
+            });
           }
           paras.push(new d.Paragraph({ text:'' }));
 
+          // Add-ons
           paras.push(new d.Paragraph({ text:'Add-ons', heading:d.HeadingLevel.HEADING_2 }));
           if(payload.addons.length === 0){
             paras.push(new d.Paragraph({ text:'None selected', italics:true }));
           }else{
-            payload.addons.forEach(a =>
-              paras.push(new d.Paragraph({ children:[
-                new d.TextRun({ text:`• ${a.label}`, bold:true }),
-                new d.TextRun({ text:` — ${a.serviceName} — ${fmt(a.price)}` })
-              ]}))
-            );
+            payload.addons.forEach(a => {
+              paras.push(new d.Paragraph({
+                children: [
+                  new d.TextRun({ text:`• ${a.label}`, bold:true }),
+                  new d.TextRun({ text:` — ${a.serviceName} — ${fmt(a.price)}` })
+                ]
+              }));
+            });
           }
           paras.push(new d.Paragraph({ text:'' }));
 
-          paras.push(new d.Paragraph({ children:[
-            new d.TextRun({ text:`Estimated total ${this.plan==='monthly' ? '(per month)' : ''}: `, bold:true }),
-            new d.TextRun({ text:fmt(payload.total), bold:true })
-          ]}));
+          // Total
+          paras.push(new d.Paragraph({
+            children: [
+              new d.TextRun({ text:`Estimated total ${this.plan==='monthly' ? '(per month)' : ''}: `, bold:true }),
+              new d.TextRun({ text:fmt(payload.total), bold:true })
+            ]
+          }));
 
           if(this.quoteNote){
             paras.push(new d.Paragraph({ text:'' }));
-            paras.push(new d.Paragraph({ children:[
-              new d.TextRun({ text:'Note: ', bold:true }),
-              new d.TextRun({ text:this.quoteNote })
-            ]}));
+            paras.push(new d.Paragraph({
+              children: [
+                new d.TextRun({ text:'Note: ', bold:true }),
+                new d.TextRun({ text:this.quoteNote })
+              ]
+            }));
           }
 
           paras.push(new d.Paragraph({ text:'' }));
-          paras.push(new d.Paragraph({ children:[
-            new d.TextRun({ text:'This quote is a non-binding estimate. Final scope and timeline will be confirmed on kickoff.', italics:true, size:20, color:'6b7280' })
-          ]}));
+          paras.push(new d.Paragraph({
+            children: [ new d.TextRun({
+              text:'This quote is a non-binding estimate. Final scope and timeline will be confirmed on kickoff.',
+              italics:true, size:20, color:'6b7280'
+            })]
+          }));
 
-          const doc = new d.Document({ sections:[{ properties:{}, children: paras }] });
-          const blob = await d.Packer.toBlob(doc);
+          try{
+            const doc  = new d.Document({ sections:[{ properties:{}, children: paras }] });
+            const blob = await d.Packer.toBlob(doc);
 
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(blob);
-          a.download = filename;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          URL.revokeObjectURL(a.href);
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+              URL.revokeObjectURL(a.href);
+              a.remove();
+            }, 0);
+          }catch(e){
+            console.error('DOCX generation failed:', e);
+            this.flash('DOCX failed to generate');
+          }
         },
 
-        // ---------- QUOTE: email ----------
+        // ---------- QUOTE: email (no simultaneous download) ----------
         handleOpenEmailDraft(){
-          if(!this.emailValid(this.quoteEmail)){ this.flash('Enter a valid email'); return; }
+          if(!this.emailValid(this.quoteEmail)){
+            this.flash('Enter a valid email');
+            return;
+          }
+
+          // Ensure we have a fresh link
+          this.quoteLink = this.buildShareLink();
 
           const lines = [
             `Here’s your saved 1CoastMedia quote link:`,
-            this.quoteLink || this.buildShareLink(),
+            this.quoteLink,
             ``,
             `Summary:`,
             ...this.cartServices.map(k => `• ${this.serviceName(k)} — ${this.fmtUSD(this.serviceBase(k))}`),
@@ -897,21 +948,18 @@
             `Estimated total ${this.plan==='monthly'?'(per month)':''}: ${this.fmtUSD(this.total)}`,
             this.quoteNote ? `\nNote: ${this.quoteNote}` : ''
           ];
+
           const subj = `Your 1CoastMedia quote — ${this.plan==='monthly'?'monthly plan':'one-time'}`;
           const href = `mailto:${encodeURIComponent(this.quoteEmail)}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(lines.join('\n'))}`;
 
-          // Trigger mail app, then auto-download selected format
-          const a = document.createElement('a');
-          a.href = href;
-          a.style.display = 'none';
-          document.body.appendChild(a);
-          a.click();
-          setTimeout(() => a.remove(), 0);
-
-          setTimeout(() => this.downloadQuoteFile(), 350);
-
-          this.flash('Opening your email app…');
-          this.quoteOpen = false;
+          try {
+            window.location.assign(href);
+            this.flash('Opening your email app…');
+            this.quoteOpen = false;
+          } catch (e) {
+            console.error('mailto failed:', e);
+            this.flash('Could not open your email app');
+          }
         },
 
         tryLoadShared(){
@@ -1038,7 +1086,7 @@
 
       <div class="px-5 py-4 border-t flex flex-wrap justify-end gap-2">
         <button @click="quoteOpen=false" class="rounded-lg px-3 py-2 ring-1 ring-slate-200 bg-white">Cancel</button>
-        <button @click="downloadQuoteFile()" class="rounded-lg px-3 py-2 ring-1 ring-slate-200 bg-white">Save {{ quoteFormat.toUpperCase() }}</button>
+        <button @click="downloadQuoteFile()" class="rounded-lg px-3 py-2 ring-1 ring-slate-200 bg-white" x-text="`Save ${quoteFormat.toUpperCase()}`"></button>
         <button @click="handleOpenEmailDraft()" class="rounded-lg px-4 py-2 bg-indigo-600 text-white font-medium">Open Email Draft</button>
       </div>
     </section>
