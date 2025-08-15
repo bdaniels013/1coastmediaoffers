@@ -1,25 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Admin • 1CoastMedia</title>
 
-<link rel="icon" href="/assets/1coastmedia_logo_A_primary_mark_2048.jpg" />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<link rel="icon" href="/assets/1coastmedia_logo_A_primary_mark_2048.jpg"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 
 <!-- Tailwind (admin-only) -->
 <script src="https://cdn.tailwindcss.com"></script>
-<script>tailwind.config={theme:{extend:{}}};</script>
+<script>tailwind.config={theme:{extend:{}}}</script>
 
-<!-- Alpine (state) -->
+<!-- Alpine for state -->
 <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-<!-- Sortable (drag & drop) -->
+<!-- Sortable for drag & drop -->
 <script defer src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 
 <style>
-  [x-cloak]{display:none !important}
+  [x-cloak]{display:none!important}
   body{font-family:Inter,ui-sans-serif,system-ui}
   .card{background:#fff;border:1px solid rgba(15,23,42,.08);border-radius:1rem;box-shadow:0 10px 28px rgba(2,6,23,.06)}
   .input{width:100%;border:1px solid rgba(15,23,42,.12);border-radius:.5rem;padding:.6rem .8rem}
@@ -31,7 +31,7 @@
 </style>
 </head>
 
-<body class="bg-slate-50" x-data="adminApp()" x-init="init()" x-cloak>
+<body class="bg-slate-50" x-data="adminApp()" x-init="boot()" x-cloak>
   <!-- Top bar -->
   <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200">
     <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
@@ -59,8 +59,8 @@
       <h1 class="text-xl font-bold">Admin login</h1>
       <p class="text-sm text-slate-500 mt-1">Use the credentials set in Vercel env vars.</p>
       <div class="mt-4 space-y-3">
-        <div><label class="label">Username</label><input x-model="login.username" class="input" /></div>
-        <div><label class="label">Password</label><input x-model="login.password" type="password" class="input" /></div>
+        <div><label class="label">Username</label><input x-model="login.username" class="input" autocomplete="username"/></div>
+        <div><label class="label">Password</label><input x-model="login.password" type="password" class="input" autocomplete="current-password"/></div>
         <button @click="doLogin" class="w-full mt-2 rounded bg-indigo-600 text-white font-semibold px-4 py-2">Sign in</button>
       </div>
       <p class="text-xs text-rose-600 mt-3" x-text="error"></p>
@@ -94,7 +94,9 @@
       <div class="flex items-center justify-between mb-2"><h2 class="text-lg font-bold">Recent Orders</h2></div>
       <div class="card overflow-auto">
         <table class="min-w-full text-sm">
-          <thead class="bg-slate-100 text-slate-600"><tr><th class="text-left p-2">Date</th><th class="text-left p-2">Customer</th><th class="text-left p-2">Plan</th><th class="text-left p-2">Status</th><th class="text-left p-2">Total</th></tr></thead>
+          <thead class="bg-slate-100 text-slate-600">
+            <tr><th class="text-left p-2">Date</th><th class="text-left p-2">Customer</th><th class="text-left p-2">Plan</th><th class="text-left p-2">Status</th><th class="text-left p-2">Total</th></tr>
+          </thead>
           <tbody>
             <template x-for="o in orders" :key="o.id">
               <tr class="border-t">
@@ -111,7 +113,7 @@
       </div>
     </section>
 
-    <!-- Reorder -->
+    <!-- Reorder Base Services -->
     <section>
       <div class="flex items-center justify-between mb-3">
         <div>
@@ -119,14 +121,14 @@
           <p class="text-xs text-slate-500">Drag the handle or use ↑/↓. Click “Save Order”.</p>
         </div>
         <div class="flex gap-2">
-          <button id="reloadOrder" class="rounded-lg ring-1 ring-slate-200 bg-white px-3 py-2 text-sm">Reload</button>
-          <button id="saveOrder" class="rounded-lg bg-indigo-600 text-white px-4 py-2 font-semibold disabled:opacity-50" disabled>Saved</button>
+          <button id="orderReload" class="rounded-lg ring-1 ring-slate-200 bg-white px-3 py-2 text-sm">Reload</button>
+          <button id="orderSave" class="rounded-lg bg-indigo-600 text-white px-4 py-2 font-semibold disabled:opacity-50" disabled>Saved</button>
         </div>
       </div>
       <div class="card p-3 max-h-[60vh] overflow-auto">
         <ul id="orderList" class="grid gap-2"></ul>
       </div>
-      <p id="orderNote" class="mt-2 text-xs text-slate-500"></p>
+      <p id="orderMsg" class="mt-2 text-xs text-slate-500"></p>
     </section>
 
     <!-- Services -->
@@ -188,7 +190,10 @@
   <!-- SERVICE MODAL -->
   <div class="fixed inset-0 bg-slate-900/50 z-50 hidden" :class="{'!block':modals.service}" x-transition>
     <div class="card p-5 max-w-2xl w-full mx-auto my-8 bg-white">
-      <div class="flex items-center justify-between"><h3 class="text-lg font-bold" x-text="serviceForm.id ? 'Edit Service' : 'New Service'"></h3><button class="h-9 w-9 rounded hover:bg-slate-100 grid place-items-center" @click="modals.service=false">✕</button></div>
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold" x-text="serviceForm.id ? 'Edit Service' : 'New Service'"></h3>
+        <button class="h-9 w-9 rounded hover:bg-slate-100 grid place-items-center" @click="modals.service=false">✕</button>
+      </div>
       <div class="grid md:grid-cols-2 gap-3 mt-3">
         <div><label class="label">Key (e.g. web)</label><input class="input" x-model.trim="serviceForm.id" :disabled="!!serviceForm._lockId"/></div>
         <div><label class="label">Name</label><input class="input" x-model.trim="serviceForm.name"/></div>
@@ -205,7 +210,10 @@
   <!-- ADDON MODAL -->
   <div class="fixed inset-0 bg-slate-900/50 z-50 hidden" :class="{'!block':modals.addon}" x-transition>
     <div class="card p-5 max-w-2xl w-full mx-auto my-8 bg-white">
-      <div class="flex items-center justify-between"><h3 class="text-lg font-bold" x-text="addonForm.id ? 'Edit Add-on' : 'New Add-on'"></h3><button class="h-9 w-9 rounded hover:bg-slate-100 grid place-items-center" @click="modals.addon=false">✕</button></div>
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold" x-text="addonForm.id ? 'Edit Add-on' : 'New Add-on'"></h3>
+        <button class="h-9 w-9 rounded hover:bg-slate-100 grid place-items-center" @click="modals.addon=false">✕</button>
+      </div>
       <div class="grid md:grid-cols-2 gap-3 mt-3">
         <div><label class="label">ID (e.g. web-seo)</label><input class="input" x-model.trim="addonForm.id" :disabled="!!addonForm._lockId"/></div>
         <div><label class="label">Service</label>
@@ -227,74 +235,78 @@
   </div>
 
 <script>
-/* ---------- Helpers ---------- */
-const api = (r, init={}) =>
-  fetch(`/api/admin?r=${encodeURIComponent(r)}`, { credentials:'include', ...init });
+/* ====================== CORE STATE (Alpine) ====================== */
+const API = (r, init={}) =>
+  fetch(`/api/admin?r=${encodeURIComponent(r)}`, { credentials: 'include', ...init });
 
 function adminApp(){
   return {
+    /* --- state --- */
     authed:false, me:null, error:'', globalError:'', formError:'', busy:false,
     login:{username:'',password:''},
-
     kpis:{revenue_cents:0,orders:0,customers:0,pageviews:0},
     orders:[], customers:[], leads:[], services:[], addons:[], addonFilter:'',
-
+    modals:{ service:false, addon:false },
     serviceForm:{id:'', _lockId:false, name:'', blurb:'', base_one_time_usd:0, base_monthly_usd:0, includes_csv:''},
     addonForm:{id:'', _lockId:false, service_id:'', label:'', description:'', short:'', badge:'', popular:false, price_one_time_usd:0, price_monthly_usd:0},
 
     get filteredAddons(){ return this.addonFilter ? this.addons.filter(a=>a.service_id===this.addonFilter) : this.addons; },
 
-    async init(){
+    async boot(){
+      // Wait for DOM (ensures reorder widget nodes exist)
+      if (document.readyState === 'loading') {
+        await new Promise(r => document.addEventListener('DOMContentLoaded', r, { once:true }));
+      }
       await this.checkAuth();
-      if(this.authed){ await this.refreshAll(); }
-      initReorder(); // safe to call anytime; it will wait for login/data
+      if (this.authed) { await this.refreshAll(); }
+      // initialize reorder widget (it’s safe pre/post login)
+      initReorderWidget();
     },
 
+    /* --- auth --- */
     async checkAuth(){
       try{
-        const r = await api('me');
-        if(!r.ok) throw new Error('Not authenticated');
+        const r = await API('me');
+        if(!r.ok) throw 0;
         const j = await r.json();
         this.me = j.user; this.authed = true; this.globalError = '';
-      }catch(e){
-        this.authed = false;
-        // keep login visible; don’t hard-fail
-      }
+      }catch{ this.authed = false; }
     },
-
     async doLogin(){
       try{
         this.error=''; this.globalError='';
-        const r = await api('login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(this.login)});
+        const r = await API('login',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(this.login) });
         if(!r.ok){ this.error='Invalid login'; return; }
         this.authed = true; this.me = this.login.username; this.login={username:'',password:''};
         await this.refreshAll();
-        if(window.reloadOrder) window.reloadOrder(); // load reorder list
-      }catch(e){ this.error=e.message || 'Login failed'; }
+        // after login, load reorder list
+        if (window.orderWidget?.reload) window.orderWidget.reload();
+      }catch(e){ this.error = e.message || 'Login failed'; }
     },
+    async logout(){ await API('logout'); location.reload(); },
 
-    async logout(){ await api('logout'); location.reload(); },
-
+    /* --- data load --- */
     async refreshAll(){
       try{
         const [m,o,c,l,s,a] = await Promise.all([
-          api('metrics').then(r=>r.ok?r.json():Promise.reject(r)),
-          api('orders').then(r=>r.ok?r.json():Promise.reject(r)),
-          api('customers').then(r=>r.ok?r.json():Promise.reject(r)),
-          api('leads').then(r=>r.ok?r.json():Promise.reject(r)),
-          api('services').then(r=>r.ok?r.json():Promise.reject(r)),
-          api('addons').then(r=>r.ok?r.json():Promise.reject(r)),
+          API('metrics').then(r=>r.ok?r.json():Promise.reject(r)),
+          API('orders').then(r=>r.ok?r.json():Promise.reject(r)),
+          API('customers').then(r=>r.ok?r.json():Promise.reject(r)),
+          API('leads').then(r=>r.ok?r.json():Promise.reject(r)),
+          API('services').then(r=>r.ok?r.json():Promise.reject(r)),
+          API('addons').then(r=>r.ok?r.json():Promise.reject(r)),
         ]);
-        this.kpis=m; this.orders=o; this.customers=c; this.leads=l; this.services=s; this.addons=a; this.globalError='';
+        this.kpis=m; this.orders=o; this.customers=c; this.leads=l; this.services=s; this.addons=a;
+        this.globalError='';
       }catch(e){
-        this.globalError = 'Failed to load dashboard data. Check /api/admin routes & auth.';
+        this.globalError = 'Failed to load dashboard data. Check /api/admin routes and credentials.';
       }
     },
 
-    // money (expects cents)
+    /* --- utils --- */
     fmtUSD(c){ return (Number(c||0)/100).toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}); },
 
-    // Service CRUD
+    /* --- service CRUD --- */
     openService(s=null){
       this.formError='';
       if(s){
@@ -304,10 +316,10 @@ function adminApp(){
           base_monthly_usd: Math.round((s.base_monthly_cents||0)/100),
           includes_csv: (s.includes||[]).join(', ')
         };
-      }else{
+      } else {
         this.serviceForm = {id:'', _lockId:false, name:'', blurb:'', base_one_time_usd:0, base_monthly_usd:0, includes_csv:''};
       }
-      this.modals = { ...this.modals, service:true };
+      this.modals.service=true;
     },
     async saveService(){
       try{
@@ -320,21 +332,21 @@ function adminApp(){
           includes: f.includes_csv.split(',').map(x=>x.trim()).filter(Boolean)
         };
         const method = f._lockId ? 'PUT' : 'POST';
-        const r = await api('services',{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+        const r = await API('services',{ method, headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
         if(!r.ok){ const e=await r.json().catch(()=>({})); throw new Error(e.error||'Save failed'); }
         this.modals.service=false; await this.refreshAll();
-        if(window.reloadOrder) window.reloadOrder();
+        if (window.orderWidget?.reload) window.orderWidget.reload();
       }catch(e){ this.formError=e.message; }
     },
     async delService(id){
       if(!confirm('Delete service '+id+'? This also deletes its add-ons.')) return;
-      const r = await api('services' + '&id=' + encodeURIComponent(id),{method:'DELETE'});
+      const r = await API('services'+'&id='+encodeURIComponent(id),{ method:'DELETE' });
       if(!r.ok){ alert('Delete failed'); return; }
       await this.refreshAll();
-      if(window.reloadOrder) window.reloadOrder();
+      if (window.orderWidget?.reload) window.orderWidget.reload();
     },
 
-    // Addon CRUD
+    /* --- addon CRUD --- */
     openAddon(a=null){
       this.formError='';
       const firstService = this.services[0]?.id || '';
@@ -346,10 +358,10 @@ function adminApp(){
           price_one_time_usd: Math.round((a.price_one_time_cents||0)/100),
           price_monthly_usd: Math.round((a.price_monthly_cents||0)/100)
         };
-      }else{
+      } else {
         this.addonForm = {id:'',_lockId:false,service_id:firstService,label:'',description:'',short:'',badge:'',popular:false,price_one_time_usd:0,price_monthly_usd:0};
       }
-      this.modals = { ...this.modals, addon:true };
+      this.modals.addon=true;
     },
     async saveAddon(){
       try{
@@ -362,19 +374,19 @@ function adminApp(){
           price_one_time_cents: Math.round(Number(f.price_one_time_usd||0)*100),
           price_monthly_cents: Math.round(Number(f.price_monthly_usd||0)*100)
         };
-        const r = await api('addons',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+        const r = await API('addons',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
         if(!r.ok){ const e=await r.json().catch(()=>({})); throw new Error(e.error||'Save failed'); }
         this.modals.addon=false; await this.refreshAll();
       }catch(e){ this.formError=e.message; }
     },
     async delAddon(id){
       if(!confirm('Delete add-on '+id+'?')) return;
-      const r = await api('addons' + '&id=' + encodeURIComponent(id),{method:'DELETE'});
+      const r = await API('addons'+'&id='+encodeURIComponent(id),{ method:'DELETE' });
       if(!r.ok){ alert('Delete failed'); return; }
       await this.refreshAll();
     },
 
-    // optional: seed from site’s current offerings
+    /* --- optional one-click seed (uses the public offerings) --- */
     siteCatalog:{
       services:[
         { key:'web', name:'Web & App', blurb:'Launch a clean, mobile-first site fast.', base:{oneTime:300, monthly:500}, includes:['Kickoff & setup','Landing page (3–5 sections)','Light copy help'] },
@@ -402,43 +414,49 @@ function adminApp(){
         ['web','web-brandkit','Brand Kit','Fonts, colors, components.','Consistent look','Brand',false,200,150],
       ]
     },
-
     async syncFromSite(){
       try{
         this.busy = true;
         for(const s of this.siteCatalog.services){
           const payload={ id:s.key, name:s.name, blurb:s.blurb||'', base_one_time_cents:Math.round((s.base?.oneTime||0)*100), base_monthly_cents:Math.round((s.base?.monthly||0)*100), includes:s.includes||[] };
-          const r = await api('services',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+          const r = await API('services',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
           if(!r.ok) throw new Error('Service upsert failed: '+s.key);
         }
         for(const a of this.siteCatalog.addons){
           const [service_id,id,label,description,short,badge,popular,oneTime,monthly]=a;
           const payload={ id,service_id,label,description,short,badge,popular:!!popular, price_one_time_cents:Math.round((oneTime||0)*100), price_monthly_cents:Math.round((monthly||0)*100) };
-          const r = await api('addons',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+          const r = await API('addons',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
           if(!r.ok) throw new Error('Add-on upsert failed: '+id);
         }
         await this.refreshAll();
-        if(window.reloadOrder) window.reloadOrder();
+        if (window.orderWidget?.reload) window.orderWidget.reload();
       }catch(e){ this.globalError = e.message || 'Sync failed'; }
       finally{ this.busy=false; }
     },
   }
 }
+</script>
 
-/* ---------- Reorder widget (self-contained) ---------- */
-function initReorder(){
-  const listEl = document.getElementById('orderList');
-  const saveBtn = document.getElementById('saveOrder');
-  const reloadBtn = document.getElementById('reloadOrder');
-  const noteEl = document.getElementById('orderNote');
+<script>
+/* ====================== REORDER WIDGET (Catalog) ======================
+   Uses /api/admin?r=catalog (GET) -> { services:[ {key,name,blurb,base,includes,addOns} ] }
+        /api/admin?r=save-catalog (POST) with { services:[...] } to persist order
+   It is self-contained and robust even if you aren’t logged in (will prompt you).
+*/
+function initReorderWidget(){
+  const listEl   = document.getElementById('orderList');
+  const saveBtn  = document.getElementById('orderSave');
+  const reloadBtn= document.getElementById('orderReload');
+  const msgEl    = document.getElementById('orderMsg');
   if(!listEl || !saveBtn || !reloadBtn) return;
 
-  let services = [];
-  let sortableReady = false;
+  let services = [];       // working array in the PUBLIC shape the homepage expects
+  let sortableInit = false;
 
-  function say(msg, ok=true){ if(!noteEl) return; noteEl.textContent = msg; noteEl.style.color = ok ? '#64748b' : '#b91c1c'; }
+  function say(msg, ok=true){ msgEl.textContent = msg; msgEl.style.color = ok ? '#64748b' : '#b91c1c'; }
+  const esc = s => String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;");
 
-  function esc(s){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;'); }
+  function setDirty(d){ saveBtn.disabled=!d; saveBtn.textContent = d ? 'Save Order' : 'Saved'; }
 
   function render(){
     listEl.innerHTML='';
@@ -449,9 +467,9 @@ function initReorder(){
       li.innerHTML=`
         <button type="button" class="drag-handle h-10 w-10 grid place-items-center rounded-lg bg-slate-100 ring-1 ring-slate-200 text-slate-600" aria-label="Drag to reorder">
           <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-            <circle cx="6"  cy="7"  r="1.5"></circle><circle cx="12" cy="7"  r="1.5"></circle><circle cx="18" cy="7"  r="1.5"></circle>
-            <circle cx="6"  cy="12" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="18" cy="12" r="1.5"></circle>
-            <circle cx="6"  cy="17" r="1.5"></circle><circle cx="12" cy="17" r="1.5"></circle><circle cx="18" cy="17" r="1.5"></circle>
+            <circle cx="6" cy="7" r="1.5"></circle><circle cx="12" cy="7" r="1.5"></circle><circle cx="18" cy="7" r="1.5"></circle>
+            <circle cx="6" cy="12" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="18" cy="12" r="1.5"></circle>
+            <circle cx="6" cy="17" r="1.5"></circle><circle cx="12" cy="17" r="1.5"></circle><circle cx="18" cy="17" r="1.5"></circle>
           </svg>
         </button>
         <div class="flex-1 min-w-0">
@@ -466,69 +484,93 @@ function initReorder(){
       `;
       listEl.appendChild(li);
     });
+    // arrow bump handlers
     listEl.querySelectorAll('.bump-up').forEach(btn=>btn.addEventListener('click',e=>bump(e,-1)));
     listEl.querySelectorAll('.bump-down').forEach(btn=>btn.addEventListener('click',e=>bump(e,+1)));
   }
 
-  function bump(e,delta){
-    const li=e.currentTarget.closest('li'); const key=li?.dataset?.key;
-    const i=services.findIndex(x=>x.key===key); const j=i+delta;
-    if(i<0||j<0||j>=services.length) return;
-    const [it]=services.splice(i,1); services.splice(j,0,it);
-    render(); setDirty(true);
+  function bump(e, delta){
+    const li = e.currentTarget.closest('li');
+    const key = li?.dataset?.key;
+    const i = services.findIndex(x=>x.key===key);
+    const j = i + delta;
+    if(i<0 || j<0 || j>=services.length) return;
+    const [item] = services.splice(i,1);
+    services.splice(j,0,item);
+    render();
+    setDirty(true);
+    // keep item visible
+    listEl.children[j]?.scrollIntoView({ block:'nearest' });
   }
 
-  function setDirty(d){ saveBtn.disabled=!d; saveBtn.textContent=d?'Save Order':'Saved'; }
-
   function ensureSortable(){
-    if(sortableReady || !window.Sortable) return;
+    if(sortableInit || !window.Sortable) return;
     Sortable.create(listEl,{
-      handle:'.drag-handle',
-      animation:180,
-      easing:'cubic-bezier(.2,.7,.3,1)',
-      fallbackOnBody:true,
-      swapThreshold:0.65,
-      ghostClass:'drag-ghost',
-      dragClass:'drag-dragging',
+      handle: '.drag-handle',
+      animation: 180,
+      easing: 'cubic-bezier(.2,.7,.3,1)',
+      ghostClass: 'drag-ghost',
+      dragClass: 'drag-dragging',
+      forceFallback: true,           // better on some mobile browsers
+      fallbackTolerance: 3,
+      scroll: true,                  // *** auto-scroll while dragging ***
+      scrollSensitivity: 60,
+      scrollSpeed: 14,
+      bubbleScroll: true,
       onEnd(){
-        const keys=[...listEl.children].map(el=>el.dataset.key);
-        services.sort((a,b)=>keys.indexOf(a.key)-keys.indexOf(b.key));
+        const keys = [...listEl.children].map(el=>el.dataset.key);
+        services.sort((a,b)=> keys.indexOf(a.key) - keys.indexOf(b.key));
         setDirty(true);
       }
     });
-    sortableReady=true;
+    sortableInit = true;
   }
 
   async function loadCatalog(){
     try{
       say('Loading…');
-      const r=await fetch('/api/admin?r=catalog',{credentials:'include',cache:'no-store'});
-      if(!r.ok){ if(r.status===401){ say('Please login to reorder.', false); } else { say('Failed to load catalog ('+r.status+').', false); } return; }
-      const j=await r.json();
+      const r = await fetch('/api/admin?r=catalog', { credentials:'include', cache:'no-store' });
+      if(!r.ok){
+        if(r.status===401){ say('Please login to reorder.', false); }
+        else { say('Failed to load catalog ('+r.status+').', false); }
+        return;
+      }
+      const j = await r.json();
       services = Array.isArray(j.services) ? j.services.slice() : [];
       render(); ensureSortable(); setDirty(false);
-      say(services.length? 'Drag to reorder, then save.' : 'No services in catalog.');
-    }catch(e){ console.error(e); say('Catalog error: '+(e.message||e), false); }
+      say(services.length ? 'Drag to reorder, then save.' : 'No services in catalog.');
+    }catch(e){
+      console.error(e); say('Catalog error: '+(e.message||e), false);
+    }
   }
 
   async function saveOrder(){
     try{
       saveBtn.disabled=true; saveBtn.textContent='Saving…';
-      const payload={ services: services.map(s=>({ key:s.key, name:s.name, blurb:s.blurb, base:s.base, includes:s.includes||[], addOns:s.addOns||[] })) };
-      const r=await fetch('/api/admin?r=save-catalog',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify(payload)});
-      const j=await r.json().catch(()=> ({}));
-      if(!r.ok) throw new Error(j.error||'Save failed');
+      // Persist the entire service array in the same shape the homepage expects
+      const payload = { services: services.map(s => ({
+        key:s.key, name:s.name, blurb:s.blurb, base:s.base,
+        includes:Array.isArray(s.includes)?s.includes:[], addOns:Array.isArray(s.addOns)?s.addOns:[]
+      }))};
+      const r = await fetch('/api/admin?r=save-catalog', {
+        method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include', body:JSON.stringify(payload)
+      });
+      const j = await r.json().catch(()=> ({}));
+      if(!r.ok) throw new Error(j.error || 'Save failed');
       setDirty(false); say('Order saved.');
-    }catch(e){ console.error(e); say('Save failed: '+(e.message||e), false); setDirty(true); }
+    }catch(e){
+      console.error(e); say('Save failed: '+(e.message||e), false); setDirty(true);
+    }
   }
 
+  // wire
   reloadBtn.addEventListener('click', loadCatalog);
   saveBtn.addEventListener('click', saveOrder);
 
-  // Expose for post-login reload
-  window.reloadOrder = loadCatalog;
+  // expose small API for Alpine to call after login or CRUD
+  window.orderWidget = { reload: loadCatalog };
 
-  // Load after page ready (and after Sortable has had a chance to attach)
+  // boot after full load so Sortable is present and the container can measure for scroll
   window.addEventListener('load', () => { ensureSortable(); loadCatalog(); });
 }
 </script>
