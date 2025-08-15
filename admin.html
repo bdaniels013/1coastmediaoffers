@@ -15,19 +15,12 @@
 <!-- Alpine for state -->
 <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-<!-- Sortable for drag & drop -->
-<script defer src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
-
 <style>
   [x-cloak]{display:none!important}
   body{font-family:Inter,ui-sans-serif,system-ui}
   .card{background:#fff;border:1px solid rgba(15,23,42,.08);border-radius:1rem;box-shadow:0 10px 28px rgba(2,6,23,.06)}
   .input{width:100%;border:1px solid rgba(15,23,42,.12);border-radius:.5rem;padding:.6rem .8rem}
   .label{font-size:.75rem;color:#64748b}
-  .drag-handle{cursor:grab;touch-action:none;user-select:none}
-  .drag-handle:active{cursor:grabbing}
-  .drag-ghost{opacity:.6;transform:rotate(.5deg) scale(.995)}
-  .drag-dragging{opacity:.9}
 </style>
 </head>
 
@@ -113,34 +106,33 @@
       </div>
     </section>
 
-  <!-- Reorder Base Services (library-free drag & drop) -->
-<section>
-  <div class="flex items-center justify-between mb-3">
-    <div>
-      <h3 class="text-lg font-semibold">Homepage order</h3>
-      <p class="text-xs text-slate-500">
-        Drag a row, use ↑/↓/Home/End keys, or click ⤒ ↑ ↓ ⤓. Click “Save Order”.
-      </p>
-    </div>
-    <div class="flex gap-2">
-      <button id="orderReload" class="rounded-lg ring-1 ring-slate-200 bg-white px-3 py-2 text-sm">Reload</button>
-      <button id="orderSave" class="rounded-lg bg-indigo-600 text-white px-4 py-2 font-semibold disabled:opacity-50" disabled>Saved</button>
-    </div>
-  </div>
+    <!-- Reorder Base Services (library-free drag & drop + arrows + keyboard) -->
+    <section>
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h3 class="text-lg font-semibold">Homepage order</h3>
+          <p class="text-xs text-slate-500">
+            Drag a row, use ↑/↓/Home/End keys, or click ⤒ ↑ ↓ ⤓. Click “Save Order”.
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <button id="orderReload" class="rounded-lg ring-1 ring-slate-200 bg-white px-3 py-2 text-sm">Reload</button>
+          <button id="orderSave" class="rounded-lg bg-indigo-600 text-white px-4 py-2 font-semibold disabled:opacity-50" disabled>Saved</button>
+        </div>
+      </div>
 
-  <div class="card p-3 max-h-[60vh] overflow-auto">
-    <ul id="orderList" class="grid gap-2"></ul>
-  </div>
+      <div class="card p-3 max-h-[60vh] overflow-auto">
+        <ul id="orderList" class="grid gap-2"></ul>
+      </div>
 
-  <p id="orderMsg" class="mt-2 text-xs text-slate-500"></p>
+      <p id="orderMsg" class="mt-2 text-xs text-slate-500"></p>
 
-  <!-- Floating Save button for long lists / mobile -->
-  <button id="orderSaveFab"
-          class="hidden fixed bottom-6 right-6 rounded-full px-5 py-3 bg-indigo-600 text-white font-semibold shadow-lg shadow-indigo-600/30">
-    Save Order
-  </button>
-</section>
-
+      <!-- Floating Save button for long lists / mobile -->
+      <button id="orderSaveFab"
+              class="hidden fixed bottom-6 right-6 rounded-full px-5 py-3 bg-indigo-600 text-white font-semibold shadow-lg shadow-indigo-600/30">
+        Save Order
+      </button>
+    </section>
 
     <!-- Services -->
     <div class="card p-4">
@@ -198,50 +190,233 @@
     </div>
   </main>
 
-  <!-- SERVICE MODAL -->
+  <!-- SERVICE MODAL (friendlier) -->
   <div class="fixed inset-0 bg-slate-900/50 z-50 hidden" :class="{'!block':modals.service}" x-transition>
     <div class="card p-5 max-w-2xl w-full mx-auto my-8 bg-white">
       <div class="flex items-center justify-between">
-        <h3 class="text-lg font-bold" x-text="serviceForm.id ? 'Edit Service' : 'New Service'"></h3>
-        <button class="h-9 w-9 rounded hover:bg-slate-100 grid place-items-center" @click="modals.service=false">✕</button>
+        <h3 class="text-lg font-bold" x-text="serviceForm._lockId ? 'Edit Base Service' : 'New Base Service'"></h3>
+        <button class="h-9 w-9 rounded hover:bg-slate-100 grid place-items-center" @click="modals.service=false" aria-label="Close">✕</button>
       </div>
-      <div class="grid md:grid-cols-2 gap-3 mt-3">
-        <div><label class="label">Key (e.g. web)</label><input class="input" x-model.trim="serviceForm.id" :disabled="!!serviceForm._lockId"/></div>
-        <div><label class="label">Name</label><input class="input" x-model.trim="serviceForm.name"/></div>
-        <div class="md:col-span-2"><label class="label">Blurb</label><input class="input" x-model.trim="serviceForm.blurb"/></div>
-        <div><label class="label">Base (One-time) USD</label><input type="number" class="input" x-model.number="serviceForm.base_one_time_usd"/></div>
-        <div><label class="label">Base (Monthly) USD</label><input type="number" class="input" x-model.number="serviceForm.base_monthly_usd"/></div>
-        <div class="md:col-span-2"><label class="label">Includes (comma separated)</label><input class="input" x-model.trim="serviceForm.includes_csv" placeholder="Kickoff & setup, Landing page (3–5 sections), Light copy help"/></div>
+
+      <p class="text-sm text-slate-500 mt-1">
+        A “Base Service” is one of the four tiles on your homepage (Web & App, Video/Audio, Events, UGC). Prices are in <b>USD</b>.
+      </p>
+
+      <div class="grid md:grid-cols-2 gap-4 mt-4">
+        <div class="md:col-span-2">
+          <label class="label">Public Name <span class="text-rose-600">*</span></label>
+          <input class="input" x-model.trim="serviceForm.name" placeholder="e.g., Web & App" @input="maybeSuggestServiceKey()"/>
+          <p class="text-xs text-slate-500 mt-1">What customers will see on the tile.</p>
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="label">Short Description (1 sentence)</label>
+          <input class="input" x-model.trim="serviceForm.blurb" placeholder="e.g., Launch a clean, mobile-first site fast."/>
+          <div class="flex items-center justify-between text-xs text-slate-500 mt-1">
+            <span>Keep it short and benefit-focused.</span>
+            <span x-text="serviceForm.blurb?.length || 0"></span>
+          </div>
+        </div>
+
+        <div>
+          <label class="label">One-time Base Price (USD)</label>
+          <input type="number" min="0" class="input" x-model.number="serviceForm.base_one_time_usd" placeholder="e.g., 300"/>
+          <p class="text-xs text-slate-500 mt-1">Shown when visitors pick “One-time”.</p>
+        </div>
+
+        <div>
+          <label class="label">Monthly Base Price (USD)</label>
+          <input type="number" min="0" class="input" x-model.number="serviceForm.base_monthly_usd" placeholder="e.g., 500"/>
+          <p class="text-xs text-slate-500 mt-1">Shown when visitors pick “Monthly”.</p>
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="label">What’s included (bullets)</label>
+          <div class="flex gap-2 mt-1">
+            <input class="input" x-model.trim="serviceForm.includes_input" placeholder="e.g., Kickoff & setup" @keydown.enter.prevent="addIncludeChip()"/>
+            <button class="px-3 rounded bg-slate-900 text-white text-sm" type="button" @click="addIncludeChip()">Add</button>
+          </div>
+
+          <!-- Quick examples -->
+          <div class="flex flex-wrap gap-2 mt-2">
+            <button type="button" class="px-2 py-1 text-xs rounded ring-1 ring-slate-200" @click="quickInclude('Kickoff & setup')">Kickoff & setup</button>
+            <button type="button" class="px-2 py-1 text-xs rounded ring-1 ring-slate-200" @click="quickInclude('Landing page (3–5 sections)')">Landing page (3–5 sections)</button>
+            <button type="button" class="px-2 py-1 text-xs rounded ring-1 ring-slate-200" @click="quickInclude('Light copy help')">Light copy help</button>
+          </div>
+
+          <!-- Chips -->
+          <div class="mt-2 flex flex-wrap gap-2">
+            <template x-for="(it, i) in serviceForm.includes_list" :key="'inc-'+i">
+              <span class="inline-flex items-center gap-2 px-2 py-1 text-xs rounded-full bg-slate-100 ring-1 ring-slate-200">
+                <span x-text="it"></span>
+                <button class="text-slate-500 hover:text-rose-600" @click="removeIncludeChip(i)" aria-label="Remove">✕</button>
+              </span>
+            </template>
+            <span x-show="serviceForm.includes_list.length===0" class="text-xs text-slate-400">No bullets yet.</span>
+          </div>
+        </div>
+
+        <div class="md:col-span-2">
+          <details class="rounded-lg ring-1 ring-slate-200 bg-slate-50 px-3 py-2">
+            <summary class="cursor-pointer text-sm font-semibold">Advanced: Service Key (ID)</summary>
+            <div class="mt-2">
+              <label class="label">Key (no spaces, used internally)</label>
+              <input class="input" x-model.trim="serviceForm.id" :disabled="!!serviceForm._lockId" placeholder="e.g., web"/>
+              <p class="text-xs text-slate-500 mt-1">Keep as-is for existing services. Changing a live key can orphan related add-ons.</p>
+            </div>
+          </details>
+        </div>
       </div>
-      <div class="mt-4 flex justify-end gap-2"><button class="px-3 py-2 rounded border" @click="modals.service=false">Cancel</button><button class="px-3 py-2 rounded bg-indigo-600 text-white" @click="saveService">Save</button></div>
+
+      <!-- Live preview -->
+      <div class="mt-4">
+        <div class="text-xs text-slate-500 mb-1">Preview</div>
+        <div class="rounded-lg ring-1 ring-slate-200 p-3">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-[11px] uppercase rounded bg-slate-100 ring-1 ring-slate-200 px-2 py-0.5 inline-block">One-time / Monthly</div>
+              <div class="text-base font-semibold mt-1" x-text="serviceForm.name || 'Untitled'"></div>
+              <div class="text-sm text-slate-600" x-text="serviceForm.blurb || 'Short description appears here.'"></div>
+            </div>
+            <div class="text-right">
+              <div class="text-xs text-slate-500">Base</div>
+              <div class="font-bold" x-text="'$'+(serviceForm.base_one_time_usd||0) + ' / $' + (serviceForm.base_monthly_usd||0)"></div>
+            </div>
+          </div>
+          <ul class="mt-2 text-sm list-disc pl-5">
+            <template x-for="(it,i) in serviceForm.includes_list" :key="'pv-'+i">
+              <li x-text="it"></li>
+            </template>
+            <li x-show="serviceForm.includes_list.length===0" class="text-slate-400">No bullets yet.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-4 flex justify-end gap-2">
+        <button class="px-3 py-2 rounded border" @click="modals.service=false">Cancel</button>
+        <button class="px-3 py-2 rounded bg-indigo-600 text-white disabled:opacity-50"
+                :disabled="!canSaveService()" @click="saveService">Save</button>
+      </div>
       <p class="text-xs text-rose-600 mt-2" x-text="formError"></p>
     </div>
   </div>
-  
 
-  <!-- ADDON MODAL -->
+  <!-- ADD-ON MODAL (friendlier) -->
   <div class="fixed inset-0 bg-slate-900/50 z-50 hidden" :class="{'!block':modals.addon}" x-transition>
     <div class="card p-5 max-w-2xl w-full mx-auto my-8 bg-white">
       <div class="flex items-center justify-between">
-        <h3 class="text-lg font-bold" x-text="addonForm.id ? 'Edit Add-on' : 'New Add-on'"></h3>
-        <button class="h-9 w-9 rounded hover:bg-slate-100 grid place-items-center" @click="modals.addon=false">✕</button>
+        <h3 class="text-lg font-bold" x-text="addonForm._lockId ? 'Edit Add-on' : 'New Add-on'"></h3>
+        <button class="h-9 w-9 rounded hover:bg-slate-100 grid place-items-center" @click="modals.addon=false" aria-label="Close">✕</button>
       </div>
-      <div class="grid md:grid-cols-2 gap-3 mt-3">
-        <div><label class="label">ID (e.g. web-seo)</label><input class="input" x-model.trim="addonForm.id" :disabled="!!addonForm._lockId"/></div>
-        <div><label class="label">Service</label>
-          <select class="input" x-model="addonForm.service_id">
-            <template x-for="s in services" :key="'sopt-'+s.id"><option :value="s.id" x-text="s.id"></option></template>
+
+      <p class="text-sm text-slate-500 mt-1">
+        Add-ons attach to a specific base service (e.g., “Web & App → SEO Basics”).
+      </p>
+
+      <div class="grid md:grid-cols-2 gap-4 mt-4">
+        <div class="md:col-span-2">
+          <label class="label">Which Base Service? <span class="text-rose-600">*</span></label>
+          <select class="input" x-model="addonForm.service_id" @change="maybeSuggestAddonId()">
+            <template x-for="s in services" :key="'sopt-'+s.id">
+              <option :value="s.id" x-text="s.name + ' (' + s.id + ')'"></option>
+            </template>
           </select>
+          <p class="text-xs text-slate-500 mt-1">Choose where this add-on will appear.</p>
         </div>
-        <div><label class="label">Label</label><input class="input" x-model.trim="addonForm.label"/></div>
-        <div><label class="label">Badge</label><input class="input" x-model.trim="addonForm.badge"/></div>
-        <div class="md:col-span-2"><label class="label">Short</label><input class="input" x-model.trim="addonForm.short"/></div>
-        <div class="md:col-span-2"><label class="label">Description</label><textarea class="input" x-model.trim="addonForm.description"></textarea></div>
-        <div><label class="label">One-time USD</label><input type="number" class="input" x-model.number="addonForm.price_one_time_usd"/></div>
-        <div><label class="label">Monthly USD</label><input type="number" class="input" x-model.number="addonForm.price_monthly_usd"/></div>
-        <div class="flex items-center gap-2"><input id="popular" type="checkbox" x-model="addonForm.popular"/><label for="popular" class="text-sm">Popular</label></div>
+
+        <div class="md:col-span-2">
+          <label class="label">Add-on Name <span class="text-rose-600">*</span></label>
+          <input class="input" x-model.trim="addonForm.label" placeholder="e.g., SEO Basics" @input="maybeSuggestAddonId()"/>
+          <p class="text-xs text-slate-500 mt-1">Short, customer-friendly name.</p>
+        </div>
+
+        <div>
+          <label class="label">Short Tagline (optional)</label>
+          <input class="input" x-model.trim="addonForm.short" placeholder="e.g., Quick search wins"/>
+          <div class="flex items-center justify-between text-xs text-slate-500 mt-1">
+            <span>Used as a brief hint in cards.</span>
+            <span x-text="addonForm.short?.length || 0"></span>
+          </div>
+        </div>
+
+        <div>
+          <label class="label">Badge (optional)</label>
+          <div class="flex gap-2">
+            <input class="input" x-model.trim="addonForm.badge" placeholder="e.g., Quick win"/>
+            <div class="hidden md:flex gap-1">
+              <button type="button" class="px-2 py-1 text-xs rounded ring-1 ring-slate-200" @click="addonForm.badge='Quick win'">Quick win</button>
+              <button type="button" class="px-2 py-1 text-xs rounded ring-1 ring-slate-200" @click="addonForm.badge='Premium'">Premium</button>
+              <button type="button" class="px-2 py-1 text-xs rounded ring-1 ring-slate-200" @click="addonForm.badge='Conversion'">Conversion</button>
+            </div>
+          </div>
+          <p class="text-xs text-slate-500 mt-1">Tiny label (e.g., “Premium”, “Quick win”).</p>
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="label">Detailed Description</label>
+          <textarea class="input" x-model.trim="addonForm.description" placeholder="What exactly is included, in a sentence or two."></textarea>
+          <div class="flex items-center justify-between text-xs text-slate-500 mt-1">
+            <span>Be specific about deliverables.</span>
+            <span x-text="addonForm.description?.length || 0"></span>
+          </div>
+        </div>
+
+        <div>
+          <label class="label">One-time Price (USD)</label>
+          <input type="number" min="0" class="input" x-model.number="addonForm.price_one_time_usd" placeholder="e.g., 150"/>
+        </div>
+
+        <div>
+          <label class="label">Monthly Price (USD)</label>
+          <input type="number" min="0" class="input" x-model.number="addonForm.price_monthly_usd" placeholder="e.g., 150"/>
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="inline-flex items-center gap-2 text-sm">
+            <input type="checkbox" x-model="addonForm.popular"/>
+            <span>Mark as <b>Popular</b></span>
+          </label>
+        </div>
+
+        <div class="md:col-span-2">
+          <details class="rounded-lg ring-1 ring-slate-200 bg-slate-50 px-3 py-2">
+            <summary class="cursor-pointer text-sm font-semibold">Advanced: Add-on ID</summary>
+            <div class="mt-2">
+              <label class="label">ID (no spaces, used internally)</label>
+              <input class="input" x-model.trim="addonForm.id" :disabled="!!addonForm._lockId" placeholder="e.g., web-seo"/>
+              <p class="text-xs text-slate-500 mt-1">Keep as-is for existing add-ons.</p>
+            </div>
+          </details>
+        </div>
       </div>
-      <div class="mt-4 flex justify-end gap-2"><button class="px-3 py-2 rounded border" @click="modals.addon=false">Cancel</button><button class="px-3 py-2 rounded bg-indigo-600 text-white" @click="saveAddon">Save</button></div>
+
+      <!-- Live preview -->
+      <div class="mt-4">
+        <div class="text-xs text-slate-500 mb-1">Preview</div>
+        <div class="rounded-lg ring-1 ring-slate-200 p-3">
+          <div class="flex items-center justify-between">
+            <div class="min-w-0">
+              <div class="font-medium truncate" x-text="addonForm.label || 'Add-on name'"></div>
+              <div class="text-[11px] text-slate-500 mt-0.5 inline-flex items-center gap-2">
+                <span class="rounded-full bg-slate-100 ring-1 ring-slate-200 px-2 py-0.5 uppercase tracking-wide" x-text="addonForm.badge || 'Badge'"></span>
+                <span class="rounded-full bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200 px-2 py-0.5" x-show="addonForm.popular">Popular</span>
+              </div>
+            </div>
+            <div class="text-sm font-semibold whitespace-nowrap">
+              <span x-text="'$'+(addonForm.price_one_time_usd||0)"></span>
+              <span class="text-slate-400"> / </span>
+              <span x-text="'$'+(addonForm.price_monthly_usd||0)"></span>
+            </div>
+          </div>
+          <div class="mt-2 text-xs text-slate-500" x-text="addonForm.description || 'Description appears here.'"></div>
+        </div>
+      </div>
+
+      <div class="mt-4 flex justify-end gap-2">
+        <button class="px-3 py-2 rounded border" @click="modals.addon=false">Cancel</button>
+        <button class="px-3 py-2 rounded bg-indigo-600 text-white disabled:opacity-50"
+                :disabled="!canSaveAddon()" @click="saveAddon">Save</button>
+      </div>
       <p class="text-xs text-rose-600 mt-2" x-text="formError"></p>
     </div>
   </div>
@@ -264,19 +439,34 @@ function adminApp(){
     kpis:{revenue_cents:0,orders:0,customers:0,pageviews:0},
     orders:[], customers:[], leads:[], services:[], addons:[], addonFilter:'',
     modals:{ service:false, addon:false },
-    serviceForm:{id:'', _lockId:false, name:'', blurb:'', base_one_time_usd:0, base_monthly_usd:0, includes_csv:''},
-    addonForm:{id:'', _lockId:false, service_id:'', label:'', description:'', short:'', badge:'', popular:false, price_one_time_usd:0, price_monthly_usd:0},
 
+    /* forms */
+    serviceForm:{
+      id:'', _lockId:false,
+      name:'', blurb:'',
+      base_one_time_usd:0, base_monthly_usd:0,
+      includes_list:[],
+      includes_input:''
+    },
+    addonForm:{
+      id:'', _lockId:false,
+      service_id:'', label:'',
+      description:'', short:'', badge:'',
+      popular:false,
+      price_one_time_usd:0, price_monthly_usd:0
+    },
+
+    /* derived */
     get filteredAddons(){ return this.addonFilter ? this.addons.filter(a=>a.service_id===this.addonFilter) : this.addons; },
 
+    /* boot */
     async boot(){
       if (document.readyState === 'loading') {
         await new Promise(r => document.addEventListener('DOMContentLoaded', r, { once:true }));
       }
       await this.checkAuth();
       if (this.authed) { await this.refreshAll(); }
-      // initialize reorder widget
-      initReorderWidget();
+      initReorderWidget(); // independent widget
     },
 
     /* --- auth --- */
@@ -320,38 +510,48 @@ function adminApp(){
 
     /* --- utils --- */
     fmtUSD(c){ return (Number(c||0)/100).toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}); },
+    slug(s){ return String(s||'').toLowerCase().trim().replace(/&/g,' and ').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); },
 
     /* --- service CRUD --- */
     openService(s=null){
       this.formError='';
       if(s){
         this.serviceForm = {
-          id:s.id, _lockId:true, name:s.name||'', blurb:s.blurb||'',
+          id:s.id, _lockId:true,
+          name:s.name||'', blurb:s.blurb||'',
           base_one_time_usd: Math.round((s.base_one_time_cents||0)/100),
           base_monthly_usd: Math.round((s.base_monthly_cents||0)/100),
-          includes_csv: (s.includes||[]).join(', ')
+          includes_list: Array.isArray(s.includes) ? s.includes.slice() : [],
+          includes_input:''
         };
       } else {
-        this.serviceForm = {id:'', _lockId:false, name:'', blurb:'', base_one_time_usd:0, base_monthly_usd:0, includes_csv:''};
+        this.serviceForm = {
+          id:'', _lockId:false,
+          name:'', blurb:'',
+          base_one_time_usd:0, base_monthly_usd:0,
+          includes_list:[], includes_input:''
+        };
       }
       this.modals.service=true;
     },
     async saveService(){
       try{
+        if(!this.canSaveService()){ this.formError='Please complete the required fields.'; return; }
         const f=this.serviceForm;
-        if(!f.id || !f.name){ this.formError='Key and Name are required'; return; }
         const payload={
-          id:f.id.trim(), name:f.name.trim(), blurb:f.blurb||'',
+          id:f.id.trim(),
+          name:f.name.trim(),
+          blurb:f.blurb||'',
           base_one_time_cents: Math.round(Number(f.base_one_time_usd||0)*100),
           base_monthly_cents: Math.round(Number(f.base_monthly_usd||0)*100),
-          includes: f.includes_csv.split(',').map(x=>x.trim()).filter(Boolean)
+          includes: Array.isArray(f.includes_list) ? f.includes_list : []
         };
         const method = f._lockId ? 'PUT' : 'POST';
         const r = await API('services',{ method, headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
         if(!r.ok){ const e=await r.json().catch(()=>({})); throw new Error(e.error||'Save failed'); }
         this.modals.service=false; await this.refreshAll();
         if (window.orderWidget?.reload) window.orderWidget.reload();
-      }catch(e){ this.formError=e.message; }
+      }catch(e){ this.formError=e.message || 'Save failed'; }
     },
     async delService(id){
       if(!confirm('Delete service '+id+'? This also deletes its add-ons.')) return;
@@ -359,6 +559,29 @@ function adminApp(){
       if(!r.ok){ alert('Delete failed'); return; }
       await this.refreshAll();
       if (window.orderWidget?.reload) window.orderWidget.reload();
+    },
+
+    addIncludeChip(){
+      const v = (this.serviceForm.includes_input||'').trim();
+      if(!v) return;
+      this.serviceForm.includes_list.push(v);
+      this.serviceForm.includes_input='';
+    },
+    removeIncludeChip(i){ this.serviceForm.includes_list.splice(i,1); },
+    quickInclude(text){
+      if(!this.serviceForm.includes_list.includes(text)){
+        this.serviceForm.includes_list.push(text);
+      }
+    },
+    maybeSuggestServiceKey(){
+      if (this.serviceForm._lockId) return;
+      if (!this.serviceForm.id) this.serviceForm.id = this.slug(this.serviceForm.name);
+    },
+    canSaveService(){
+      return !!(this.serviceForm.id || !this.serviceForm._lockId) // new needs an id
+        && !!this.serviceForm.name
+        && this.serviceForm.base_one_time_usd >= 0
+        && this.serviceForm.base_monthly_usd >= 0;
     },
 
     /* --- addon CRUD --- */
@@ -374,14 +597,18 @@ function adminApp(){
           price_monthly_usd: Math.round((a.price_monthly_cents||0)/100)
         };
       } else {
-        this.addonForm = {id:'',_lockId:false,service_id:firstService,label:'',description:'',short:'',badge:'',popular:false,price_one_time_usd:0,price_monthly_usd:0};
+        this.addonForm = {
+          id:'',_lockId:false,service_id:firstService,label:'',
+          description:'',short:'',badge:'',
+          popular:false,price_one_time_usd:0,price_monthly_usd:0
+        };
       }
       this.modals.addon=true;
     },
     async saveAddon(){
       try{
+        if(!this.canSaveAddon()){ this.formError='Please complete the required fields.'; return; }
         const f=this.addonForm;
-        if(!f.id || !f.service_id || !f.label){ this.formError='ID, Service, Label are required'; return; }
         const payload={
           id:f.id.trim(), service_id:f.service_id, label:f.label.trim(),
           description:f.description||'', short:f.short||'', badge:f.badge||'',
@@ -392,13 +619,26 @@ function adminApp(){
         const r = await API('addons',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
         if(!r.ok){ const e=await r.json().catch(()=>({})); throw new Error(e.error||'Save failed'); }
         this.modals.addon=false; await this.refreshAll();
-      }catch(e){ this.formError=e.message; }
+      }catch(e){ this.formError=e.message || 'Save failed'; }
     },
     async delAddon(id){
       if(!confirm('Delete add-on '+id+'?')) return;
       const r = await API('addons', { method:'DELETE' }, { id });
       if(!r.ok){ alert('Delete failed'); return; }
       await this.refreshAll();
+    },
+    maybeSuggestAddonId(){
+      if (this.addonForm._lockId) return;
+      const base = this.slug(this.addonForm.service_id || '');
+      const label= this.slug(this.addonForm.label || '');
+      if (base && label) this.addonForm.id = `${base}-${label}`;
+    },
+    canSaveAddon(){
+      return !!this.addonForm.service_id
+        && !!this.addonForm.label
+        && (this.addonForm.price_one_time_usd >= 0)
+        && (this.addonForm.price_monthly_usd >= 0)
+        && (this.addonForm.id || !this.addonForm._lockId);
     },
 
     /* --- optional one-click seed (uses the public offerings) --- */
@@ -452,21 +692,7 @@ function adminApp(){
 }
 </script>
 
-  // Wire once (delegated)
-  listEl.addEventListener('click', clickHandler);
-  listEl.addEventListener('keydown', keyMoveHandler);
-  reloadBtn.addEventListener('click', loadCatalog);
-  saveBtn.addEventListener('click', saveOrder);
-  if (saveFabBtn) saveFabBtn.addEventListener('click', saveOrder);
-
-  // Expose for Alpine
-  window.orderWidget = { reload: loadCatalog };
-
-  // Boot after full load (ensures Sortable is ready)
-  window.addEventListener('load', () => { ensureSortable(); loadCatalog(); });
-}
-</script>
-  <script>
+<script>
 /* ------- Library-free reorder widget: drag & drop + arrows + keyboard ------- */
 (function(){
   const listEl     = document.getElementById('orderList');
