@@ -543,5 +543,129 @@ function adminApp(){
   }
 }
 </script>
+  <script>
+(() => {
+  const CATALOG_URL = '/api/admin?r=catalog';
+  const SAVE_URL    = '/api/admin?r=save-catalog';
+
+  const $list  = document.getElementById('svc-sort');
+  const $save  = document.getElementById('saveOrder');
+  const $reset = document.getElementById('reloadOrder');
+  const $toast = document.getElementById('orderToast');
+
+  /** in-memory cache of catalog from DB */
+  let catalog = { services: [] };
+
+  function say(msg, ok=true) {
+    $toast.textContent = msg;
+    $toast.style.color = ok ? '#64748b' : '#b91c1c';
+    setTimeout(() => ($toast.textContent = ''), 1800);
+  }
+
+  async function fetchCatalog() {
+    const r = await fetch(CATALOG_URL, { cache: 'no-store' });
+    if (!r.ok) throw new Error(`catalog ${r.status}`);
+    const j = await r.json();
+    if (!Array.isArray(j.services)) throw new Error('catalog shape');
+    catalog = j;
+  }
+
+  function renderList() {
+    $list.innerHTML = '';
+    (catalog.services || []).forEach(svc => {
+      const li = document.createElement('li');
+      li.className =
+        'flex items-center justify-between gap-3 bg-white px-3 py-2';
+      li.draggable = true;
+      li.dataset.key = svc.key;
+
+      li.innerHTML = `
+        <div class="flex items-center gap-3">
+          <span class="cursor-grab select-none text-slate-400" title="Drag">≡</span>
+          <div>
+            <div class="font-semibold">${svc.name}</div>
+            <div class="text-xs text-slate-500">${svc.key}</div>
+          </div>
+        </div>
+        <div class="text-sm font-semibold text-slate-700">
+          $${(svc.base?.oneTime ?? 0)} / $${(svc.base?.monthly ?? 0)}
+        </div>
+      `;
+
+      // DnD behavior
+      li.addEventListener('dragstart', e => {
+        e.dataTransfer.setData('text/plain', svc.key);
+        li.classList.add('opacity-60');
+      });
+      li.addEventListener('dragend', () => li.classList.remove('opacity-60'));
+      li.addEventListener('dragover', e => e.preventDefault());
+      li.addEventListener('drop', e => {
+        e.preventDefault();
+        const fromKey = e.dataTransfer.getData('text/plain');
+        const toLi = e.currentTarget;
+        if (!fromKey || fromKey === toLi.dataset.key) return;
+        const fromLi = [...$list.children].find(el => el.dataset.key === fromKey);
+        if (!fromLi) return;
+
+        // insert before or after based on relative position
+        const before = fromLi.compareDocumentPosition(toLi) & Node.DOCUMENT_POSITION_FOLLOWING;
+        $list.insertBefore(fromLi, before ? toLi : toLi.nextSibling);
+
+        // Update catalog.services in memory to match new DOM order
+        const order = [...$list.querySelectorAll('li')].map(el => el.dataset.key);
+        catalog.services = order
+          .map(k => catalog.services.find(s => s.key === k))
+          .filter(Boolean);
+      });
+
+      $list.appendChild(li);
+    });
+  }
+
+  async function resetFromDB() {
+    try {
+      await fetchCatalog();
+      renderList();
+      say('Order reset from database.');
+    } catch (e) {
+      console.error(e);
+      say('Failed to load catalog.', false);
+    }
+  }
+
+  async function saveOrder() {
+    try {
+      // Defensive: ensure no missing or duplicate keys
+      const keys = new Set();
+      catalog.services = catalog.services.filter(s => {
+        if (!s?.key || keys.has(s.key)) return false;
+        keys.add(s.key);
+        return true;
+      });
+
+      const r = await fetch(SAVE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ services: catalog.services })
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j?.error || r.statusText);
+
+      say('Order saved. Homepage will reflect new order.');
+    } catch (e) {
+      console.error(e);
+      say(`Save failed: ${e.message || e}`, false);
+    }
+  }
+
+  // Wire up buttons
+  $reset.addEventListener('click', resetFromDB);
+  $save.addEventListener('click', saveOrder);
+
+  // Initial load
+  resetFromDB();
+})();
+</script>
+
 </body>
 </html>
