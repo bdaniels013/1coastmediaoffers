@@ -219,6 +219,17 @@
         <div class="text-sm text-slate-600">Est. total: <strong x-text="fmtUSD(total)"></strong><span class="text-slate-500" x-show="plan==='monthly'">/mo</span></div>
         <div class="flex gap-2">
           <button @click="openAddons(activeService)" class="tap rounded-xl ring-1 ring-slate-200 bg-white px-4 py-2 text-sm font-semibold f-ring">Add-Ons</button>
+          
+          <!-- Using IDs -->
+<button id="btn-save-cart">Save Cart</button>
+<button id="btn-email-quote">Email Quote</button>
+<button id="btn-clear-cart-2">Clear</button>
+
+<!-- or using data-action (no IDs needed) -->
+<button data-action="save-cart">Save Cart</button>
+<button data-action="email-quote">Email Quote</button>
+<button data-action="clear-cart">Clear</button>
+
         
 <button id="btn-save-cart"
         class="rounded-full px-4 h-10 ring-1 ring-slate-200 bg-white text-slate-700 text-sm">
