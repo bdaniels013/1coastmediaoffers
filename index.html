@@ -217,38 +217,19 @@
       <div class="rounded-2xl bg-white ring-1 ring-slate-200 p-4 flex items-center justify-between gap-3">
         <div class="text-sm text-slate-600">Selected: <strong x-text="cartServices.length"></strong> base • <strong x-text="cartAddons.length"></strong> add-ons</div>
         <div class="text-sm text-slate-600">Est. total: <strong x-text="fmtUSD(total)"></strong><span class="text-slate-500" x-show="plan==='monthly'">/mo</span></div>
-        <div class="flex gap-2">
+        <div class="flex gap-2 flex-wrap justify-end">
           <button @click="openAddons(activeService)" class="tap rounded-xl ring-1 ring-slate-200 bg-white px-4 py-2 text-sm font-semibold f-ring">Add-Ons</button>
-          
-          <!-- Using IDs -->
-<button id="btn-save-cart">Save Cart</button>
-<button id="btn-email-quote">Email Quote</button>
-<button id="btn-clear-cart-2">Clear</button>
 
-<!-- or using data-action (no IDs needed) -->
-<button data-action="save-cart">Save Cart</button>
-<button data-action="email-quote">Email Quote</button>
-<button data-action="clear-cart">Clear</button>
+          <!-- NEW: Save, Email, Clear, Review -->
+          <button @click="saveCart()" class="rounded-xl ring-1 ring-slate-200 bg-white text-slate-700 px-4 py-2 text-sm f-ring">Save Cart</button>
+          <button @click="openQuote()" class="rounded-xl ring-1 ring-slate-200 bg-white text-slate-700 px-4 py-2 text-sm f-ring">Email Quote</button>
 
-        
-<button id="btn-save-cart"
-        class="rounded-full px-4 h-10 ring-1 ring-slate-200 bg-white text-slate-700 text-sm">
-  Save Cart
-</button>
+          <button @click="clearAll()"
+                  class="tap rounded-xl ring-1 ring-rose-200 bg-white text-rose-700 px-4 py-2 text-sm font-semibold f-ring hover:bg-rose-50"
+                  title="Remove all selected base services and add-ons">
+            Clear Cart
+          </button>
 
-<button id="btn-email-quote"
-        class="rounded-full px-4 h-10 ring-1 ring-slate-200 bg-white text-slate-700 text-sm">
-  Email Quote
-</button>
-
-          
-          <button
-  @click="clearAll()"
-  class="tap rounded-xl ring-1 ring-rose-200 bg-white text-rose-700 px-4 py-2 text-sm font-semibold f-ring hover:bg-rose-50"
-  title="Remove all selected base services and add-ons">
-  Clear Cart
-</button>
-          
           <button @click="openBuilder()" class="tap rounded-xl bg-indigo-600 text-white px-4 py-2 text-sm font-semibold f-ring hover:bg-indigo-700">Review & Checkout</button>
         </div>
       </div>
@@ -312,7 +293,6 @@
             <div class="text-sm text-slate-600">Est. total: <strong x-text="fmtUSD(total)"></strong><span class="text-slate-500" x-show="plan==='monthly'">/mo</span></div>
           </div>
 
-          <!-- The list itself scrolls if needed, independently -->
           <div class="mt-3 divide-y divide-slate-200 ring-1 ring-slate-200 rounded-xl bg-white overflow-hidden max-h-[60vh] overflow-y-auto pr-1 scroll-touch touch-pan-y">
             <template x-for="ad in visibleAddons" :key="ad.id">
               <div>
@@ -339,6 +319,7 @@
           </div>
 
           <div class="mt-4 flex items-center justify-end gap-2">
+            <button @click="clearAll()" class="rounded-lg btn-outline px-4 py-2 f-ring">Clear</button>
             <button @click="addonsOpen=false" class="rounded-lg btn-outline px-4 py-2 f-ring">Close</button>
             <button @click="addonsOpen=false; openBuilder()" class="rounded-lg btn-primary px-4 py-2 font-semibold f-ring">Review & Checkout</button>
           </div>
@@ -493,7 +474,7 @@
 
   <footer class="py-10 border-t border-slate-200 text-center text-xs text-slate-500">© <span x-text="year"></span> 1CoastMedia • Mississippi Gulf Coast • All rights reserved.</footer>
 
-  <!-- App -->
+  <!-- Alpine App -->
   <script>
     function landingApp(){
       return {
@@ -503,7 +484,7 @@
         addonQuery: '',
         sortBy: 'popular',
 
-        // HARD-CODED FALLBACK (never render blank)
+        // fallback catalog (never blank)
         services: [
           { key:'web', name:'Web & App', blurb:'Launch a clean, mobile-first site fast.', base:{oneTime:300, monthly:500}, includes:['Kickoff & setup','Landing page (3–5 sections)','Light copy help'], addOns:[
             { id:'web-seo', label:'SEO Basics', desc:'Titles, speed checks, findable.', short:'Quick search wins', price:{oneTime:150, monthly:150}, badge:'Quick win', popular:true },
@@ -581,15 +562,20 @@
         cartAddons: [],
         builderOpen:false,
         addonsOpen:false,
+        quoteOpen:false,
         activeService:'web',
         stickyCta:false,
         toast:{show:false,text:''},
         isSubmitting:false,
         contact:{ name:'', email:'', company:'', phone:'', notes:'' },
 
+        // Quote modal state
+        quoteEmail:'',
+        quoteNote:'',
+        quoteLink:'',
+
         // --- INIT ---
         async init(){
-          // Build index from fallback
           this.rebuildIndex();
 
           // Hydrate from DB (if available)
@@ -601,16 +587,9 @@
                 this.services = j.services;
                 this.activeService = this.services[0]?.key || this.activeService;
                 this.rebuildIndex();
-                console.info('Catalog loaded from DB:', this.services.length);
-              }else{
-                console.info('Catalog API returned empty; keeping fallback.');
               }
-            }else{
-              console.warn('Catalog fetch failed', r.status, '— keeping fallback.');
             }
-          }catch(e){
-            console.warn('Catalog fetch error — keeping fallback.', e);
-          }
+          }catch{}
 
           // Restore cart/contact
           try{
@@ -621,17 +600,21 @@
             if(saved.contact)  this.contact     = { ...this.contact, ...saved.contact };
           }catch{}
 
+          // Load shared quote from URL ?share=
+          this.tryLoadShared();
+
           // Sticky CTA
           const onScroll = () => { this.stickyCta = window.scrollY > 640 };
           onScroll(); window.addEventListener('scroll', onScroll);
 
           // Lock page scroll when modals open
           const lock = () => {
-            const shouldLock = this.addonsOpen || this.builderOpen;
+            const shouldLock = this.addonsOpen || this.builderOpen || this.quoteOpen;
             document.documentElement.classList.toggle('no-scroll', shouldLock);
           };
           this.$watch('addonsOpen', lock);
           this.$watch('builderOpen', lock);
+          this.$watch('quoteOpen', lock);
           lock();
         },
 
@@ -707,6 +690,102 @@
         openAddons(key){ this.activeService = key || 'web'; this.addonsOpen = true; },
         openBuilder(){ this.builderOpen = true; },
         clearAll(){ this.cartServices = []; this.cartAddons = []; this.save(); this.flash('Cleared cart'); },
+
+        // --- Save Cart (download .json) ---
+        saveCart(){
+          const payload = {
+            generatedAt: new Date().toISOString(),
+            plan: this.plan,
+            services: this.cartServices.map(k => ({ key:k, name:this.serviceName(k), price:this.serviceBase(k) })),
+            addons: this.cartAddons.map(id => ({
+              id,
+              label: this.addonIndex[id]?.label,
+              service: this.addonIndex[id]?.service,
+              serviceName: this.serviceName(this.addonIndex[id]?.service),
+              price: this.addonIndex[id]?.price?.[this.plan] || 0
+            })),
+            total: this.total
+          };
+          const blob = new Blob([JSON.stringify(payload,null,2)], { type:'application/json' });
+          const stamp = new Date().toISOString().replace(/[-:T]/g,'').slice(0,12);
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = `1coast-quote-${stamp}.json`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(a.href);
+          this.flash('Saved cart file');
+        },
+
+        // --- Email Quote (modal + share link) ---
+        openQuote(){
+          this.quoteEmail = this.contact.email || '';
+          this.quoteNote = '';
+          this.quoteLink = this.buildShareLink();
+          this.quoteOpen = true;
+        },
+        buildShareLink(){
+          const state = {
+            v:1,
+            plan:this.plan,
+            s:this.cartServices,
+            a:this.cartAddons,
+            c:{ name:this.contact.name, email:this.contact.email }
+          };
+          const json = JSON.stringify(state);
+          const b64 = btoa(unescape(encodeURIComponent(json)))   // base64url
+                        .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+          const url = new URL(window.location.href);
+          url.searchParams.set('share', b64);
+          return url.toString();
+        },
+        copyQuoteLink(){
+          if(!this.quoteLink){ this.quoteLink = this.buildShareLink(); }
+          navigator.clipboard?.writeText(this.quoteLink).then(
+            () => this.flash('Link copied'),
+            () => this.flash('Copy failed')
+          );
+        },
+        sendQuoteEmail(){
+          if(!this.emailValid(this.quoteEmail)){ this.flash('Enter a valid email'); return; }
+          const subj = `Your 1CoastMedia quote — ${this.plan==='monthly'?'monthly plan':'one-time'}`;
+          const body = [
+            `Here’s your saved quote link:`,
+            this.quoteLink,
+            ``,
+            `Summary:`,
+            ...this.cartServices.map(k => `• ${this.serviceName(k)} — ${this.fmtUSD(this.serviceBase(k))}`),
+            ...this.cartAddons.map(id => `• ${this.addonIndex[id]?.label} (${this.serviceName(this.addonIndex[id]?.service)}) — ${this.fmtUSD(this.addonIndex[id]?.price?.[this.plan]||0)}`),
+            ``,
+            `Estimated total ${this.plan==='monthly'?'(per month)':''}: ${this.fmtUSD(this.total)}`,
+            this.quoteNote ? `\nNote: ${this.quoteNote}` : ''
+          ].join('\n');
+          const href = `mailto:${encodeURIComponent(this.quoteEmail)}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`;
+          window.location.href = href;
+          this.flash('Opening your email app…');
+          this.quoteOpen = false;
+        },
+        tryLoadShared(){
+          const sp = new URLSearchParams(window.location.search);
+          const token = sp.get('share');
+          if(!token) return;
+          try{
+            const b64 = token.replace(/-/g,'+').replace(/_/g,'/');
+            const json = decodeURIComponent(escape(atob(b64)));
+            const state = JSON.parse(json||'{}');
+            if(state.v===1){
+              if(state.plan) this.plan = state.plan;
+              if(Array.isArray(state.s)) this.cartServices = state.s;
+              if(Array.isArray(state.a)) this.cartAddons  = state.a;
+              if(state.c?.email) this.contact.email = state.c.email;
+              if(state.c?.name)  this.contact.name  = state.c.name;
+              this.save();
+              this.flash('Loaded saved quote');
+            }
+          }catch(e){ console.warn('Invalid shared quote token'); }
+        },
+
         flash(text){ this.toast = { text, show:true }; setTimeout(()=> this.toast.show=false, 1400); },
 
         // --- CHECKOUT ---
@@ -754,53 +833,55 @@
       }
     }
   </script>
-  <!-- Quote Modal -->
-<div id="quote-modal" class="fixed inset-0 z-[60] hidden">
-  <!-- backdrop -->
-  <div class="absolute inset-0 bg-slate-900/60"></div>
 
-  <!-- panel -->
-  <div class="relative mx-auto my-10 w-[min(680px,92vw)] rounded-2xl bg-white shadow-xl">
-    <div class="flex items-center justify-between px-5 py-4 border-b">
-      <h3 class="text-lg font-semibold">Email this quote to yourself</h3>
-      <button id="quote-close" class="h-9 w-9 grid place-items-center rounded hover:bg-slate-100">✕</button>
-    </div>
+  <!-- Quote Modal (Alpine-driven) -->
+  <div x-show="quoteOpen" x-transition.opacity class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+    <!-- backdrop -->
+    <button @click="quoteOpen=false" class="absolute inset-0 bg-slate-900/60" aria-label="Close"></button>
 
-    <div class="px-5 pt-4 pb-5 space-y-4 max-h-[70vh] overflow-auto">
-      <p class="text-sm text-slate-600">
-        We’ll generate a private link to your cart and open your email app with a pre-filled draft.
-      </p>
-
-      <div>
-        <label class="block text-xs text-slate-500 mb-1">Your email</label>
-        <input id="quote-email" type="email" placeholder="you@example.com"
-               class="w-full rounded-lg border border-slate-200 px-3 py-2">
+    <!-- panel -->
+    <div @keydown.escape.window="quoteOpen=false"
+         class="relative mx-auto w-[min(720px,92vw)] rounded-2xl bg-white shadow-xl ring-1 ring-slate-200">
+      <div class="flex items-center justify-between px-5 py-4 border-b">
+        <h3 class="text-lg font-semibold">Email this quote to yourself</h3>
+        <button @click="quoteOpen=false" class="h-9 w-9 grid place-items-center rounded hover:bg-slate-100">✕</button>
       </div>
 
-      <div>
-        <label class="block text-xs text-slate-500 mb-1">Optional note</label>
-        <textarea id="quote-note" rows="3" placeholder="Anything you want to remember…"
-                  class="w-full rounded-lg border border-slate-200 px-3 py-2"></textarea>
-      </div>
+      <div class="px-5 pt-4 pb-5 space-y-4 max-h-[70vh] overflow-auto">
+        <p class="text-sm text-slate-600">
+          We’ll generate a private link to your cart and open your email app with a pre-filled draft.
+        </p>
 
-      <div>
-        <label class="block text-xs text-slate-500 mb-1">Shareable quote link</label>
-        <div class="flex gap-2">
-          <input id="quote-link" readonly
-                 class="flex-1 rounded-lg border border-slate-200 px-3 py-2 bg-slate-50">
-          <button id="quote-copy"
-                  class="rounded-lg px-3 py-2 ring-1 ring-slate-200 bg-white text-sm">Copy</button>
+        <div>
+          <label class="block text-xs text-slate-500 mb-1">Your email</label>
+          <input x-model.trim="quoteEmail" type="email" placeholder="you@example.com"
+                 class="w-full rounded-lg border border-slate-200 px-3 py-2">
         </div>
-        <p class="text-[11px] text-slate-500 mt-1">Anyone with this link can see your selections (no personal info).</p>
-      </div>
-    </div>
 
-    <div class="px-5 py-4 border-t flex justify-end gap-2">
-      <button id="quote-cancel" class="rounded-lg px-3 py-2 ring-1 ring-slate-200 bg-white">Cancel</button>
-      <button id="quote-send"
-              class="rounded-lg px-4 py-2 bg-indigo-600 text-white font-medium">Open Email Draft</button>
+        <div>
+          <label class="block text-xs text-slate-500 mb-1">Optional note</label>
+          <textarea x-model.trim="quoteNote" rows="3" placeholder="Anything you want to remember…"
+                    class="w-full rounded-lg border border-slate-200 px-3 py-2"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs text-slate-500 mb-1">Shareable quote link</label>
+          <div class="flex gap-2">
+            <input :value="quoteLink" readonly
+                   class="flex-1 rounded-lg border border-slate-200 px-3 py-2 bg-slate-50">
+            <button @click="copyQuoteLink()"
+                    class="rounded-lg px-3 py-2 ring-1 ring-slate-200 bg-white text-sm">Copy</button>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1">Anyone with this link can see your selections (no personal info).</p>
+        </div>
+      </div>
+
+      <div class="px-5 py-4 border-t flex justify-end gap-2">
+        <button @click="quoteOpen=false" class="rounded-lg px-3 py-2 ring-1 ring-slate-200 bg-white">Cancel</button>
+        <button @click="sendQuoteEmail()"
+                class="rounded-lg px-4 py-2 bg-indigo-600 text-white font-medium">Open Email Draft</button>
+      </div>
     </div>
   </div>
-</div>
 </body>
 </html>
