@@ -33,7 +33,7 @@
   <meta name="twitter:image" content="https://1coastmedia.com/assets/1coastmedia_wordmark_horizontal_3000.jpg" />
 
   <!-- Where to POST -->
-  <meta name="checkout-endpoint" content="/api/stripe/checkout" />
+  <meta name="checkout-endpoint" content="/api/checkout" />
 
   <!-- Stripe publishable key (client fallback) -->
   <meta name="stripe-publishable-key" content="pk_live_51O4Qh0KoF1Q8iKteAbGsSkEj65fg0tSGOG6dcJCcLyvz0PHC5y8jEAkMDfDFfCTdEeRyPcOtZ7O13MBNZkDhBMR900NqzTN4LN" />
@@ -695,7 +695,7 @@
               return { service: svcKey, base, addons };
             });
 
-            const endpoint = document.querySelector('meta[name="checkout-endpoint"]')?.content || '/api/stripe/checkout';
+            const endpoint = document.querySelector('meta[name="checkout-endpoint"]')?.content || '/api/checkout';
             this.isSubmitting = true;
 
             const res = await fetch(endpoint, {
