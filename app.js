@@ -494,6 +494,39 @@ export function landingApp(){
       return baseSum + addonSum;
     },
 
+    // Add missing computed properties for monthly and one-time totals
+    get getMonthlyTotal(){
+      let baseSum = 0;
+      this.cartServices.forEach(key => {
+        for (const category of Object.values(this.serviceCategories)) {
+          const service = category.services?.find(s => s.key === key);
+          if (service && service.price.monthly) {
+            baseSum += service.price.monthly;
+            break;
+          }
+        }
+      });
+      
+      const addonSum = this.cartAddons.reduce((s, id) => s + (this.addonIndex[id]?.price?.monthly || 0), 0);
+      return baseSum + addonSum;
+    },
+
+    get getOneTimeTotal(){
+      let baseSum = 0;
+      this.cartServices.forEach(key => {
+        for (const category of Object.values(this.serviceCategories)) {
+          const service = category.services?.find(s => s.key === key);
+          if (service && service.price.oneTime) {
+            baseSum += service.price.oneTime;
+            break;
+          }
+        }
+      });
+      
+      const addonSum = this.cartAddons.reduce((s, id) => s + (this.addonIndex[id]?.price?.oneTime || 0), 0);
+      return baseSum + addonSum;
+    },
+
     /* ---------- helpers ---------- */
     serviceName(key){ 
       for (const category of Object.values(this.serviceCategories)) {
@@ -584,8 +617,14 @@ export function landingApp(){
         if(!this.emailValid(this.contact.email)){ this.flash('Enter a valid email.'); return; }
 
         const cart = this.cartServices.map(svcKey => {
-          const svc = this.services.find(s => s.key === svcKey);
-          const base = svc?.base?.[this.plan] || 0;
+          // Fix: Find service in serviceCategories instead of this.services
+          let svc = null;
+          for (const category of Object.values(this.serviceCategories)) {
+            svc = category.services?.find(s => s.key === svcKey);
+            if (svc) break;
+          }
+          
+          const base = svc?.price?.[this.plan] || 0;
           const addons = this.cartAddons
             .filter(id => this.addonIndex[id]?.service === svcKey)
             .map(id => ({ id, name: this.addonIndex[id].label, price: this.addonIndex[id].price[this.plan] }));
