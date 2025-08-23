@@ -19,9 +19,9 @@ export function landingApp(){
     plan: 'oneTime',
     addonQuery: '',
     sortBy: 'popular',
-    activeTab: 'signature', // New: track active service tab
+    activeTab: 'signature',
 
-    // Complete 1CoastMedia Service Catalog
+    // Complete 1CoastMedia Service Catalog (fallback)
     serviceCategories: {
       signature: {
         name: '★ Signature',
@@ -399,27 +399,24 @@ export function landingApp(){
       // expose Alpine instance for global helpers
       window.App = this;
 
-      // Build index from fallback
-      this.rebuildIndex();
-
-      // Hydrate from DB catalog
+      // Try to fetch from API and convert to serviceCategories format
       try{
         const r = await fetch(CATALOG_URL, { cache:'no-store' });
         if(r.ok){
           const j = await r.json();
           if(Array.isArray(j.services) && j.services.length){
-            this.services = j.services;
-            this.activeService = this.services[0]?.key || 'web';
-            this.rebuildIndex();
+            // Convert old API format to new serviceCategories format
+            this.serviceCategories = this.convertApiToCategories(j.services);
+            console.log('Loaded services from API and converted to categories');
           }
         } else {
-          console.warn('Catalog fetch failed', r.status);
+          console.warn('Catalog fetch failed, using fallback', r.status);
         }
       }catch(e){
-        console.warn('Catalog fetch error', e);
+        console.warn('Catalog fetch error, using fallback', e);
       }
 
-      // Restore cart from localStorage (legacy key)
+      // Restore cart from localStorage
       try{
         const saved = JSON.parse(localStorage.getItem('coast_cart')||'{}');
         this.hydrateFromSaved(saved);
@@ -436,44 +433,91 @@ export function landingApp(){
       const onScroll = () => { this.stickyCta = window.scrollY > 640 };
       onScroll(); window.addEventListener('scroll', onScroll);
 
-      // Wire Save / Email Quote buttons (if present in DOM)
+      // Wire Save / Email Quote buttons
       wireConversionButtons();
     },
 
-    rebuildIndex(){
-      this.addonIndex = this.services.reduce((acc, svc) => {
-        (svc.addOns||[]).forEach(a => acc[a.id] = { ...a, service: svc.key });
-        return acc;
-      }, {});
+    // Convert old API services array to new serviceCategories format
+    convertApiToCategories(apiServices) {
+      const categories = {
+        signature: { name: '★ Signature', description: 'Standout lead offers with fast turnarounds', services: [] },
+        core: { name: 'Core', description: 'Optimized base packages for essential needs', services: [] },
+        oneTime: { name: 'One-Time', description: 'Project boosts and standalone services', services: [] },
+        monthly: { name: 'Monthly', description: 'Recurring services with minimum terms', services: [] }
+      };
+
+      // Map API services to categories based on naming patterns or price structure
+      apiServices.forEach(service => {
+        const convertedService = {
+          key: service.key,
+          name: service.name,
+          outcome: service.blurb || `Professional ${service.name.toLowerCase()}`,
+          deliverables: service.includes || ['Service delivery as specified'],
+          price: {
+            oneTime: service.base?.oneTime || null,
+            monthly: service.base?.monthly || null
+          },
+          sla: '5-7 days', // default
+          acceptance: 'Delivery confirmed and approved'
+        };
+
+        // Categorize based on service characteristics
+        const name = service.name.toLowerCase();
+        if (name.includes('48') || name.includes('hour') || name.includes('sprint') || name.includes('intensive')) {
+          categories.signature.services.push(convertedService);
+        } else if (service.base?.monthly && !service.base?.oneTime) {
+          categories.monthly.services.push(convertedService);
+        } else if (service.base?.oneTime && !service.base?.monthly) {
+          categories.oneTime.services.push(convertedService);
+        } else {
+          categories.core.services.push(convertedService);
+        }
+      });
+
+      return categories;
     },
 
     /* ---------- computeds ---------- */
     get total(){
-      const baseSum = this.cartServices.reduce((s, key) => s + (this.services.find(x => x.key === key)?.base?.[this.plan] || 0), 0);
+      let baseSum = 0;
+      this.cartServices.forEach(key => {
+        for (const category of Object.values(this.serviceCategories)) {
+          const service = category.services?.find(s => s.key === key);
+          if (service && service.price[this.plan]) {
+            baseSum += service.price[this.plan];
+            break;
+          }
+        }
+      });
+      
       const addonSum = this.cartAddons.reduce((s, id) => s + (this.addonIndex[id]?.price?.[this.plan] || 0), 0);
       return baseSum + addonSum;
     },
-    get visibleAddons(){
-      let items = (this.services.find(s => s.key === this.activeService)?.addOns || []).slice();
-      const q = this.addonQuery.trim().toLowerCase();
-      if(q) items = items.filter(a => a.label.toLowerCase().includes(q) || a.desc.toLowerCase().includes(q) || (a.short||'').toLowerCase().includes(q));
-      if(this.sortBy==='price-asc') items.sort((a,b)=>a.price[this.plan]-b.price[this.plan]);
-      else if(this.sortBy==='price-desc') items.sort((a,b)=>b.price[this.plan]-a.price[this.plan]);
-      else if(this.sortBy==='alpha') items.sort((a,b)=>a.label.localeCompare(b.label));
-      else items.sort((a,b)=> (b.popular?1:0) - (a.popular?1:0));
-      return items;
-    },
 
     /* ---------- helpers ---------- */
-    serviceName(key){ return (this.services.find(s => s.key === key) || {}).name || key; },
-    serviceBase(key){ return (this.services.find(s => s.key === key) || {}).base?.[this.plan] || 0; },
+    serviceName(key){ 
+      for (const category of Object.values(this.serviceCategories)) {
+        const service = category.services?.find(s => s.key === key);
+        if (service) return service.name;
+      }
+      return key;
+    },
+    
+    servicePrice(key){ 
+      for (const category of Object.values(this.serviceCategories)) {
+        const service = category.services?.find(s => s.key === key);
+        if (service && service.price[this.plan]) return service.price[this.plan];
+      }
+      return 0;
+    },
+    
     fmtUSD(v){ return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v); },
     save(){
       localStorage.setItem('coast_cart', JSON.stringify(this.getCartSnapshot()));
     },
     emailValid(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e||''); },
 
-    // snapshot of current cart (used by Save/Quote)
+    // snapshot of current cart
     getCartSnapshot(){
       return {
         services: this.cartServices.slice(),
@@ -482,18 +526,25 @@ export function landingApp(){
         contact: { ...this.contact }
       };
     },
-    // apply saved/quoted cart to UI
+    
+    // apply saved cart to UI
     hydrateFromSaved(saved){
       if(!saved) return;
       if(Array.isArray(saved.services)) this.cartServices = [...new Set(saved.services)];
-      if(Array.isArray(saved.addons))   this.cartAddons  = [...new Set(saved.addons)];
+      if(Array.isArray(saved.addons)) this.cartAddons = [...new Set(saved.addons)];
       if(saved.plan && (saved.plan==='oneTime' || saved.plan==='monthly')) this.plan = saved.plan;
       if(saved.contact) this.contact = { ...this.contact, ...saved.contact };
     },
 
     /* ---------- UI actions ---------- */
     setPlan(p){ this.plan = p; this.save(); },
-    toggleService(key){ const i=this.cartServices.indexOf(key); if(i>-1) this.cartServices.splice(i,1); else this.cartServices.push(key); this.save(); },
+    toggleService(key){ 
+      const i=this.cartServices.indexOf(key); 
+      if(i>-1) this.cartServices.splice(i,1); 
+      else this.cartServices.push(key); 
+      this.save(); 
+    },
+    
     toggleAddon(id){
       const svcKey = this.addonIndex[id]?.service;
       const i = this.cartAddons.indexOf(id);
