@@ -173,45 +173,143 @@
     </div>
   </section>
 
-  <!-- BASE SERVICES -->
+  <!-- SERVICES SECTION WITH TABS -->
   <section id="services" class="py-10">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="flex items-end justify-between gap-4">
-        <div>
-          <h2 class="text-3xl font-extrabold tracking-tight">Base Services</h2>
-          <p class="mt-2 text-slate-600">Start with a base. Add add-ons anywhere. <span class="text-slate-500">(Checkout requires at least one base.)</span></p>
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-extrabold tracking-tight">1CoastMedia — Full Service Catalog (2025)</h2>
+        <p class="mt-2 text-slate-600 max-w-2xl mx-auto">Real deliverables. Fast turnarounds. Measurable outcomes.</p>
+        <div class="mt-4 text-sm text-slate-500">
+          <span class="font-semibold">Promise:</span> Speed sprints • Local SEO mastery • Event + Creator programs • Risk-Reversal guarantees
         </div>
-        <button @click="openAddons(activeService)" class="hidden sm:inline-flex tap btn items-center gap-2 rounded-xl bg-slate-900 text-white px-4 py-3 font-semibold shadow-sm hover:shadow-lg">Explore Add-Ons</button>
       </div>
 
-      <div class="mt-6 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <template x-for="svc in services" :key="'svc-'+svc.key">
+      <!-- Service Category Tabs -->
+      <div class="flex justify-center mb-8">
+        <div class="inline-flex rounded-xl bg-slate-100 p-1 ring-1 ring-slate-200">
+          <button @click="activeTab='signature'" :class="activeTab==='signature' ? 'bg-white shadow text-slate-900' : 'text-slate-700'" class="px-4 py-2 rounded-lg text-sm font-semibold f-ring">★ Signature</button>
+          <button @click="activeTab='core'" :class="activeTab==='core' ? 'bg-white shadow text-slate-900' : 'text-slate-700'" class="px-4 py-2 rounded-lg text-sm font-semibold f-ring">Core</button>
+          <button @click="activeTab='oneTime'" :class="activeTab==='oneTime' ? 'bg-white shadow text-slate-900' : 'text-slate-700'" class="px-4 py-2 rounded-lg text-sm font-semibold f-ring">One-Time</button>
+          <button @click="activeTab='monthly'" :class="activeTab==='monthly' ? 'bg-white shadow text-slate-900' : 'text-slate-700'" class="px-4 py-2 rounded-lg text-sm font-semibold f-ring">Monthly</button>
+        </div>
+      </div>
+
+      <!-- Category Description -->
+      <div class="text-center mb-6">
+        <p class="text-slate-600" x-text="serviceCategories[activeTab]?.description"></p>
+      </div>
+
+      <!-- Service Cards Grid -->
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <template x-for="service in serviceCategories[activeTab]?.services || []" :key="service.key">
           <div class="halo p-0.5">
-            <div class="card p-6">
-              <div class="flex items-start justify-between gap-3">
-                <div>
-                  <div class="text-[11px] uppercase tracking-wide rounded bg-slate-100 ring-1 ring-slate-200 px-2 py-0.5 inline-block" x-text="plan==='oneTime' ? 'One-time' : 'Monthly'"></div>
-                  <h3 class="text-xl font-bold mt-2" x-text="svc.name"></h3>
-                  <p class="text-sm text-slate-600 mt-1" x-text="svc.blurb"></p>
+            <div class="card p-6 h-full flex flex-col">
+              <!-- Service Header -->
+              <div class="flex items-start justify-between gap-3 mb-4">
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-2">
+                    <h3 class="text-lg font-bold" x-text="service.name"></h3>
+                    <span x-show="service.badge" class="text-xs px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 font-medium" x-text="service.badge"></span>
+                  </div>
+                  <p class="text-sm font-medium text-slate-900" x-text="service.outcome"></p>
                 </div>
                 <div class="text-right">
-                  <div class="text-xs text-slate-500">Base</div>
-                  <div class="text-2xl font-extrabold text-slate-900" x-text="fmtUSD(svc.base[plan])"></div>
+                  <div class="text-xs text-slate-500" x-text="service.sla"></div>
+                  <div class="text-xl font-extrabold text-slate-900">
+                    <span x-show="service.price[plan]" x-text="fmtUSD(service.price[plan])"></span>
+                    <span x-show="!service.price[plan] && typeof service.price[plan] === 'string'" x-text="service.price[plan]"></span>
+                    <span x-show="!service.price[plan] && !service.price[plan === 'oneTime' ? 'monthly' : 'oneTime']" class="text-slate-400">N/A</span>
+                  </div>
+                  <div x-show="service.minTerm" class="text-xs text-slate-500" x-text="'Min: ' + service.minTerm"></div>
                 </div>
               </div>
-              <ul class="mt-3 text-sm text-slate-700 space-y-1">
-                <template x-for="it in svc.includes" :key="it"><li class="flex gap-2"><span>•</span><span x-text="it"></span></li></template>
-              </ul>
-              <div class="mt-5 grid grid-cols-2 gap-2">
-                <button @click="toggleService(svc.key)" class="tap rounded-lg px-3 py-2 text-sm font-semibold f-ring" :class="cartServices.includes(svc.key) ? 'bg-emerald-600 text-white' : 'bg-slate-900 text-white'" x-text="cartServices.includes(svc.key) ? 'Added' : 'Add Base'"></button>
-                <button @click="activeService=svc.key; openAddons(svc.key)" class="tap rounded-lg ring-1 ring-slate-200 bg-white px-3 py-2 text-sm font-semibold f-ring">Add-Ons</button>
+
+              <!-- Deliverables -->
+              <div class="flex-1 mb-4">
+                <div class="text-xs font-medium text-slate-700 mb-2">Deliverables:</div>
+                <ul class="text-sm text-slate-600 space-y-1">
+                  <template x-for="item in service.deliverables" :key="item">
+                    <li class="flex items-start gap-2">
+                      <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></span>
+                      <span x-text="item"></span>
+                    </li>
+                  </template>
+                </ul>
               </div>
+
+              <!-- Acceptance Criteria -->
+              <div x-show="service.acceptance" class="mb-4">
+                <div class="text-xs font-medium text-slate-700 mb-1">Acceptance:</div>
+                <p class="text-xs text-slate-500" x-text="service.acceptance"></p>
+              </div>
+
+              <!-- Guarantee -->
+              <div x-show="service.guarantee" class="mb-4">
+                <div class="text-xs font-medium text-emerald-700 mb-1">Guarantee:</div>
+                <p class="text-xs text-emerald-600" x-text="service.guarantee"></p>
+              </div>
+
+              <!-- CTA Button -->
+              <button 
+                @click="toggleService(service.key)" 
+                :class="cartServices.includes(service.key) ? 'bg-emerald-600 text-white' : 'bg-slate-900 text-white hover:bg-slate-800'"
+                class="w-full tap btn rounded-xl px-4 py-3 font-semibold shadow-sm hover:shadow-lg transition-colors"
+              >
+                <span x-show="!cartServices.includes(service.key)">Add to Cart</span>
+                <span x-show="cartServices.includes(service.key)" class="flex items-center justify-center gap-2">
+                  <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                  Added
+                </span>
+              </button>
             </div>
           </div>
         </template>
       </div>
+
+      <!-- Bundles Section -->
+      <div class="mt-12">
+        <h3 class="text-2xl font-bold text-center mb-6">Value Bundles</h3>
+        <div class="grid md:grid-cols-3 gap-6">
+          <template x-for="bundle in bundles" :key="bundle.key">
+            <div class="card p-6 text-center">
+              <h4 class="font-bold text-lg mb-2" x-text="bundle.name"></h4>
+              <p class="text-sm text-slate-600 mb-4" x-text="bundle.description"></p>
+              <div class="text-sm text-slate-500 mb-4">
+                <span class="font-medium">Includes:</span>
+                <span x-text="bundle.includes.join(', ')"></span>
+              </div>
+              <div class="text-xl font-bold text-slate-900 mb-4">
+                <span x-show="bundle.price.oneTime" x-text="fmtUSD(bundle.price.oneTime) + ' + '"></span>
+                <span x-text="bundle.price.monthly ? fmtUSD(bundle.price.monthly) + '/mo' : (bundle.price.quarterly ? fmtUSD(bundle.price.quarterly) + '/qtr' : '')"></span>
+              </div>
+              <button class="w-full btn bg-slate-900 text-white rounded-xl px-4 py-2 font-semibold">Select Bundle</button>
+            </div>
+          </template>
+        </div>
+      </div>
     </div>
   </section>
+
+  <!-- Sticky Summary -->
+  <div x-show="cartServices.length > 0" class="fixed bottom-4 right-4 bg-white rounded-xl shadow-lg ring-1 ring-slate-200 p-4 max-w-sm">
+    <div class="flex items-center justify-between mb-2">
+      <span class="font-semibold">Cart Summary</span>
+      <button @click="clearAll()" class="text-xs text-slate-500 hover:text-slate-700">Clear</button>
+    </div>
+    <div class="text-sm text-slate-600 mb-2">
+      <div class="flex justify-between">
+        <span>One-time:</span>
+        <span x-text="fmtUSD(getOneTimeTotal())"></span>
+      </div>
+      <div class="flex justify-between">
+        <span>Monthly:</span>
+        <span x-text="fmtUSD(getMonthlyTotal())"></span>
+      </div>
+    </div>
+    <button @click="openBuilder()" class="w-full btn bg-slate-900 text-white rounded-lg px-4 py-2 font-semibold text-sm">Review & Checkout</button>
+  </div>
 
   <!-- Summary bar -->
   <section class="py-6">

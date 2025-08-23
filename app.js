@@ -19,76 +19,367 @@ export function landingApp(){
     plan: 'oneTime',
     addonQuery: '',
     sortBy: 'popular',
+    activeTab: 'signature', // New: track active service tab
 
-    // Fallback catalog so the site never renders blank
-    services: [
-      { key:'web', name:'Web & App', blurb:'Launch a clean, mobile-first site fast.', base:{oneTime:300, monthly:500}, includes:['Kickoff & setup','Landing page (3–5 sections)','Light copy help'], addOns:[
-        { id:'web-seo', label:'SEO Basics', desc:'Titles, speed checks, findable.', short:'Quick search wins', price:{oneTime:150, monthly:150}, badge:'Quick win', popular:true },
-        { id:'web-auto', label:'Lead Automations', desc:'Instant replies to leads.', short:'Never miss a lead', price:{oneTime:100, monthly:100}, badge:'Hands-off', popular:true },
-        { id:'web-api', label:'Payments & Maps', desc:'Stripe checkout + maps.', short:'High-impact add', price:{oneTime:250, monthly:250}, badge:'High impact' },
-        { id:'web-mvp', label:'Clickable MVP', desc:'Tap-through prototype.', short:'Test ideas', price:{oneTime:500, monthly:500}, badge:'Prototype' },
-        { id:'web-copy', label:'Website Copywriting', desc:'We write clear, on-brand copy.', short:'Words that sell', price:{oneTime:120, monthly:120}, badge:'Done-for-you' },
-        { id:'web-speed', label:'Speed & Security', desc:'Performance boosts + hardening.', short:'Faster & safer', price:{oneTime:150, monthly:150}, badge:'Speed' },
-        { id:'web-forms', label:'Smart Forms', desc:'Lead routing + spam block.', short:'Higher conversions', price:{oneTime:150, monthly:100}, badge:'Leads' },
-        { id:'web-analytics', label:'Analytics Setup', desc:'Simple dashboard + goals.', short:'Know what works', price:{oneTime:100, monthly:120}, badge:'Insight' },
-        { id:'web-blog', label:'Blog/CMS Setup', desc:'Easy updates, categories, tags.', short:'Publish fast', price:{oneTime:200, monthly:150}, badge:'Content' },
-        { id:'web-booking', label:'Booking Integration', desc:'Calendly/Square appointments.', short:'Fewer no-shows', price:{oneTime:150, monthly:120}, badge:'Conversion' },
-        { id:'web-reviews', label:'Reviews Widget', desc:'Pull Google/FB reviews on site.', short:'Build trust', price:{oneTime:100, monthly:100}, badge:'Trust' },
-        { id:'web-a11y', label:'Accessibility Audit', desc:'WCAG quick audit + fixes.', short:'Compliance wins', price:{oneTime:180, monthly:150}, badge:'Compliance' },
-        { id:'web-i18n', label:'Multi-language', desc:'Key pages in 2nd language.', short:'Expand reach', price:{oneTime:220, monthly:150}, badge:'Reach' },
-        { id:'web-dns', label:'Domain & DNS', desc:'Purchase, connect, SSL.', short:'We handle setup', price:{oneTime:80, monthly:0}, badge:'Setup' },
-        { id:'web-section', label:'Custom Section', desc:'1 bespoke section block.', short:'Tailored UI', price:{oneTime:120, monthly:120}, badge:'Custom' },
-        { id:'web-photos', label:'Photo Sourcing', desc:'Handpicked stock + edits.', short:'Better visuals', price:{oneTime:90, monthly:90}, badge:'Visuals' },
-        { id:'web-brandkit', label:'Brand Kit', desc:'Fonts, colors, components.', short:'Consistent look', price:{oneTime:200, monthly:150}, badge:'Brand' },
-      ]},
-      { key:'video', name:'Video / Audio', blurb:'Short, on-brand edits that convert.', base:{oneTime:600, monthly:1200}, includes:['Kickoff & plan','1–2 min edit','Clean edit, coastal vibe'], addOns:[
-        { id:'vid-audio', label:'Clean Audio + Captions', desc:'Noise fix + captions.', short:'Watchable anywhere', price:{oneTime:200, monthly:250}, badge:'Accessibility', popular:true },
-        { id:'vid-adv', label:'Advanced Edit / Series', desc:'More story, motion, polish.', short:'Flagship content', price:{oneTime:800, monthly:1000}, badge:'Premium', popular:true },
-        { id:'vid-drone-p', label:'Drone B-roll (Basic)', desc:'Dynamic aerial flavor.', short:'Wow factor', price:{oneTime:300, monthly:300}, badge:'Wow' },
-        { id:'vid-drone-pro', label:'Drone Cinematics (Pro)', desc:'Licensed pilot + pro gear.', short:'Top-tier aerials', price:{oneTime:1500, monthly:1500}, badge:'Cinematic' },
-        { id:'vid-extra', label:'Extra Edit Pass', desc:'More refinements + cuts.', short:'Sharper pacing', price:{oneTime:300, monthly:500}, badge:'Polish' },
-        { id:'vid-script', label:'Script & Shotlist', desc:'Plan lines + shots.', short:'Shoot with ease', price:{oneTime:150, monthly:150}, badge:'Plan' },
-        { id:'vid-color', label:'Pro Color Grade', desc:'Crisp, cinematic look.', short:'Standout look', price:{oneTime:150, monthly:150}, badge:'Look' },
-        { id:'vid-sizes', label:'All Social Sizes', desc:'9:16, 1:1, 16:9 outputs.', short:'Every platform', price:{oneTime:120, monthly:120}, badge:'Everywhere' },
-        { id:'vid-thumbs', label:'Thumbnail Pack (x3)', desc:'Scroll-stopping covers.', short:'Higher CTR', price:{oneTime:100, monthly:100}, badge:'Hook' },
-        { id:'vid-raw', label:'Raw Footage Delivery', desc:'We hand you the files.', short:'Own the source', price:{oneTime:60, monthly:60}, badge:'Archive' },
-        { id:'vid-voice', label:'Voiceover', desc:'Pro VO talent included.', short:'Narration', price:{oneTime:220, monthly:220}, badge:'Pro' },
-        { id:'vid-tele', label:'Teleprompter', desc:'Confident on-camera lines.', short:'Confidence', price:{oneTime:90, monthly:90}, badge:'Assist' },
-        { id:'vid-studio', label:'Studio Day', desc:'Lighting, backdrops, sound.', short:'Controlled set', price:{oneTime:700, monthly:700}, badge:'Studio' },
-        { id:'vid-multi', label:'Multi-location Shoot', desc:'Up to 3 locations.', short:'More variety', price:{oneTime:400, monthly:400}, badge:'Scope' },
-        { id:'vid-cast', label:'Talent Casting', desc:'Find on-brand talent.', short:'Right faces', price:{oneTime:300, monthly:300}, badge:'Talent' },
-      ]},
-      { key:'events', name:'Events', blurb:'Plan smooth, run tight, look great.', base:{oneTime:1000, monthly:1200}, includes:['Scope & timeline','Basic coordination','Day-of support'], addOns:[
-        { id:'ev-ven', label:'Vendor/Venue Handling', desc:'We wrangle calls.', short:'Stress-free', price:{oneTime:500, monthly:600}, badge:'Stress-free', popular:true },
-        { id:'ev-digital', label:'RSVP/Tickets Page', desc:'Modern guest flow.', short:'Smooth RSVPs', price:{oneTime:200, monthly:200}, badge:'Modern' },
-        { id:'ev-media', label:'Highlight Media', desc:'Recap video + photos.', short:'Shareworthy', price:{oneTime:300, monthly:300}, badge:'Content' },
-        { id:'ev-auto', label:'Guest Automations', desc:'Reminders + check-in.', short:'No bottlenecks', price:{oneTime:150, monthly:150}, badge:'Smooth' },
-        { id:'ev-hybrid', label:'Livestream Setup', desc:'Hybrid reach, simple.', short:'Reach more', price:{oneTime:400, monthly:400}, badge:'Reach' },
-        { id:'ev-host', label:'Host / MC', desc:'Energy + timing control.', short:'Keep pace', price:{oneTime:250, monthly:250}, badge:'Energy' },
-        { id:'ev-runshow', label:'Run-of-Show', desc:'Minute-by-minute plan.', short:'Clarity', price:{oneTime:150, monthly:150}, badge:'Clarity' },
-        { id:'ev-sponsor', label:'Sponsor Kit + Outreach', desc:'Deck + outreach.', short:'New revenue', price:{oneTime:200, monthly:200}, badge:'Revenue' },
-        { id:'ev-security', label:'Permits & Security Guide', desc:'Who to call + when.', short:'Safer event', price:{oneTime:120, monthly:120}, badge:'Safety' },
-        { id:'ev-vip', label:'VIP/Backstage Mgmt', desc:'Green room + access.', short:'White-glove', price:{oneTime:200, monthly:200}, badge:'VIP' },
-        { id:'ev-photobooth', label:'Photo Booth', desc:'Branded photos on site.', short:'Fun moments', price:{oneTime:350, monthly:350}, badge:'Fun' },
-        { id:'ev-ticketing', label:'Ticketing Integration', desc:'Stripe/Square, QR.', short:'Faster gates', price:{oneTime:220, monthly:220}, badge:'Revenue' },
-      ]},
-      { key:'ugc', name:'UGC', blurb:'Creators + clips that actually get seen.', base:{oneTime:450, monthly:600}, includes:['Kickoff & setup','30k verified views','Simple report'], addOns:[
-        { id:'ugc-repurpose', label:'Ads-Ready Pack', desc:'Cut-downs + hooks.', short:'Convert more', price:{oneTime:200, monthly:200}, badge:'Ads-ready', popular:true },
-        { id:'ugc-leads', label:'Lead Capture Page', desc:'Turn views to contacts.', short:'Capture demand', price:{oneTime:250, monthly:250}, badge:'Leads' },
-        { id:'ugc-enhance', label:'Eye-Candy Overlays', desc:'On-brand text, beats.', short:'More watch time', price:{oneTime:150, monthly:150}, badge:'Engaging' },
-        { id:'ugc-captions', label:'SEO Captions', desc:'Be found & tapped.', short:'Search hits', price:{oneTime:100, monthly:100}, badge:'Search' },
-        { id:'ugc-brand', label:'Branding Pack', desc:'Logos, end-slates.', short:'Brand recall', price:{oneTime:150, monthly:150}, badge:'Brand' },
-        { id:'ugc-views-10k', label:'+10k Views', desc:'~10,000 verified views.', short:'+10k reach', price:{oneTime:150, monthly:150}, badge:'+10k' },
-        { id:'ugc-views-20k', label:'+20k Views', desc:'~20,000 verified views.', short:'+20k reach', price:{oneTime:300, monthly:300}, badge:'+20k' },
-        { id:'ugc-views-70k', label:'+70k Views', desc:'~70,000 verified views.', short:'+70k reach', price:{oneTime:1050, monthly:1050}, badge:'+70k' },
-        { id:'ugc-creator', label:'Creator Matching', desc:'Shortlist best locals.', short:'Best fit', price:{oneTime:100, monthly:100}, badge:'Match' },
-        { id:'ugc-studio', label:'Studio Polish', desc:'Re-cut with pro touch.', short:'Pro finish', price:{oneTime:150, monthly:150}, badge:'Pro' },
-        { id:'ugc-comment', label:'Comment Reply Pack', desc:'Smart replies to boost.', short:'Engage more', price:{oneTime:100, monthly:100}, badge:'Engage' },
-        { id:'ugc-tracking', label:'Tracking Upgrade', desc:'Deeper insights.', short:'Better decisions', price:{oneTime:120, monthly:120}, badge:'Insight' },
-        { id:'ugc-white', label:'Whitelisting Rights', desc:'Run creator posts as ads.', short:'Run as ads', price:{oneTime:220, monthly:220}, badge:'Rights' },
-        { id:'ugc-usage', label:'Usage Rights Extension', desc:'Extend paid usage.', short:'More time', price:{oneTime:180, monthly:180}, badge:'Rights' },
-        { id:'ugc-hooks', label:'A/B Hooks Pack', desc:'5 alt hooks to test.', short:'Test faster', price:{oneTime:140, monthly:140}, badge:'Test' },
-      ]},
+    // Complete 1CoastMedia Service Catalog
+    serviceCategories: {
+      signature: {
+        name: '★ Signature',
+        description: 'Standout lead offers with fast turnarounds',
+        services: [
+          {
+            key: '48h-launch',
+            name: '48-Hour Launch Funnel',
+            outcome: 'Complete funnel live in 48 hours',
+            deliverables: ['Landing page + thank-you', 'GA4/pixels setup', '3 ad creatives', '1 welcome email'],
+            price: { oneTime: 1950, monthly: null },
+            sla: '48 hours',
+            acceptance: 'Test lead, analytics events, QA report',
+            badge: 'Fastest ROI',
+            popular: true
+          },
+          {
+            key: 'local-authority',
+            name: 'Local Authority Sprint',
+            outcome: 'Dominate local search in 7 days',
+            deliverables: ['GBP overhaul', 'Top-20 citation cleanup', 'Local schema', '4 posts', '10 geo-photos', '1 local landing page'],
+            price: { oneTime: 1500, monthly: null },
+            sla: '7 days',
+            acceptance: 'Schema validates, posts live, citations log',
+            badge: 'Local Favorite',
+            popular: true
+          },
+          {
+            key: 'event-surge',
+            name: 'Event Surge Kit',
+            outcome: 'Event ready with full promotion setup',
+            deliverables: ['Event page/ticket embed', '2 short promos', '3 flyer sizes', 'GBP Event', 'Geo ad setup', 'Email blast'],
+            price: { oneTime: 1200, monthly: null },
+            sla: '5-7 days',
+            acceptance: 'Page live, test opt-in fires',
+            badge: 'Event-Ready'
+          },
+          {
+            key: 'brand-day',
+            name: 'Brand-in-a-Day Intensive',
+            outcome: 'Complete brand identity in one day',
+            deliverables: ['Logo (2 concepts + 1 rev)', 'Palette + typography', 'Mini brand guide', '6 social templates', '1 motion bumper'],
+            price: { oneTime: 1750, monthly: null },
+            sla: '1 day',
+            acceptance: 'All files delivered, brand guide complete',
+            badge: 'Best Seller'
+          },
+          {
+            key: 'site-week',
+            name: 'Site-in-a-Week (6pp)',
+            outcome: 'Professional 6-page website in 7 days',
+            deliverables: ['6 responsive pages', 'Design system', 'Basic SEO', 'CRM/lead handoff', 'Analytics', 'Training'],
+            price: { oneTime: 3500, monthly: null },
+            sla: '7 days',
+            acceptance: 'Lighthouse ≥90, forms working',
+            badge: 'Best Seller'
+          },
+          {
+            key: 'creator-concierge',
+            name: 'Creator Concierge',
+            outcome: 'Full-service creator management',
+            deliverables: ['8 short videos', '12 posts', 'Engagement 30m/day', '2 UGC assets', 'Monthly insights'],
+            price: { oneTime: null, monthly: 1800 },
+            sla: 'Monthly',
+            minTerm: '3 months',
+            acceptance: 'Content calendar delivered, engagement metrics',
+            badge: 'Best Seller'
+          },
+          {
+            key: 'cannabis-kit',
+            name: 'Compliance-Safe Cannabis/Hemp Kit',
+            outcome: 'Compliant marketing that converts',
+            deliverables: ['2 SEO articles', 'Compliant directory placement', 'Email/SMS flows', 'GBP hygiene'],
+            price: { oneTime: null, monthly: 1400 },
+            sla: 'Monthly',
+            minTerm: '3 months',
+            acceptance: 'Compliance review passed, flows active'
+          },
+          {
+            key: 'review-rocket',
+            name: 'Review Rocket',
+            outcome: 'Automated review generation system',
+            deliverables: ['Review landing page', 'Automation (100 invites)', 'Templates', 'Signage file'],
+            price: { oneTime: 350, monthly: null },
+            addOns: [{ name: 'Print QR codes', price: 50 }],
+            sla: '5 days',
+            acceptance: 'Landing page live, automation tested'
+          },
+          {
+            key: 'roi-guard-ppc',
+            name: 'ROI-Guard PPC Management',
+            outcome: 'Guaranteed PPC performance',
+            deliverables: ['Campaign build + creatives', 'Weekly optimization', 'Performance reporting'],
+            price: { oneTime: 800, monthly: '12% ad spend (min $700/mo)' },
+            sla: 'Setup: 7 days, Ongoing: Weekly',
+            minTerm: '3 months',
+            guarantee: 'No conversions by day 45 → 2 free A/B tests',
+            acceptance: 'Campaigns live, tracking verified'
+          },
+          {
+            key: 'ugc-lab',
+            name: 'UGC Lab (Starter)',
+            outcome: 'Professional UGC content pipeline',
+            deliverables: ['4 UGC videos/month via micro-creators', 'Hook library updates'],
+            price: { oneTime: null, monthly: 1200 },
+            sla: 'Monthly',
+            minTerm: '2 months',
+            acceptance: 'Videos delivered, hook library updated'
+          }
+        ]
+      },
+      core: {
+        name: 'Core',
+        description: 'Optimized base packages for essential needs',
+        services: [
+          {
+            key: 'website-launch-pro',
+            name: 'Website Launch — Pro',
+            outcome: 'Professional website with full setup',
+            deliverables: ['6 pages', 'Design system', 'SEO basics', 'CRM/pixel handoff', 'GA4 goals', 'Training'],
+            price: { oneTime: 2800, monthly: null },
+            sla: '3-4 weeks',
+            acceptance: 'Lighthouse ≥90, all integrations working'
+          },
+          {
+            key: 'brand-essentials',
+            name: 'Brand Essentials Kit',
+            outcome: 'Complete brand identity package',
+            deliverables: ['Logo (3 concepts, 2 revs)', 'Palette + typography', 'Mini brand guide', 'Avatars/banners'],
+            price: { oneTime: 1200, monthly: null },
+            sla: '1-2 weeks',
+            acceptance: 'All brand assets delivered'
+          },
+          {
+            key: 'content-sprint-30',
+            name: 'Content Sprint — 30 Days',
+            outcome: 'Month of ready-to-post content',
+            deliverables: ['12 posts', '2 short videos', '20 photos', 'Content calendar'],
+            price: { oneTime: 1950, monthly: null },
+            sla: '4 weeks',
+            acceptance: 'All content delivered, calendar provided'
+          },
+          {
+            key: 'local-growth',
+            name: 'Local Growth Kit',
+            outcome: 'Local SEO foundation established',
+            deliverables: ['GBP optimization', 'Citations cleanup', 'Local schema', 'Review system'],
+            price: { oneTime: 1000, monthly: null },
+            sla: '2-3 weeks',
+            acceptance: 'Schema validates, GBP optimized'
+          }
+        ]
+      },
+      oneTime: {
+        name: 'One-Time',
+        description: 'Project boosts and standalone services',
+        services: [
+          {
+            key: 'logo-design',
+            name: 'Logo Design',
+            outcome: 'Professional logo with full file set',
+            deliverables: ['3 concepts', '2 revisions', 'Full file set'],
+            price: { oneTime: 400, monthly: null },
+            sla: '5 days'
+          },
+          {
+            key: 'brand-style-mini',
+            name: 'Brand Style Guide Mini',
+            outcome: 'Consistent brand guidelines',
+            deliverables: ['Fonts/colors guide', '2 template covers'],
+            price: { oneTime: 350, monthly: null },
+            sla: '4 days'
+          },
+          {
+            key: 'copywriting-sprint',
+            name: 'Copywriting Sprint (≤6pp)',
+            outcome: 'Compelling copy for up to 6 pages',
+            deliverables: ['Website copy', 'SEO optimization', 'Brand voice consistency'],
+            price: { oneTime: 500, monthly: null },
+            sla: '5 days'
+          },
+          {
+            key: 'landing-page',
+            name: 'Landing Page (Design+Build)',
+            outcome: 'High-converting landing page',
+            deliverables: ['Custom design', 'Mobile responsive', 'QA ≥90 desktop'],
+            price: { oneTime: 1200, monthly: null },
+            sla: '7 days'
+          },
+          {
+            key: 'promo-video',
+            name: 'Promo Video (30-45s)',
+            outcome: 'Professional promotional video',
+            deliverables: ['30-45 second edit', '2 aspect ratios', 'Captions included'],
+            price: { oneTime: 800, monthly: null },
+            sla: '6 days'
+          },
+          {
+            key: 'event-flyer',
+            name: 'Event Flyer',
+            outcome: 'Print and digital event promotion',
+            deliverables: ['Print-ready design', 'Instagram format'],
+            price: { oneTime: 200, monthly: null },
+            sla: '3 days'
+          },
+          {
+            key: 'email-campaign',
+            name: 'Email Campaign Setup',
+            outcome: 'Professional email marketing setup',
+            deliverables: ['Campaign design', 'List setup', 'Automation config'],
+            price: { oneTime: 300, monthly: null },
+            sla: '3 days'
+          },
+          {
+            key: 'seo-audit',
+            name: 'SEO Starter Audit & Fix (10 items)',
+            outcome: 'Improved search visibility',
+            deliverables: ['Technical audit', '10 priority fixes', 'Recommendations report'],
+            price: { oneTime: 600, monthly: null },
+            sla: '7 days'
+          },
+          {
+            key: 'photography-pack',
+            name: 'Photography Pack (20 edits)',
+            outcome: 'Professional photo editing',
+            deliverables: ['20 edited photos', 'Color correction', 'Optimization for web'],
+            price: { oneTime: 450, monthly: null },
+            sla: '7 days'
+          },
+          {
+            key: 'checkout-booking',
+            name: 'Checkout/Booking Integration',
+            outcome: 'Seamless payment and booking system',
+            deliverables: ['Payment gateway setup', 'Booking system integration', 'Testing'],
+            price: { oneTime: 350, monthly: null },
+            sla: '4 days'
+          }
+        ]
+      },
+      monthly: {
+        name: 'Monthly',
+        description: 'Recurring services with minimum terms',
+        services: [
+          {
+            key: 'social-starter',
+            name: 'Social Media Starter',
+            outcome: 'Consistent social presence',
+            deliverables: ['1 platform', '12 posts', 'Engagement 15m/day', 'Monthly report'],
+            price: { oneTime: null, monthly: 900 },
+            minTerm: '3 months'
+          },
+          {
+            key: 'social-growth',
+            name: 'Social Media Growth',
+            outcome: 'Multi-platform social strategy',
+            deliverables: ['2 platforms', '16 posts', '2 reels', '30m/day engagement', 'Insights report'],
+            price: { oneTime: null, monthly: 1400 },
+            minTerm: '3 months'
+          },
+          {
+            key: 'website-maintenance',
+            name: 'Website Maintenance',
+            outcome: 'Worry-free website management',
+            deliverables: ['Weekly updates', '3h monthly edits', 'Uptime monitoring', 'Monthly report'],
+            price: { oneTime: null, monthly: 300 },
+            minTerm: '3 months'
+          },
+          {
+            key: 'seo-retainer-std',
+            name: 'SEO Retainer Standard',
+            outcome: 'Steady search growth',
+            deliverables: ['2 SEO articles', 'Keyword planning', 'On-page fixes', 'Monthly report'],
+            price: { oneTime: null, monthly: 1200 },
+            minTerm: '4 months'
+          },
+          {
+            key: 'seo-retainer-growth',
+            name: 'SEO Retainer Growth',
+            outcome: 'Aggressive search domination',
+            deliverables: ['4 articles', 'Technical fixes', 'Citation building', 'Growth roadmap'],
+            price: { oneTime: null, monthly: 1800 },
+            minTerm: '4 months'
+          },
+          {
+            key: 'paid-ads-mgmt',
+            name: 'Paid Ads Management',
+            outcome: 'Profitable ad campaigns',
+            deliverables: ['Campaign management', 'Creative testing', 'Weekly optimization'],
+            price: { oneTime: 800, monthly: '12% spend (min $700/mo)' },
+            minTerm: '3 months'
+          },
+          {
+            key: 'email-marketing-std',
+            name: 'Email Marketing Standard',
+            outcome: 'Effective email campaigns',
+            deliverables: ['2 sends/month', 'List hygiene', 'Performance report'],
+            price: { oneTime: null, monthly: 700 },
+            minTerm: '2 months'
+          },
+          {
+            key: 'email-marketing-growth',
+            name: 'Email Marketing Growth',
+            outcome: 'Advanced email strategy',
+            deliverables: ['4 sends/month', 'A/B testing', 'Automation setup', 'Insights report'],
+            price: { oneTime: null, monthly: 1200 },
+            minTerm: '3 months'
+          },
+          {
+            key: 'content-retainer-lite',
+            name: 'Content Retainer Lite',
+            outcome: 'Regular content creation',
+            deliverables: ['Half-day shoot', '30 photos', '2 videos'],
+            price: { oneTime: null, monthly: 1300 },
+            minTerm: '3 months'
+          },
+          {
+            key: 'content-retainer-pro',
+            name: 'Content Retainer Pro',
+            outcome: 'Premium content production',
+            deliverables: ['Full-day shoot', '50 photos', '4 videos'],
+            price: { oneTime: null, monthly: 2100 },
+            minTerm: '3 months'
+          },
+          {
+            key: 'analytics-cro',
+            name: 'Analytics & CRO',
+            outcome: 'Data-driven optimization',
+            deliverables: ['Custom dashboard', 'Event tracking', '1 A/B test/month'],
+            price: { oneTime: null, monthly: 450 },
+            minTerm: '2 months'
+          }
+        ]
+      }
+    },
+
+    // Bundles for value stacking
+    bundles: [
+      {
+        key: 'local-dominator',
+        name: 'Local Dominator',
+        description: 'Complete local market domination',
+        includes: ['Local Authority Sprint', 'GBP posts', 'Review Rocket'],
+        price: { oneTime: 1000, monthly: 300 }
+      },
+      {
+        key: 'growth-wave',
+        name: 'Growth Wave (Quarterly)',
+        description: 'Quarterly growth acceleration',
+        includes: ['Campaign refresh', 'LP refresh', '6 graphics', '2 shorts', 'Email/GBP'],
+        price: { quarterly: 2500 }
+      },
+      {
+        key: 'launch-ads',
+        name: 'Launch + Ads',
+        description: 'Website launch with immediate traffic',
+        includes: ['Website Launch Pro', 'ROI-Guard PPC', '1 A/B test'],
+        price: { oneTime: 2800, monthly: 'PPC fee' }
+      }
     ],
 
     addonIndex:{},
@@ -97,7 +388,7 @@ export function landingApp(){
     cartAddons:[],
     builderOpen:false,
     addonsOpen:false,
-    activeService:'web',
+    activeService:'signature',
     stickyCta:false,
     toast:{show:false,text:''},
     isSubmitting:false,
