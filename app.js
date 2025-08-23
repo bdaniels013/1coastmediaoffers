@@ -575,6 +575,40 @@ export function landingApp(){
     },
     emailValid(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e||''); },
 
+    // Get minimum terms info for selected services
+    getMinTermsInfo(){
+      const monthlyServices = this.cartServices.filter(key => {
+        for (const category of Object.values(this.serviceCategories)) {
+          const service = category.services?.find(s => s.key === key);
+          if (service && service.price.monthly && service.minTerm) {
+            return true;
+          }
+        }
+        return false;
+      });
+      
+      if (monthlyServices.length === 0) return null;
+      
+      const terms = monthlyServices.map(key => {
+        for (const category of Object.values(this.serviceCategories)) {
+          const service = category.services?.find(s => s.key === key);
+          if (service && service.minTerm) {
+            return service.minTerm;
+          }
+        }
+        return null;
+      }).filter(Boolean);
+      
+      // Find the longest minimum term
+      const maxTerm = terms.reduce((max, term) => {
+        const months = parseInt(term.match(/\d+/)?.[0] || '0');
+        const maxMonths = parseInt(max.match(/\d+/)?.[0] || '0');
+        return months > maxMonths ? term : max;
+      }, '0 months');
+      
+      return maxTerm;
+    },
+
     // snapshot of current cart
     getCartSnapshot(){
       return {

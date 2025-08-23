@@ -307,6 +307,10 @@
         <span>Monthly:</span>
         <span x-text="fmtUSD(getMonthlyTotal())"></span>
       </div>
+      <div x-show="getMinTermsInfo() && plan === 'monthly'" class="flex justify-between text-xs text-slate-500 mt-1 pt-1 border-t border-slate-100">
+        <span>Min commitment:</span>
+        <span x-text="getMinTermsInfo()"></span>
+      </div>
     </div>
     <button @click="openBuilder()" class="w-full btn bg-slate-900 text-white rounded-lg px-4 py-2 font-semibold text-sm">Review & Checkout</button>
   </div>
@@ -567,9 +571,8 @@
 
   <footer class="py-10 border-t border-slate-200 text-center text-xs text-slate-500">© <span x-text="year"></span> 1CoastMedia • Mississippi Gulf Coast • All rights reserved.</footer>
 
-  <!-- Alpine App -->
-  <script>
-    function landingApp(){
+  <!-- Load Alpine.js application -->
+  <script type="module" src="/app.js"></script>
       return {
         // --- STATE ---
         year: new Date().getFullYear(),
@@ -1126,7 +1129,6 @@
         },
       }
     }
-  </script>
 
   <!-- Quote Modal (PDF / DOCX + Email) -->
   <div x-show="quoteOpen" x-transition.opacity class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4">
