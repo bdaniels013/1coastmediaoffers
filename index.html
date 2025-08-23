@@ -87,6 +87,7 @@
     .btn-primary:hover{background:#4338ca}
     .btn-outline{background:#fff;border:1px solid rgba(15,23,42,.10)}
   </style>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
 <body class="mesh text-slate-800" x-data="landingApp()" x-init="init()">
@@ -572,7 +573,7 @@
   <footer class="py-10 border-t border-slate-200 text-center text-xs text-slate-500">© <span x-text="year"></span> 1CoastMedia • Mississippi Gulf Coast • All rights reserved.</footer>
 
   <!-- Load Alpine.js application -->
-  <script type="module" src="/app.js"></script>
+  <script src="/app.js"></script>
       return {
         // --- STATE ---
         year: new Date().getFullYear(),
@@ -1191,5 +1192,6 @@
       </div>
     </section>
   </div>
+  <script type="module" src="/app.js"></script>
 </body>
 </html>
