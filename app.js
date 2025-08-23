@@ -21,6 +21,9 @@ export function landingApp(){
     sortBy: 'popular',
     activeTab: 'signature',
 
+    // Add missing services array for template compatibility
+    services: [],
+
     // Complete 1CoastMedia Service Catalog (fallback)
     serviceCategories: {
       signature: {
