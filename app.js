@@ -399,6 +399,9 @@ export function landingApp(){
       // expose Alpine instance for global helpers
       window.App = this;
 
+      // Populate services array from serviceCategories for template compatibility
+      this.populateServicesArray();
+
       // Try to fetch from API and convert to serviceCategories format
       try{
         const r = await fetch(CATALOG_URL, { cache:'no-store' });
@@ -407,6 +410,8 @@ export function landingApp(){
           if(Array.isArray(j.services) && j.services.length){
             // Convert old API format to new serviceCategories format
             this.serviceCategories = this.convertApiToCategories(j.services);
+            // Repopulate services array after API update
+            this.populateServicesArray();
             console.log('Loaded services from API and converted to categories');
           }
         } else {
@@ -435,6 +440,16 @@ export function landingApp(){
 
       // Wire Save / Email Quote buttons
       wireConversionButtons();
+    },
+
+    // Populate services array from serviceCategories for template compatibility
+    populateServicesArray() {
+      this.services = [];
+      Object.values(this.serviceCategories).forEach(category => {
+        if (category.services) {
+          this.services.push(...category.services);
+        }
+      });
     },
 
     // Convert old API services array to new serviceCategories format
@@ -494,8 +509,8 @@ export function landingApp(){
       return baseSum + addonSum;
     },
 
-    // Add missing computed properties for monthly and one-time totals
-    get getMonthlyTotal(){
+    // Fix: Change these to methods instead of computed properties
+    getMonthlyTotal(){
       let baseSum = 0;
       this.cartServices.forEach(key => {
         for (const category of Object.values(this.serviceCategories)) {
@@ -511,7 +526,7 @@ export function landingApp(){
       return baseSum + addonSum;
     },
 
-    get getOneTimeTotal(){
+    getOneTimeTotal(){
       let baseSum = 0;
       this.cartServices.forEach(key => {
         for (const category of Object.values(this.serviceCategories)) {
@@ -525,6 +540,13 @@ export function landingApp(){
       
       const addonSum = this.cartAddons.reduce((s, id) => s + (this.addonIndex[id]?.price?.oneTime || 0), 0);
       return baseSum + addonSum;
+    },
+
+    // Add missing visibleAddons computed property
+    get visibleAddons() {
+      // Return empty array for now since addons aren't fully implemented
+      // This prevents the template error
+      return [];
     },
 
     /* ---------- helpers ---------- */
