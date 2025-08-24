@@ -83,19 +83,28 @@ function landingApp() {
         bundles: this.bundles.length,
         addons: this.addons.length
       });
+
+      // Watchers to toggle body scroll based on modal state
+      this.$watch('checkoutModalOpen', (value) => {
+        document.body.style.overflow = (value || this.showAddonsModal) ? 'hidden' : '';
+      });
+      this.$watch('showAddonsModal', (value) => {
+        document.body.style.overflow = (value || this.checkoutModalOpen) ? 'hidden' : '';
+      });
     },
     
     // Modal management
     openCheckoutModal() {
       console.log('Alpine: Opening checkout modal');
       this.checkoutModalOpen = true;
-      window.openCheckoutModal();
+      // prevent background scrolling when modal is open
+      document.body.style.overflow = 'hidden';
     },
     
     closeCheckoutModal() {
       console.log('Alpine: Closing checkout modal');
       this.checkoutModalOpen = false;
-      window.closeCheckoutModal();
+      document.body.style.overflow = '';
     },
     
     openAddonsModal(serviceKey = '') {
