@@ -52,42 +52,14 @@
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script defer src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
 
-  <style>
-    :root{--ink:#0b1220;--indigo:#4f46e5;--cyan:#06b6d4;--emerald:#10b981}
-    html{scroll-behavior:smooth}
-    body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
-    .mesh{background-image:
-      radial-gradient(70rem 35rem at -10% -10%, rgba(79,70,229,.14), transparent 60%),
-      radial-gradient(60rem 30rem at 110% 10%, rgba(6,182,212,.12), transparent 60%),
-      radial-gradient(36rem 22rem at 60% 120%, rgba(16,185,129,.10), transparent 60%),
-      linear-gradient(#f8fafc, #ffffff 28%, #f1f5f9)}
-    .glass{backdrop-filter:saturate(170%) blur(14px);background:rgba(255,255,255,.84)}
-    .halo{position:relative;border-radius:1.25rem}
-    .halo:before{content:"";position:absolute;inset:-1px;border-radius:inherit;background:linear-gradient(120deg, rgba(2,6,23,.08), rgba(79,70,229,.32), rgba(6,182,212,.32), rgba(2,6,23,.08));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;padding:1px;pointer-events:none}
-    .card{border-radius:1.25rem;background:#fff;border:1px solid rgba(15,23,42,.08);box-shadow:0 12px 34px rgba(2,6,23,.06);transition:box-shadow .2s ease, transform .2s ease}
-    .card:hover{box-shadow:0 18px 52px rgba(2,6,23,.10);transform:translateY(-1px)}
-    .btn{transition:transform .2s ease, box-shadow .2s ease}
-    .btn:hover{transform:translateY(-1px)}
-    .tap:active{transform:scale(.98)}
-    .f-ring:focus-visible{outline:none;box-shadow:0 0 0 4px rgba(79,70,229,.18)}
-    .spinner{border:3px solid #e2e8f0;border-top-color:#0f172a;border-radius:999px;width:18px;height:18px;animation:spin .8s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    h1,h2,h3{letter-spacing:-0.02em}
-    section{scroll-margin-top:80px}
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="/styles/main.css">
 
-    /* Modal scroll helpers */
-    .no-scroll { overflow: hidden; }
-    .scroll-touch { -webkit-overflow-scrolling: touch; }
-    .touch-pan-y { touch-action: pan-y; }
-    .modal-shell { max-height: 92svh; }
-    @supports not (height: 1svh) { .modal-shell { max-height: 92vh; } }
+  <!-- Service Data -->
+  <script src="/data/services.js"></script>
 
-    /* Buttons */
-    .btn-primary{background:#4f46e5;color:#fff}
-    .btn-primary:hover{background:#4338ca}
-    .btn-outline{background:#fff;border:1px solid rgba(15,23,42,.10)}
-  </style>
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <!-- Main App Logic -->
+  <script src="/app.js"></script>
 </head>
 
 <body class="mesh text-slate-800" x-data="landingApp()" x-init="init()">
@@ -324,874 +296,234 @@
         <div class="text-sm text-slate-600">Est. total: <strong x-text="fmtUSD(total)"></strong><span class="text-slate-500" x-show="plan==='monthly'">/mo</span></div>
         <div class="flex gap-2 flex-wrap justify-end">
           <button @click="openAddons(activeService)" class="tap rounded-xl ring-1 ring-slate-200 bg-white px-4 py-2 text-sm font-semibold f-ring">Add-Ons</button>
-
-          <!-- New actions -->
           <button @click="downloadQuoteFile()" class="rounded-xl ring-1 ring-slate-200 bg-white text-slate-700 px-4 py-2 text-sm f-ring">Save Quote</button>
           <button @click="openQuote()" class="rounded-xl ring-1 ring-slate-200 bg-white text-slate-700 px-4 py-2 text-sm f-ring">Email Quote</button>
-
-          <button @click="clearAll()"
-                  class="tap rounded-xl ring-1 ring-rose-200 bg-white text-rose-700 px-4 py-2 text-sm font-semibold f-ring hover:bg-rose-50"
-                  title="Remove all selected base services and add-ons">
-            Clear Cart
-          </button>
-
+          <button @click="clearAll()" class="tap rounded-xl ring-1 ring-rose-200 bg-white text-rose-700 px-4 py-2 text-sm font-semibold f-ring hover:bg-rose-50" title="Remove all selected base services and add-ons">Clear Cart</button>
           <button @click="openBuilder()" class="tap rounded-xl bg-indigo-600 text-white px-4 py-2 text-sm font-semibold f-ring hover:bg-indigo-700">Review & Checkout</button>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Explore Add-Ons -->
-  <div x-show="addonsOpen" x-transition.opacity class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
-    <button @click="addonsOpen=false" class="absolute inset-0 bg-slate-900/50" aria-label="Close overlay"></button>
-
-    <section
-      class="relative w-full sm:max-w-6xl rounded-2xl bg-white text-slate-900 shadow-2xl ring-1 ring-slate-200 flex flex-col modal-shell overflow-hidden"
-      role="dialog" aria-modal="true" aria-labelledby="addonsTitle"
-    >
-      <div class="p-5 border-b border-slate-200 flex items-center justify-between shrink-0">
-        <h3 id="addonsTitle" class="text-lg font-bold">Explore Add-Ons</h3>
-        <button @click="addonsOpen=false" class="h-9 w-9 grid place-items-center rounded-md hover:bg-slate-50 f-ring" aria-label="Close">
-          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 6l12 12M6 18L18 6"/></svg>
-        </button>
-      </div>
-
-      <div class="p-5 grid lg:grid-cols-4 gap-4 flex-1 overflow-y-auto scroll-touch touch-pan-y">
-        <aside class="lg:col-span-1 space-y-3">
-          <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-3">
-            <label class="text-xs text-slate-500">Service</label>
-            <select x-model="activeService" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-2 py-2 text-sm f-ring">
-              <template x-for="s in services" :key="'sel-'+s.key"><option :value="s.key" x-text="s.name"></option></template>
-            </select>
-          </div>
-          <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-3">
-            <label class="text-xs text-slate-500">Search add-ons</label>
-            <input x-model.trim="addonQuery" placeholder="e.g., SEO, drone, captions" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-2 py-2 text-sm f-ring" />
-          </div>
-          <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-3">
-            <label class="text-xs text-slate-500">Sort</label>
-            <select x-model="sortBy" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-2 py-2 text-sm f-ring">
-              <option value="popular">Popular</option>
-              <option value="price-asc">Price ↑</option>
-              <option value="price-desc">Price ↓</option>
-              <option value="alpha">A–Z</option>
-            </select>
-          </div>
-          <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-3">
-            <div class="text-xs text-slate-500">Quick picks</div>
-            <div class="mt-2 grid grid-cols-2 gap-2">
-              <button @click="quickPick('essentials')" class="rounded-lg btn-outline px-2 py-1 text-xs font-semibold">Essentials</button>
-              <button @click="quickPick('premium')" class="rounded-lg btn-outline px-2 py-1 text-xs font-semibold">Premium</button>
-            </div>
-          </div>
-        </aside>
-
-        <div class="lg:col-span-3">
-          <div class="flex items-center justify-between gap-2 flex-wrap">
-            <div class="text-sm text-slate-600">Selected add-ons: <strong x-text="cartAddons.length"></strong></div>
-            <div class="text-sm text-slate-600">Est. total: <strong x-text="fmtUSD(total)"></strong><span class="text-slate-500" x-show="plan==='monthly'">/mo</span></div>
-          </div>
-
-          <div class="mt-3 divide-y divide-slate-200 ring-1 ring-slate-200 rounded-xl bg-white overflow-hidden max-h-[60vh] overflow-y-auto pr-1 scroll-touch touch-pan-y">
-            <template x-for="ad in visibleAddons" :key="ad.id">
-              <div>
-                <div class="flex items-center justify-between p-3">
-                  <div class="min-w-0">
-                    <div class="font-medium truncate" x-text="ad.label"></div>
-                    <div class="text-[11px] text-slate-500 mt-0.5 inline-flex items-center gap-2">
-                      <span class="rounded-full bg-slate-100 ring-1 ring-slate-200 px-2 py-0.5 uppercase tracking-wide" x-text="ad.badge"></span>
-                      <span x-show="ad.popular" class="rounded-full bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200 px-2 py-0.5">Popular</span>
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-3">
-                    <div class="text-sm font-semibold whitespace-nowrap" x-text="fmtUSD(ad.price[plan])"></div>
-                    <button @click="toggleAddon(ad.id)" class="tap rounded-md px-2 py-1 text-xs font-semibold f-ring" :class="cartAddons.includes(ad.id)?'bg-emerald-600 text-white':'ring-1 ring-slate-200'" x-text="cartAddons.includes(ad.id)?'Added':'Add'"></button>
-                  </div>
-                </div>
-                <button @click="toggleDesc(ad.id)" class="w-full text-left px-3 pb-3 text-xs text-slate-500 flex items-center gap-1 f-ring">
-                  <span class="underline">Details</span>
-                  <svg class="h-3 w-3 transition" :class="{ 'rotate-180': openDescs[ad.id] }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-                </button>
-                <div class="px-3 pb-3 text-sm text-slate-600" x-show="openDescs[ad.id]" x-transition x-text="ad.desc"></div>
-              </div>
-            </template>
-          </div>
-
-          <div class="mt-4 flex items-center justify-end gap-2">
-            <button @click="clearAll()" class="rounded-lg btn-outline px-4 py-2 f-ring">Clear</button>
-            <button @click="addonsOpen=false" class="rounded-lg btn-outline px-4 py-2 f-ring">Close</button>
-            <button @click="addonsOpen=false; openBuilder()" class="rounded-lg btn-primary px-4 py-2 font-semibold f-ring">Review & Checkout</button>
-          </div>
+  <!-- DEPENDENCY MODAL -->
+  <div x-show="dependencyModalOpen" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
+    <div class="flex min-h-full items-center justify-center p-4">
+      <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" @click="dependencyModalOpen = false"></div>
+      <div class="relative bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-bold text-slate-900">Dependencies Required</h3>
+          <button @click="dependencyModalOpen = false" class="text-slate-400 hover:text-slate-600">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
-      </div>
-    </section>
-  </div>
-
-  <!-- Builder (Review & Checkout) -->
-  <div x-show="builderOpen" x-transition.opacity class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
-    <div @click="builderOpen=false" class="absolute inset-0 bg-slate-900/50"></div>
-    <div class="relative w-full sm:max-w-6xl rounded-2xl bg-white text-slate-900 shadow-2xl ring-1 ring-slate-200 max-h-[92vh] overflow-hidden">
-      <div class="p-5 border-b border-slate-200 flex items-center justify-between">
-        <h3 class="text-lg font-bold">Review & Checkout</h3>
-        <button @click="builderOpen=false" class="h-9 w-9 grid place-items-center rounded-md hover:bg-slate-50 f-ring" aria-label="Close">
-          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 6l12 12M6 18L18 6"/></svg>
-        </button>
-      </div>
-      <div class="p-5 grid lg:grid-cols-3 gap-6 overflow-auto max-h-[calc(92vh-72px)]">
-        <!-- Left: choose bases -->
-        <div class="lg:col-span-1 card p-4">
-          <h4 class="font-semibold">1) Base services</h4>
-          <p class="text-xs text-slate-500 mt-1">Pick at least one base to continue.</p>
-          <div class="mt-2 grid grid-cols-2 gap-2">
-            <template x-for="s in services" :key="'pick-'+s.key">
-              <button @click="toggleService(s.key)" class="tap rounded-xl px-3 py-2 font-semibold ring-1 ring-slate-200 flex items-center justify-center gap-2 f-ring" :class="cartServices.includes(s.key) ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 hover:bg-slate-50'">
-                <span class="h-2.5 w-2.5 rounded-full" :class="cartServices.includes(s.key)?'bg-emerald-400':'bg-slate-300'"></span>
-                <span x-text="s.name"></span>
-              </button>
-            </template>
-          </div>
-        </div>
-
-        <!-- Middle: add-ons -->
-        <div class="lg:col-span-2 card p-4">
-          <div class="flex items-center justify-between gap-3 flex-wrap">
-            <h4 class="font-semibold">2) Add-ons (optional)</h4>
-            <div class="flex items-center gap-2">
-              <select x-model="activeService" class="rounded-lg bg-white ring-1 ring-slate-200 px-2 py-1 text-sm f-ring">
-                <template x-for="s in services" :key="'sel2-'+s.key"><option :value="s.key" x-text="s.name"></option></template>
-              </select>
-              <input x-model.trim="addonQuery" placeholder="Search add-ons" class="rounded-lg bg-white ring-1 ring-slate-200 px-2 py-1 text-sm f-ring" />
-            </div>
-          </div>
-          <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[28rem] overflow-auto pr-1">
-            <template x-for="ad in visibleAddons" :key="'ad-'+ad.id">
-              <button @click="toggleAddon(ad.id)" class="tap text-left rounded-xl p-4 ring-1 ring-slate-200 bg-white hover:bg-slate-50 transition relative f-ring" :class="cartAddons.includes(ad.id)?'bg-gradient-to-br from-indigo-50 to-cyan-50 ring-2 ring-indigo-300':''">
-                <div class="flex items-start justify-between gap-3">
-                  <div>
-                    <div class="font-medium leading-tight" x-text="ad.label"></div>
-                    <div class="text-xs mt-0.5 inline-flex items-center gap-2">
-                      <span class="rounded-full bg-slate-100 ring-1 ring-slate-200 px-2 py-0.5 text-[10px] uppercase tracking-wide" x-text="ad.badge"></span>
-                      <span class="text-slate-500" x-text="ad.short || ''"></span>
-                    </div>
-                  </div>
-                  <div class="text-sm font-semibold whitespace-nowrap" x-text="fmtUSD(ad.price[plan])"></div>
-                </div>
-                <div x-show="cartAddons.includes(ad.id)" class="absolute top-2 right-2 h-6 w-6 rounded-full grid place-items-center bg-white text-indigo-600 ring-1 ring-indigo-200">
-                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12l5 5L19 7"/></svg>
-                </div>
-                <div class="mt-2 text-xs text-slate-500" x-text="ad.desc"></div>
-              </button>
-            </template>
-          </div>
-        </div>
-
-        <!-- Summary + Contact -->
-        <div class="lg:col-span-3 card p-4">
-          <h4 class="font-semibold">Summary</h4>
-          <div class="mt-3 grid md:grid-cols-2 gap-4">
-            <div>
-              <div class="text-xs text-slate-500">Base services</div>
-              <template x-if="cartServices.length===0"><div class="text-sm text-slate-500">None selected</div></template>
-              <template x-for="k in cartServices" :key="'sum-base-'+k">
-                <div class="mt-2 flex items-center justify-between rounded-lg bg-slate-50 ring-1 ring-slate-200 p-3">
-                  <div class="text-sm font-semibold" x-text="serviceName(k)"></div>
-                  <div class="text-sm font-semibold" x-text="fmtUSD(serviceBase(k))"></div>
-                </div>
+        
+        <div class="mb-4">
+          <p class="text-sm text-slate-600 mb-3" x-text="dependencyReason"></p>
+          
+          <div class="bg-slate-50 rounded-lg p-3 mb-4">
+            <div class="text-xs font-medium text-slate-700 mb-2">Missing Dependencies:</div>
+            <ul class="space-y-1">
+              <template x-for="dep in missingDependencies" :key="dep.key">
+                <li class="flex items-center justify-between text-sm">
+                  <span x-text="dep.name"></span>
+                  <span class="font-medium" x-text="fmtUSD(dep.price[plan] || 0)"></span>
+                </li>
               </template>
-            </div>
-            <div>
-              <div class="text-xs text-slate-500">Add-ons</div>
-              <template x-if="cartAddons.length===0"><div class="text-sm text-slate-500">None selected</div></template>
-              <template x-for="id in cartAddons" :key="'sum-addon-'+id">
-                <div class="mt-2 flex items-center justify-between rounded-lg bg-slate-50 ring-1 ring-slate-200 p-3">
-                  <div class="text-sm"><span class="font-medium" x-text="addonIndex[id].label"></span> <span class="text-slate-500">— <span x-text="serviceName(addonIndex[id].service)"></span></span></div>
-                  <div class="text-sm font-semibold" x-text="fmtUSD(addonIndex[id].price[plan])"></div>
-                </div>
-              </template>
+            </ul>
+          </div>
+          
+          <div class="text-sm text-slate-600">
+            <div class="flex justify-between">
+              <span>Additional cost:</span>
+              <span class="font-medium" x-text="fmtUSD(missingDependencies.reduce((sum, dep) => sum + (dep.price[plan] || 0), 0))"></span>
             </div>
           </div>
-
-          <div class="mt-5 grid md:grid-cols-5 gap-3">
-            <div class="md:col-span-2">
-              <label class="text-xs text-slate-500" for="c-name">Name</label>
-              <input id="c-name" x-model.trim="contact.name" placeholder="Jane Smith" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-3 py-2 text-sm f-ring"/>
-            </div>
-            <div class="md:col-span-2">
-              <label class="text-xs text-slate-500" for="c-email">Email <span class="text-rose-500">*</span></label>
-              <input id="c-email" x-model.trim="contact.email" type="email" placeholder="you@example.com" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-3 py-2 text-sm f-ring"/>
-            </div>
-            <div>
-              <label class="text-xs text-slate-500" for="c-phone">Phone</label>
-              <input id="c-phone" x-model.trim="contact.phone" placeholder="(555) 555-5555" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-3 py-2 text-sm f-ring"/>
-            </div>
-            <div class="md:col-span-2">
-              <label class="text-xs text-slate-500" for="c-company">Company</label>
-              <input id="c-company" x-model.trim="contact.company" placeholder="Your company" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-3 py-2 text-sm f-ring"/>
-            </div>
-            <div class="md:col-span-3">
-              <label class="text-xs text-slate-500" for="c-notes">Notes</label>
-              <input id="c-notes" x-model.trim="contact.notes" placeholder="Anything we should know for kickoff?" class="mt-1 w-full rounded-lg bg-white ring-1 ring-slate-200 px-3 py-2 text-sm f-ring"/>
-            </div>
-          </div>
-
-          <div class="mt-4 flex items-center justify-between border-t border-slate-200 pt-3">
-            <div class="text-sm text-slate-600">Estimated total <span x-show="plan==='monthly'">(per month)</span></div>
-            <div class="text-lg font-extrabold" x-text="fmtUSD(total)"></div>
-          </div>
-          <div class="mt-3 flex flex-wrap justify-end gap-2">
-            <button @click="clearAll()" class="rounded-lg ring-1 ring-slate-200 px-4 py-2 bg-white f-ring" :disabled="isSubmitting">Clear All</button>
-            <button @click="beginCheckout()" class="rounded-lg bg-slate-900 text-white px-4 py-2 font-semibold f-ring inline-flex items-center gap-2" :disabled="isSubmitting">
-              <span x-show="!isSubmitting">Continue to Secure Checkout</span>
-              <span x-show="isSubmitting" class="inline-flex items-center gap-2"><span class="spinner"></span> Processing…</span>
-            </button>
-          </div>
-          <p class="mt-2 text-[11px] text-slate-500">By continuing you agree to simple scope for one-time projects or a 3-month minimum for monthly plans.</p>
+        </div>
+        
+        <div class="flex gap-3">
+          <button @click="addServiceWithDependencies()" class="flex-1 bg-slate-900 text-white rounded-xl px-4 py-2 font-semibold hover:bg-slate-800">
+            Add All
+          </button>
+          <button @click="addServiceWithoutDependencies()" class="flex-1 bg-white border border-slate-200 text-slate-700 rounded-xl px-4 py-2 font-semibold hover:bg-slate-50">
+            Add Without Dependencies
+          </button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- CONTACT -->
-  <section id="contact" class="py-16">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-10 items-start">
-      <div>
-        <h2 class="text-3xl font-extrabold tracking-tight">Ready to transform your brand?</h2>
-        <p class="mt-3 text-slate-600 max-w-prose">Prefer to chat first? Book a free call or email us anytime.</p>
-        <div class="mt-6 space-x-3 text-sm">
-          <a href="mailto:1coastmedia@gmail.com?subject=1%20Coast%20Media%20Inquiry" class="tap inline-flex items-center gap-2 rounded-xl bg-slate-900 text-white px-4 py-3 font-semibold shadow-sm hover:shadow-lg">Email Us</a>
-          <a href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noreferrer" class="tap inline-flex items-center gap-2 rounded-xl ring-1 ring-slate-200 bg-white px-4 py-3 font-semibold hover:bg-slate-50">Open Calendly</a>
-        </div>
+  <!-- ADDONS MODAL -->
+  <div x-show="addonsOpen" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
+    <div class="flex min-h-full items-end sm:items-center justify-center p-4">
+      <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" @click="closeAddons()"></div>
+      <div class="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-4xl modal-shell overflow-hidden">
+        <!-- Modal content will be populated by JavaScript -->
       </div>
-      <div class="halo p-0.5 w-full">
-        <div class="rounded-3xl glass ring-1 ring-slate-200 p-2 w-full">
-          <iframe title="Calendly" src="https://calendly.com/bdaniels013/30min?hide_event_type_details=1&text_color=0F172A&primary_color=0F172A" class="w-full rounded-2xl" style="min-height:660px"></iframe>
+    </div>
+  </div>
+
+  <!-- BUILDER MODAL -->
+  <div x-show="builderOpen" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
+    <div class="flex min-h-full items-end sm:items-center justify-center p-4">
+      <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" @click="closeBuilder()"></div>
+      <div class="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-4xl modal-shell overflow-hidden">
+        <!-- Modal content will be populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- QUOTE MODAL -->
+  <div x-show="quoteOpen" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
+    <div class="flex min-h-full items-center justify-center p-4">
+      <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" @click="closeQuote()"></div>
+      <div class="relative bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+        <!-- Modal content will be populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ SECTION -->
+  <section id="faq" class="py-16">
+    <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-extrabold tracking-tight">Frequently Asked Questions</h2>
+        <p class="mt-2 text-slate-600">Everything you need to know about working with 1CoastMedia.</p>
+      </div>
+      
+      <div x-data="{ openFaq: null }" class="space-y-4">
+        <!-- Contract Terms -->
+        <div class="card overflow-hidden">
+          <button @click="openFaq = openFaq === 'contracts' ? null : 'contracts'" class="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-slate-50">
+            <span class="font-semibold">How do contracts and commitments work?</span>
+            <svg class="w-5 h-5 transform transition-transform" :class="openFaq === 'contracts' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div x-show="openFaq === 'contracts'" x-collapse class="px-6 pb-4 text-slate-600">
+            <p>Monthly services require a 3-month minimum commitment to ensure quality results. One-time services have no ongoing commitment. You can pause or cancel monthly services with 30 days notice after the minimum term.</p>
+          </div>
+        </div>
+
+        <!-- Pauses -->
+        <div class="card overflow-hidden">
+          <button @click="openFaq = openFaq === 'pauses' ? null : 'pauses'" class="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-slate-50">
+            <span class="font-semibold">Can I pause my monthly services?</span>
+            <svg class="w-5 h-5 transform transition-transform" :class="openFaq === 'pauses' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div x-show="openFaq === 'pauses'" x-collapse class="px-6 pb-4 text-slate-600">
+            <p>Yes! After your minimum 3-month commitment, you can pause monthly services for up to 2 months per year. Just give us 30 days notice. Perfect for seasonal businesses or temporary budget adjustments.</p>
+          </div>
+        </div>
+
+        <!-- Revisions -->
+        <div class="card overflow-hidden">
+          <button @click="openFaq = openFaq === 'revisions' ? null : 'revisions'" class="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-slate-50">
+            <span class="font-semibold">How do revisions and changes work?</span>
+            <svg class="w-5 h-5 transform transition-transform" :class="openFaq === 'revisions' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div x-show="openFaq === 'revisions'" x-collapse class="px-6 pb-4 text-slate-600">
+            <p>Each deliverable includes 2 rounds of revisions. Additional changes are billed at $75/hour. We'll always discuss scope changes before proceeding to avoid surprises.</p>
+          </div>
+        </div>
+
+        <!-- Ownership -->
+        <div class="card overflow-hidden">
+          <button @click="openFaq = openFaq === 'ownership' ? null : 'ownership'" class="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-slate-50">
+            <span class="font-semibold">Who owns the work and intellectual property?</span>
+            <svg class="w-5 h-5 transform transition-transform" :class="openFaq === 'ownership' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div x-show="openFaq === 'ownership'" x-collapse class="px-6 pb-4 text-slate-600">
+            <p>You own everything we create for you - designs, code, content, and all intellectual property. We provide full source files and documentation. No vendor lock-in, ever.</p>
+          </div>
+        </div>
+
+        <!-- Delivery Speeds -->
+        <div class="card overflow-hidden">
+          <button @click="openFaq = openFaq === 'delivery' ? null : 'delivery'" class="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-slate-50">
+            <span class="font-semibold">How fast can you deliver projects?</span>
+            <svg class="w-5 h-5 transform transition-transform" :class="openFaq === 'delivery' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div x-show="openFaq === 'delivery'" x-collapse class="px-6 pb-4 text-slate-600">
+            <p>Delivery times vary by service: Landing pages (3-5 days), Websites (1-2 weeks), Apps (2-4 weeks). Monthly services deliver ongoing work within 5-7 business days per task. Rush delivery available for 50% surcharge.</p>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <footer class="py-10 border-t border-slate-200 text-center text-xs text-slate-500">© <span x-text="year"></span> 1CoastMedia • Mississippi Gulf Coast • All rights reserved.</footer>
-
-  <!-- Load Alpine.js application -->
-  <script src="/app.js"></script>
-      return {
-        // --- STATE ---
-        year: new Date().getFullYear(),
-        plan: 'oneTime',
-        addonQuery: '',
-        sortBy: 'popular',
-
-        // fallback catalog (never blank)
-        services: [
-          { key:'web', name:'Web & App', blurb:'Launch a clean, mobile-first site fast.', base:{oneTime:300, monthly:500}, includes:['Kickoff & setup','Landing page (3–5 sections)','Light copy help'], addOns:[
-            { id:'web-seo', label:'SEO Basics', desc:'Titles, speed checks, findable.', short:'Quick search wins', price:{oneTime:150, monthly:150}, badge:'Quick win', popular:true },
-            { id:'web-auto', label:'Lead Automations', desc:'Instant replies to leads.', short:'Never miss a lead', price:{oneTime:100, monthly:100}, badge:'Hands-off', popular:true },
-            { id:'web-api', label:'Payments & Maps', desc:'Stripe checkout + maps.', short:'High-impact add', price:{oneTime:250, monthly:250}, badge:'High impact' },
-            { id:'web-mvp', label:'Clickable MVP', desc:'Tap-through prototype.', short:'Test ideas', price:{oneTime:500, monthly:500}, badge:'Prototype' },
-            { id:'web-copy', label:'Website Copywriting', desc:'We write clear, on-brand copy.', short:'Words that sell', price:{oneTime:120, monthly:120}, badge:'Done-for-you' },
-            { id:'web-speed', label:'Speed & Security', desc:'Performance boosts + hardening.', short:'Faster & safer', price:{oneTime:150, monthly:150}, badge:'Speed' },
-            { id:'web-forms', label:'Smart Forms', desc:'Lead routing + spam block.', short:'Higher conversions', price:{oneTime:150, monthly:100}, badge:'Leads' },
-            { id:'web-analytics', label:'Analytics Setup', desc:'Simple dashboard + goals.', short:'Know what works', price:{oneTime:100, monthly:120}, badge:'Insight' },
-            { id:'web-blog', label:'Blog/CMS Setup', desc:'Easy updates, categories, tags.', short:'Publish fast', price:{oneTime:200, monthly:150}, badge:'Content' },
-            { id:'web-booking', label:'Booking Integration', desc:'Calendly/Square appointments.', short:'Fewer no-shows', price:{oneTime:150, monthly:120}, badge:'Conversion' },
-            { id:'web-reviews', label:'Reviews Widget', desc:'Pull Google/FB reviews on site.', short:'Build trust', price:{oneTime:100, monthly:100}, badge:'Trust' },
-            { id:'web-a11y', label:'Accessibility Audit', desc:'WCAG quick audit + fixes.', short:'Compliance wins', price:{oneTime:180, monthly:150}, badge:'Compliance' },
-            { id:'web-i18n', label:'Multi-language', desc:'Key pages in 2nd language.', short:'Expand reach', price:{oneTime:220, monthly:150}, badge:'Reach' },
-            { id:'web-dns', label:'Domain & DNS', desc:'Purchase, connect, SSL.', short:'We handle setup', price:{oneTime:80, monthly:0}, badge:'Setup' },
-            { id:'web-section', label:'Custom Section', desc:'1 bespoke section block.', short:'Tailored UI', price:{oneTime:120, monthly:120}, badge:'Custom' },
-            { id:'web-photos', label:'Photo Sourcing', desc:'Handpicked stock + edits.', short:'Better visuals', price:{oneTime:90, monthly:90}, badge:'Visuals' },
-            { id:'web-brandkit', label:'Brand Kit', desc:'Fonts, colors, components.', short:'Consistent look', price:{oneTime:200, monthly:150}, badge:'Brand' },
-          ]},
-          { key:'video', name:'Video / Audio', blurb:'Short, on-brand edits that convert.', base:{oneTime:600, monthly:1200}, includes:['Kickoff & plan','1–2 min edit','Clean edit, coastal vibe'], addOns:[
-            { id:'vid-audio', label:'Clean Audio + Captions', desc:'Noise fix + captions.', short:'Watchable anywhere', price:{oneTime:200, monthly:250}, badge:'Accessibility', popular:true },
-            { id:'vid-adv', label:'Advanced Edit / Series', desc:'More story, motion, polish.', short:'Flagship content', price:{oneTime:800, monthly:1000}, badge:'Premium', popular:true },
-            { id:'vid-drone-p', label:'Drone B-roll (Basic)', desc:'Dynamic aerial flavor.', short:'Wow factor', price:{oneTime:300, monthly:300}, badge:'Wow' },
-            { id:'vid-drone-pro', label:'Drone Cinematics (Pro)', desc:'Licensed pilot + pro gear.', short:'Top-tier aerials', price:{oneTime:1500, monthly:1500}, badge:'Cinematic' },
-            { id:'vid-extra', label:'Extra Edit Pass', desc:'More refinements + cuts.', short:'Sharper pacing', price:{oneTime:300, monthly:500}, badge:'Polish' },
-            { id:'vid-script', label:'Script & Shotlist', desc:'Plan lines + shots.', short:'Shoot with ease', price:{oneTime:150, monthly:150}, badge:'Plan' },
-            { id:'vid-color', label:'Pro Color Grade', desc:'Crisp, cinematic look.', short:'Standout look', price:{oneTime:150, monthly:150}, badge:'Look' },
-            { id:'vid-sizes', label:'All Social Sizes', desc:'9:16, 1:1, 16:9 outputs.', short:'Every platform', price:{oneTime:120, monthly:120}, badge:'Everywhere' },
-            { id:'vid-thumbs', label:'Thumbnail Pack (x3)', desc:'Scroll-stopping covers.', short:'Higher CTR', price:{oneTime:100, monthly:100}, badge:'Hook' },
-            { id:'vid-raw', label:'Raw Footage Delivery', desc:'We hand you the files.', short:'Own the source', price:{oneTime:60, monthly:60}, badge:'Archive' },
-            { id:'vid-voice', label:'Voiceover', desc:'Pro VO talent included.', short:'Narration', price:{oneTime:220, monthly:220}, badge:'Pro' },
-            { id:'vid-tele', label:'Teleprompter', desc:'Confident on-camera lines.', short:'Confidence', price:{oneTime:90, monthly:90}, badge:'Assist' },
-            { id:'vid-studio', label:'Studio Day', desc:'Lighting, backdrops, sound.', short:'Controlled set', price:{oneTime:700, monthly:700}, badge:'Studio' },
-            { id:'vid-multi', label:'Multi-location Shoot', desc:'Up to 3 locations.', short:'More variety', price:{oneTime:400, monthly:400}, badge:'Scope' },
-            { id:'vid-cast', label:'Talent Casting', desc:'Find on-brand talent.', short:'Right faces', price:{oneTime:300, monthly:300}, badge:'Talent' },
-          ]},
-          { key:'events', name:'Events', blurb:'Plan smooth, run tight, look great.', base:{oneTime:1000, monthly:1200}, includes:['Scope & timeline','Basic coordination','Day-of support'], addOns:[
-            { id:'ev-ven', label:'Vendor/Venue Handling', desc:'We wrangle calls.', short:'Stress-free', price:{oneTime:500, monthly:600}, badge:'Stress-free', popular:true },
-            { id:'ev-digital', label:'RSVP/Tickets Page', desc:'Modern guest flow.', short:'Smooth RSVPs', price:{oneTime:200, monthly:200}, badge:'Modern' },
-            { id:'ev-media', label:'Highlight Media', desc:'Recap video + photos.', short:'Shareworthy', price:{oneTime:300, monthly:300}, badge:'Content' },
-            { id:'ev-auto', label:'Guest Automations', desc:'Reminders + check-in.', short:'No bottlenecks', price:{oneTime:150, monthly:150}, badge:'Smooth' },
-            { id:'ev-hybrid', label:'Livestream Setup', desc:'Hybrid reach, simple.', short:'Reach more', price:{oneTime:400, monthly:400}, badge:'Reach' },
-            { id:'ev-host', label:'Host / MC', desc:'Energy + timing control.', short:'Keep pace', price:{oneTime:250, monthly:250}, badge:'Energy' },
-            { id:'ev-runshow', label:'Run-of-Show', desc:'Minute-by-minute plan.', short:'Clarity', price:{oneTime:150, monthly:150}, badge:'Clarity' },
-            { id:'ev-sponsor', label:'Sponsor Kit + Outreach', desc:'Deck + outreach.', short:'New revenue', price:{oneTime:200, monthly:200}, badge:'Revenue' },
-            { id:'ev-security', label:'Permits & Security Guide', desc:'Who to call + when.', short:'Safer event', price:{oneTime:120, monthly:120}, badge:'Safety' },
-            { id:'ev-vip', label:'VIP/Backstage Mgmt', desc:'Green room + access.', short:'White-glove', price:{oneTime:200, monthly:200}, badge:'VIP' },
-            { id:'ev-photobooth', label:'Photo Booth', desc:'Branded photos on site.', short:'Fun moments', price:{oneTime:350, monthly:350}, badge:'Fun' },
-            { id:'ev-ticketing', label:'Ticketing Integration', desc:'Stripe/Square, QR.', short:'Faster gates', price:{oneTime:220, monthly:220}, badge:'Revenue' },
-          ]},
-          { key:'ugc', name:'UGC', blurb:'Creators + clips that actually get seen.', base:{oneTime:450, monthly:600}, includes:['Kickoff & setup','30k verified views','Simple report'], addOns:[
-            { id:'ugc-repurpose', label:'Ads-Ready Pack', desc:'Cut-downs + hooks.', short:'Convert more', price:{oneTime:200, monthly:200}, badge:'Ads-ready', popular:true },
-            { id:'ugc-leads', label:'Lead Capture Page', desc:'Turn views to contacts.', short:'Capture demand', price:{oneTime:250, monthly:250}, badge:'Leads' },
-            { id:'ugc-enhance', label:'Eye-Candy Overlays', desc:'On-brand text, beats.', short:'More watch time', price:{oneTime:150, monthly:150}, badge:'Engaging' },
-            { id:'ugc-captions', label:'SEO Captions', desc:'Be found & tapped.', short:'Search hits', price:{oneTime:100, monthly:100}, badge:'Search' },
-            { id:'ugc-brand', label:'Branding Pack', desc:'Logos, end-slates.', short:'Brand recall', price:{oneTime:150, monthly:150}, badge:'Brand' },
-            { id:'ugc-views-10k', label:'+10k Views', desc:'~10,000 verified views.', short:'+10k reach', price:{oneTime:150, monthly:150}, badge:'+10k' },
-            { id:'ugc-views-20k', label:'+20k Views', desc:'~20,000 verified views.', short:'+20k reach', price:{oneTime:300, monthly:300}, badge:'+20k' },
-            { id:'ugc-views-70k', label:'+70k Views', desc:'~70,000 verified views.', short:'+70k reach', price:{oneTime:1050, monthly:1050}, badge:'+70k' },
-            { id:'ugc-creator', label:'Creator Matching', desc:'Shortlist best locals.', short:'Best fit', price:{oneTime:100, monthly:100}, badge:'Match' },
-            { id:'ugc-studio', label:'Studio Polish', desc:'Re-cut with pro touch.', short:'Pro finish', price:{oneTime:150, monthly:150}, badge:'Pro' },
-            { id:'ugc-comment', label:'Comment Reply Pack', desc:'Smart replies to boost.', short:'Engage more', price:{oneTime:100, monthly:100}, badge:'Engage' },
-            { id:'ugc-tracking', label:'Tracking Upgrade', desc:'Deeper insights.', short:'Better decisions', price:{oneTime:120, monthly:120}, badge:'Insight' },
-            { id:'ugc-white', label:'Whitelisting Rights', desc:'Run creator posts as ads.', short:'Run as ads', price:{oneTime:220, monthly:220}, badge:'Rights' },
-            { id:'ugc-usage', label:'Usage Rights Extension', desc:'Extend paid usage.', short:'More time', price:{oneTime:180, monthly:180}, badge:'Rights' },
-            { id:'ugc-hooks', label:'A/B Hooks Pack', desc:'5 alt hooks to test.', short:'Test faster', price:{oneTime:140, monthly:140}, badge:'Test' },
-          ]},
-        ],
-
-        // working state
-        addonIndex: {},
-        openDescs: {},
-        cartServices: [],
-        cartAddons: [],
-        builderOpen:false,
-        addonsOpen:false,
-        quoteOpen:false,
-        activeService:'web',
-        stickyCta:false,
-        toast:{show:false,text:''},
-        isSubmitting:false,
-        contact:{ name:'', email:'', company:'', phone:'', notes:'' },
-
-        // Quote modal state
-        quoteEmail:'',
-        quoteNote:'',
-        quoteLink:'',
-        quoteFormat:'pdf', // 'pdf' | 'docx'
-
-        // --- INIT ---
-        async init(){
-          this.rebuildIndex();
-
-          // Hydrate from DB (if available)
-          try{
-            const r = await fetch('/api/admin?r=catalog', { cache:'no-store' });
-            if(r.ok){
-              const j = await r.json();
-              if(Array.isArray(j.services) && j.services.length){
-                this.services = j.services;
-                this.activeService = this.services[0]?.key || this.activeService;
-                this.rebuildIndex();
-              }
-            }
-          }catch{}
-
-          // Restore cart/contact
-          try{
-            const saved = JSON.parse(localStorage.getItem('coast_cart')||'{}');
-            if(saved.services) this.cartServices = saved.services;
-            if(saved.addons)   this.cartAddons  = saved.addons;
-            if(saved.plan)     this.plan        = saved.plan;
-            if(saved.contact)  this.contact     = { ...this.contact, ...saved.contact };
-          }catch{}
-
-          // Load shared quote from URL ?share=
-          this.tryLoadShared();
-
-          // Prefill quote modal bits
-          this.quoteEmail = this.contact.email || '';
-          this.quoteLink = this.buildShareLink();
-
-          // Sticky CTA
-          const onScroll = () => { this.stickyCta = window.scrollY > 640 };
-          onScroll(); window.addEventListener('scroll', onScroll);
-
-          // Lock page scroll when modals open
-          const lock = () => {
-            const shouldLock = this.addonsOpen || this.builderOpen || this.quoteOpen;
-            document.documentElement.classList.toggle('no-scroll', shouldLock);
-          };
-          this.$watch('addonsOpen', lock);
-          this.$watch('builderOpen', lock);
-          this.$watch('quoteOpen', lock);
-          lock();
-        },
-
-        rebuildIndex(){
-          this.addonIndex = this.services.reduce((acc, svc) => {
-            (svc.addOns||[]).forEach(a => acc[a.id] = { ...a, service: svc.key });
-            return acc;
-          }, {});
-        },
-
-        // --- COMPUTEDS ---
-        get total(){
-          const baseSum = this.cartServices.reduce((s, key) => s + (this.services.find(x => x.key === key)?.base?.[this.plan] || 0), 0);
-          const addonSum = this.cartAddons.reduce((s, id) => s + (this.addonIndex[id]?.price?.[this.plan] || 0), 0);
-          return baseSum + addonSum;
-        },
-        get visibleAddons(){
-          let items = (this.services.find(s => s.key === this.activeService)?.addOns || []).slice();
-          const q = this.addonQuery.trim().toLowerCase();
-          if(q) items = items.filter(a => a.label.toLowerCase().includes(q) || a.desc.toLowerCase().includes(q) || (a.short||'').toLowerCase().includes(q));
-          if(this.sortBy==='price-asc') items.sort((a,b)=>a.price[this.plan]-b.price[this.plan]);
-          else if(this.sortBy==='price-desc') items.sort((a,b)=>b.price[this.plan]-a.price[this.plan]);
-          else if(this.sortBy==='alpha') items.sort((a,b)=>a.label.localeCompare(b.label));
-          else items.sort((a,b)=> (b.popular?1:0) - (a.popular?1:0));
-          return items;
-        },
-
-        // --- HELPERS ---
-        serviceName(key){ return (this.services.find(s => s.key === key) || {}).name || key; },
-        serviceBase(key){ return (this.services.find(s => s.key === key) || {}).base?.[this.plan] || 0; },
-        fmtUSD(v){ return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v); },
-        save(){ localStorage.setItem('coast_cart', JSON.stringify({ services:this.cartServices, addons:this.cartAddons, plan:this.plan, contact:this.contact })); },
-        emailValid(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e||''); },
-
-        // --- UI Actions ---
-        setPlan(p){ this.plan = p; this.save(); },
-        toggleService(key){
-          const i = this.cartServices.indexOf(key);
-          if(i>-1) this.cartServices.splice(i,1);
-          else this.cartServices.push(key);
-          this.save(); this.flash('Updated base services');
-        },
-        toggleAddon(id){
-          const svcKey = this.addonIndex[id]?.service;
-          const i = this.cartAddons.indexOf(id);
-          if(i>-1){ this.cartAddons.splice(i,1); this.flash('Removed add-on'); }
-          else{
-            if(svcKey && !this.cartServices.includes(svcKey)){
-              this.cartServices.push(svcKey);
-              this.flash(`Added “${this.serviceName(svcKey)}” base for this add-on.`);
-            }
-            this.cartAddons.push(id);
-            this.flash('Added add-on');
-          }
-          this.save();
-        },
-        toggleDesc(id){ this.openDescs = { ...this.openDescs, [id]: !this.openDescs[id] }; },
-        quickPick(kind){
-          const maps = {
-            essentials: { web:['web-seo','web-auto'], video:['vid-audio','vid-sizes'], events:['ev-digital','ev-media'], ugc:['ugc-captions','ugc-enhance'] },
-            premium:    { web:['web-mvp','web-api','web-copy'], video:['vid-adv','vid-drone-p'], events:['ev-ven','ev-hybrid'], ugc:['ugc-repurpose','ugc-leads','ugc-views-20k'] },
-          };
-          const add = maps[kind]?.[this.activeService] || [];
-          for(const id of add){
-            if(!this.cartAddons.includes(id)){
-              const svcKey = this.addonIndex[id]?.service;
-              if(svcKey && !this.cartServices.includes(svcKey)) this.cartServices.push(svcKey);
-              this.cartAddons.push(id);
-            }
-          }
-          this.save(); this.flash('Quick picks added');
-        },
-        openAddons(key){ this.activeService = key || 'web'; this.addonsOpen = true; },
-        openBuilder(){ this.builderOpen = true; },
-        clearAll(){ this.cartServices = []; this.cartAddons = []; this.save(); this.flash('Cleared cart'); },
-
-        // ---------- QUOTE: data builders ----------
-        buildQuotePayload(){
-          return {
-            generatedAt: new Date().toISOString(),
-            plan: this.plan,
-            services: this.cartServices.map(k => ({
-              key: k,
-              name: this.serviceName(k),
-              price: this.serviceBase(k)
-            })),
-            addons: this.cartAddons.map(id => ({
-              id,
-              label: this.addonIndex[id]?.label,
-              service: this.addonIndex[id]?.service,
-              serviceName: this.serviceName(this.addonIndex[id]?.service),
-              price: this.addonIndex[id]?.price?.[this.plan] || 0
-            })),
-            total: this.total,
-            contact: { name: this.contact.name, email: this.contact.email }
-          };
-        },
-        buildQuoteHTML(){
-          const payload = this.buildQuotePayload();
-          const fmt = n => this.fmtUSD(n);
-          const planLabel = this.plan === 'monthly' ? 'Monthly' : 'One-time';
-          const itemsBases = payload.services.map(s =>
-            `<tr><td>${s.name}</td><td style="text-align:right">${fmt(s.price)}</td></tr>`
-          ).join('');
-          const itemsAddons = payload.addons.map(a =>
-            `<tr><td>${a.label} — <span style="color:#64748b">${a.serviceName}</span></td><td style="text-align:right">${fmt(a.price)}</td></tr>`
-          ).join('');
-
-          return `
-          <div style="font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; color:#0f172a; max-width:720px; margin:auto">
-            <h1 style="font-size:20px; font-weight:800; margin:0 0 8px">1CoastMedia — Quote</h1>
-            <div style="font-size:12px; color:#64748b; margin-bottom:12px">
-              Generated: ${new Date(payload.generatedAt).toLocaleString()} • Plan: ${planLabel}
-            </div>
-
-            <h2 style="font-size:15px; font-weight:700; margin:16px 0 6px">Base Services</h2>
-            <table style="width:100%; border-collapse:collapse; font-size:13px">
-              <tbody>${itemsBases || `<tr><td style="color:#64748b">None selected</td><td></td></tr>`}</tbody>
-            </table>
-
-            <h2 style="font-size:15px; font-weight:700; margin:16px 0 6px">Add-ons</h2>
-            <table style="width:100%; border-collapse:collapse; font-size:13px">
-              <tbody>${itemsAddons || `<tr><td style="color:#64748b">None selected</td><td></td></tr>`}</tbody>
-            </table>
-
-            <hr style="border:none; border-top:1px solid #e2e8f0; margin:16px 0" />
-
-            <div style="display:flex; justify-content:space-between; font-size:14px; font-weight:800">
-              <div>Estimated total ${this.plan==='monthly' ? '(per month)' : ''}</div>
-              <div>${fmt(payload.total)}</div>
-            </div>
-
-            ${this.quoteNote ? `<div style="margin-top:12px; font-size:12px"><b>Note:</b> ${this.quoteNote}</div>` : ''}
-
-            <div style="margin-top:14px; font-size:11px; color:#64748b">
-              This quote is a non-binding estimate. Final scope and timeline will be confirmed on kickoff.
-            </div>
-          </div>`;
-        },
-
-        // ---------- QUOTE: share link & modal controls ----------
-        buildShareLink(){
-          const state = {
-            v:1,
-            plan:this.plan,
-            s:this.cartServices,
-            a:this.cartAddons,
-            c:{ name:this.contact.name, email:this.contact.email }
-          };
-          const json = JSON.stringify(state);
-          const b64 = btoa(unescape(encodeURIComponent(json)))
-                        .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-          const url = new URL(window.location.origin + window.location.pathname);
-          url.searchParams.set('share', b64);
-          return url.toString();
-        },
-        copyQuoteLink(){
-          if(!this.quoteLink){ this.quoteLink = this.buildShareLink(); }
-          navigator.clipboard?.writeText(this.quoteLink).then(
-            () => this.flash('Link copied'),
-            () => this.flash('Copy failed')
-          );
-        },
-        openQuote(){
-          this.quoteEmail = this.contact.email || '';
-          this.quoteNote = '';
-          this.quoteLink = this.buildShareLink();
-          this.quoteFormat = this.quoteFormat || 'pdf';
-          this.quoteOpen = true;
-        },
-
-        // ---------- QUOTE: file generation ----------
-        async downloadQuoteFile(){
-          const stamp = new Date().toISOString().replace(/[-:T]/g,'').slice(0,14);
-          const filenameBase = `1coast-quote-${stamp}`;
-          if(this.quoteFormat === 'docx'){
-            await this.generateDocx(`${filenameBase}.docx`);
-          }else{
-            await this.generatePDF(`${filenameBase}.pdf`);
-          }
-          this.flash(`Saved ${this.quoteFormat.toUpperCase()} quote`);
-        },
-
-        // FIXED: prevent blank PDFs by rendering from a real, off-screen node
-        async generatePDF(filename='quote.pdf'){
-          const src = document.createElement('div');
-          src.innerHTML = this.buildQuoteHTML();
-          Object.assign(src.style, {
-            position: 'fixed',
-            left: '-10000px',
-            top: '0',
-            width: '720px',
-            maxWidth: '720px',
-            background: '#ffffff',
-            zIndex: '-1'
-          });
-          document.body.appendChild(src);
-
-          const opt = {
-            margin:       10,
-            filename,
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-          };
-
-          try{
-            await html2pdf().set(opt).from(src).save();
-          }catch(e){
-            console.error('PDF generation failed:', e);
-            this.flash('PDF failed to generate');
-          }finally{
-            // keep the node briefly for engines where save() isn’t strictly awaitable
-            setTimeout(()=> src.remove(), 1200);
-          }
-        },
-
-        // FIXED: robust DOCX creation & download
-        async generateDocx(filename='quote.docx'){
-          const d = window.docx;
-          if(!d){
-            console.warn('docx library not loaded');
-            this.flash('Word generator not loaded');
-            return;
-          }
-
-          const payload   = this.buildQuotePayload();
-          const planLabel = this.plan === 'monthly' ? 'Monthly' : 'One-time';
-          const fmt       = n => this.fmtUSD(n);
-
-          const paras = [];
-          paras.push(new d.Paragraph({ text:'1CoastMedia — Quote', heading:d.HeadingLevel.HEADING_1 }));
-          paras.push(new d.Paragraph({ text:`Generated: ${new Date(payload.generatedAt).toLocaleString()} • Plan: ${planLabel}` }));
-          paras.push(new d.Paragraph({ text:'' }));
-
-          // Base services
-          paras.push(new d.Paragraph({ text:'Base Services', heading:d.HeadingLevel.HEADING_2 }));
-          if(payload.services.length === 0){
-            paras.push(new d.Paragraph({ text:'None selected', italics:true }));
-          }else{
-            payload.services.forEach(s => {
-              paras.push(new d.Paragraph({
-                children: [
-                  new d.TextRun({ text:`• ${s.name}`, bold:true }),
-                  new d.TextRun({ text:` — ${fmt(s.price)}` })
-                ]
-              }));
-            });
-          }
-          paras.push(new d.Paragraph({ text:'' }));
-
-          // Add-ons
-          paras.push(new d.Paragraph({ text:'Add-ons', heading:d.HeadingLevel.HEADING_2 }));
-          if(payload.addons.length === 0){
-            paras.push(new d.Paragraph({ text:'None selected', italics:true }));
-          }else{
-            payload.addons.forEach(a => {
-              paras.push(new d.Paragraph({
-                children: [
-                  new d.TextRun({ text:`• ${a.label}`, bold:true }),
-                  new d.TextRun({ text:` — ${a.serviceName} — ${fmt(a.price)}` })
-                ]
-              }));
-            });
-          }
-          paras.push(new d.Paragraph({ text:'' }));
-
-          // Total
-          paras.push(new d.Paragraph({
-            children: [
-              new d.TextRun({ text:`Estimated total ${this.plan==='monthly' ? '(per month)' : ''}: `, bold:true }),
-              new d.TextRun({ text:fmt(payload.total), bold:true })
-            ]
-          }));
-
-          if(this.quoteNote){
-            paras.push(new d.Paragraph({ text:'' }));
-            paras.push(new d.Paragraph({
-              children: [
-                new d.TextRun({ text:'Note: ', bold:true }),
-                new d.TextRun({ text:this.quoteNote })
-              ]
-            }));
-          }
-
-          paras.push(new d.Paragraph({ text:'' }));
-          paras.push(new d.Paragraph({
-            children: [ new d.TextRun({
-              text:'This quote is a non-binding estimate. Final scope and timeline will be confirmed on kickoff.',
-              italics:true, size:20, color:'6b7280'
-            })]
-          }));
-
-          try{
-            const doc  = new d.Document({ sections:[{ properties:{}, children: paras }] });
-            const blob = await d.Packer.toBlob(doc);
-
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => {
-              URL.revokeObjectURL(a.href);
-              a.remove();
-            }, 0);
-          }catch(e){
-            console.error('DOCX generation failed:', e);
-            this.flash('DOCX failed to generate');
-          }
-        },
-
-        // ---------- QUOTE: email (no simultaneous download) ----------
-        handleOpenEmailDraft(){
-          if(!this.emailValid(this.quoteEmail)){
-            this.flash('Enter a valid email');
-            return;
-          }
-
-          // Ensure we have a fresh link
-          this.quoteLink = this.buildShareLink();
-
-          const lines = [
-            `Here’s your saved 1CoastMedia quote link:`,
-            this.quoteLink,
-            ``,
-            `Summary:`,
-            ...this.cartServices.map(k => `• ${this.serviceName(k)} — ${this.fmtUSD(this.serviceBase(k))}`),
-            ...this.cartAddons.map(id => `• ${this.addonIndex[id]?.label} (${this.serviceName(this.addonIndex[id]?.service)}) — ${this.fmtUSD(this.addonIndex[id]?.price?.[this.plan]||0)}`),
-            ``,
-            `Estimated total ${this.plan==='monthly'?'(per month)':''}: ${this.fmtUSD(this.total)}`,
-            this.quoteNote ? `\nNote: ${this.quoteNote}` : ''
-          ];
-
-          const subj = `Your 1CoastMedia quote — ${this.plan==='monthly'?'monthly plan':'one-time'}`;
-          const href = `mailto:${encodeURIComponent(this.quoteEmail)}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(lines.join('\n'))}`;
-
-          try {
-            window.location.assign(href);
-            this.flash('Opening your email app…');
-            this.quoteOpen = false;
-          } catch (e) {
-            console.error('mailto failed:', e);
-            this.flash('Could not open your email app');
-          }
-        },
-
-        tryLoadShared(){
-          const sp = new URLSearchParams(window.location.search);
-          const token = sp.get('share');
-          if(!token) return;
-          try{
-            const b64 = token.replace(/-/g,'+').replace(/_/g,'/');
-            const json = decodeURIComponent(escape(atob(b64)));
-            const state = JSON.parse(json||'{}');
-            if(state.v===1){
-              if(state.plan) this.plan = state.plan;
-              if(Array.isArray(state.s)) this.cartServices = state.s;
-              if(Array.isArray(state.a)) this.cartAddons  = state.a;
-              if(state.c?.email) this.contact.email = state.c.email;
-              if(state.c?.name)  this.contact.name  = state.c.name;
-              this.save();
-              this.flash('Loaded saved quote');
-            }
-          }catch(e){ console.warn('Invalid shared quote token'); }
-        },
-
-        flash(text){ this.toast = { text, show:true }; setTimeout(()=> this.toast.show=false, 1400); },
-
-        // --- CHECKOUT ---
-        async beginCheckout(){
-          try{
-            if(this.isSubmitting) return;
-            if(!this.cartServices.length){ this.flash('Add at least one Base Service.'); return; }
-            if(!this.emailValid(this.contact.email)){ this.flash('Enter a valid email.'); return; }
-
-            const cart = this.cartServices.map(svcKey => {
-              const svc = this.services.find(s => s.key === svcKey);
-              const base = svc?.base?.[this.plan] || 0;
-              const addons = this.cartAddons
-                .filter(id => this.addonIndex[id]?.service === svcKey)
-                .map(id => ({ id, name: this.addonIndex[id].label, price: this.addonIndex[id].price[this.plan] }));
-              return { service: svcKey, base, addons };
-            });
-
-            const endpoint = document.querySelector('meta[name="checkout-endpoint"]')?.content || '/api/checkout';
-            this.isSubmitting = true;
-
-            const res = await fetch(endpoint, {
-              method:'POST',
-              headers:{ 'Content-Type':'application/json' },
-              body: JSON.stringify({ plan: this.plan, cart, contact: { ...this.contact } })
-            });
-            const out = await res.json().catch(()=> ({}));
-            if(!res.ok){ throw new Error(out?.error || `Checkout failed (${res.status})`); }
-
-            if(out?.url){ location.assign(out.url); }
-            else if(out?.id && window.Stripe){
-              const pk = document.querySelector('meta[name="stripe-publishable-key"]')?.content;
-              const stripe = Stripe(pk);
-              const { error } = await stripe.redirectToCheckout({ sessionId: out.id });
-              if(error) throw error;
-            }else{
-              throw new Error('Checkout response missing url');
-            }
-          }catch(e){
-            console.error(e);
-            this.flash(e.message || 'Checkout failed.');
-            this.isSubmitting = false;
-          }
-        },
-      }
-    }
-
-  <!-- Quote Modal (PDF / DOCX + Email) -->
-  <div x-show="quoteOpen" x-transition.opacity class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4">
-    <!-- backdrop -->
-    <button @click="quoteOpen=false" class="absolute inset-0 bg-slate-900/60" aria-label="Close"></button>
-
-    <!-- panel -->
-    <section class="relative mx-auto w-[min(720px,92vw)] rounded-2xl bg-white shadow-xl ring-1 ring-slate-200 modal-shell overflow-hidden flex flex-col">
-      <div class="flex items-center justify-between px-5 py-4 border-b">
-        <h3 class="text-lg font-semibold">Send or Save Your Quote</h3>
-        <button @click="quoteOpen=false" class="h-9 w-9 grid place-items-center rounded hover:bg-slate-100">✕</button>
+  <!-- CONTACT SECTION -->
+  <section id="contact" class="py-16 bg-slate-50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-extrabold tracking-tight">Ready to Get Started?</h2>
+        <p class="mt-2 text-slate-600">Let's discuss your project and build something amazing together.</p>
       </div>
-
-      <div class="px-5 pt-4 pb-5 space-y-4 overflow-y-auto scroll-touch touch-pan-y">
-        <p class="text-sm text-slate-600">
-          We’ll create a <b>PDF or Word (.docx)</b> with your selections. You can also email yourself a private link to revisit this quote later.
-        </p>
-
-        <div class="grid sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs text-slate-500 mb-1">Your email</label>
-            <input type="email" x-model.trim="quoteEmail" placeholder="you@example.com"
-                   class="w-full rounded-lg border border-slate-200 px-3 py-2">
-            <p class="text-[11px] text-slate-500 mt-1">Used for the email draft only.</p>
-          </div>
-
-          <div>
-            <label class="block text-xs text-slate-500 mb-1">File format</label>
-            <div class="flex items-center gap-4 mt-1">
-              <label class="inline-flex items-center gap-2 text-sm">
-                <input type="radio" x-model="quoteFormat" value="pdf"> PDF
-              </label>
-              <label class="inline-flex items-center gap-2 text-sm">
-                <input type="radio" x-model="quoteFormat" value="docx"> Word (.docx)
-              </label>
-            </div>
+      
+      <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div class="card p-6">
+          <h3 class="font-bold text-lg mb-4">Quick Start</h3>
+          <p class="text-slate-600 mb-4">Ready to jump in? Build your package and get started immediately.</p>
+          <button @click="openBuilder()" class="w-full btn bg-slate-900 text-white rounded-xl px-4 py-3 font-semibold">Build Your Package</button>
+        </div>
+        
+        <div class="card p-6">
+          <h3 class="font-bold text-lg mb-4">Let's Talk</h3>
+          <p class="text-slate-600 mb-4">Have questions? Want to discuss a custom project? Let's connect.</p>
+          <div class="space-y-2">
+            <a href="mailto:1coastmedia@gmail.com" class="block text-sm text-slate-600 hover:text-slate-900">📧 1coastmedia@gmail.com</a>
+            <a href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noreferrer" class="block text-sm text-slate-600 hover:text-slate-900">📅 Schedule a free 30-min call</a>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
 
+  <!-- FOOTER -->
+  <footer class="bg-slate-900 text-white py-12">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-4 gap-8">
+        <div class="md:col-span-2">
+          <div class="inline-flex items-center gap-2 mb-4">
+            <span class="inline-grid place-items-center h-8 w-8 rounded-lg bg-white overflow-hidden">
+              <img src="/assets/1coastmedia_logo_A_primary_mark_2048.jpg" alt="1CoastMedia logo" class="h-8 w-8 object-cover" />
+            </span>
+            <span class="font-extrabold tracking-tight">1CoastMedia</span>
+          </div>
+          <p class="text-slate-400 max-w-md">Gulf Coast digital services for creators, real estate, tourism, and local brands. Transparent pricing, fast turnarounds, measurable results.</p>
+        </div>
+        
         <div>
-          <label class="block text-xs text-slate-500 mb-1">Optional note</label>
-          <textarea rows="3" x-model.trim="quoteNote" placeholder="Anything you want to remember…"
-                    class="w-full rounded-lg border border-slate-200 px-3 py-2"></textarea>
+          <h4 class="font-semibold mb-4">Services</h4>
+          <ul class="space-y-2 text-sm text-slate-400">
+            <li><a href="#services" class="hover:text-white">Base Services</a></li>
+            <li><button @click="openAddons('web')" class="hover:text-white">Add-Ons</button></li>
+            <li><a href="#faq" class="hover:text-white">FAQ</a></li>
+          </ul>
         </div>
-
+        
         <div>
-          <label class="block text-xs text-slate-500 mb-1">Shareable quote link</label>
-          <div class="flex gap-2">
-            <input readonly :value="quoteLink" class="flex-1 rounded-lg border border-slate-200 px-3 py-2 bg-slate-50">
-            <button @click="copyQuoteLink()" class="rounded-lg px-3 py-2 ring-1 ring-slate-200 bg-white text-sm">Copy</button>
-          </div>
-          <p class="text-[11px] text-slate-500 mt-1">Anyone with this link can view your selections (no personal info).</p>
+          <h4 class="font-semibold mb-4">Contact</h4>
+          <ul class="space-y-2 text-sm text-slate-400">
+            <li><a href="mailto:1coastmedia@gmail.com" class="hover:text-white">1coastmedia@gmail.com</a></li>
+            <li><a href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noreferrer" class="hover:text-white">Schedule Call</a></li>
+          </ul>
         </div>
       </div>
-
-      <div class="px-5 py-4 border-t flex flex-wrap justify-end gap-2">
-        <button @click="quoteOpen=false" class="rounded-lg px-3 py-2 ring-1 ring-slate-200 bg-white">Cancel</button>
-        <button @click="downloadQuoteFile()" class="rounded-lg px-3 py-2 ring-1 ring-slate-200 bg-white" x-text="`Save ${quoteFormat.toUpperCase()}`"></button>
-        <button @click="handleOpenEmailDraft()" class="rounded-lg px-4 py-2 bg-indigo-600 text-white font-medium">Open Email Draft</button>
+      
+      <div class="border-t border-slate-800 mt-8 pt-8 text-center text-sm text-slate-400">
+        <p>&copy; 2025 1CoastMedia. All rights reserved.</p>
       </div>
-    </section>
-  </div>
-  <script type="module" src="/app.js"></script>
+    </div>
+  </footer>
 </body>
 </html>
