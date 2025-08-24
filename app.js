@@ -12,6 +12,58 @@ function fmtUSD(amount) {
   }).format(amount);
 }
 
+// Global functions for onclick handlers
+// Global functions for modal control
+window.openCheckoutModal = function() {
+    console.log('Opening checkout modal');
+    const modal = document.getElementById('checkout-modal');
+    if (modal) {
+        modal.hidden = false;
+        modal.style.display = 'block';
+        console.log('Modal opened successfully');
+    } else {
+        console.error('Modal element not found');
+    }
+};
+
+window.closeCheckoutModal = function() {
+    console.log('Closing checkout modal');
+    const modal = document.getElementById('checkout-modal');
+    if (modal) {
+        modal.hidden = true;
+        modal.style.display = 'none';
+        console.log('Modal closed successfully');
+    }
+};
+
+// Update the Alpine.js functions to use the global functions
+openCheckoutModal() {
+    window.openCheckoutModal();
+    // Keep Alpine.js state in sync
+    this.checkoutModalOpen = true;
+},
+
+closeCheckoutModal() {
+    window.closeCheckoutModal();
+    // Keep Alpine.js state in sync
+    this.checkoutModalOpen = false;
+},
+
+window.closeCheckoutModal = function() {
+  const app = window.Alpine?.store?.() || document.querySelector('[x-data]')?.__x?.$data;
+  if (app && app.closeCheckoutModal) {
+    app.closeCheckoutModal();
+  } else {
+    // Fallback direct manipulation
+    const modal = document.getElementById('checkout-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+  }
+};
+
 // Main Alpine.js application
 function landingApp() {
   return {
@@ -196,18 +248,40 @@ function landingApp() {
       return total;
     },
     
-    // Modal management
+    // Modal management with direct DOM control
+    // Alpine.js method (for @click handlers)
     openCheckoutModal() {
       console.log('🛒 Opening checkout modal');
-      console.log('Before:', this.checkoutModalOpen);
       this.checkoutModalOpen = true;
-      console.log('After:', this.checkoutModalOpen);
+      
+      const modal = document.getElementById('checkout-modal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+        modal.style.visibility = 'visible';
+        modal.style.opacity = '1';
+      }
+      
       document.body.style.overflow = 'hidden';
-    },
+    }
+    
+    // Global function (for onclick handlers)
+    window.openCheckoutModal = function() {
+      // Direct DOM manipulation with fallback
+    }
     
     closeCheckoutModal() {
       console.log('🚪 Closing checkout modal');
       this.checkoutModalOpen = false;
+      
+      // Direct DOM manipulation
+      const modal = document.getElementById('checkout-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+        console.log('✅ Modal closed via DOM manipulation');
+      }
+      
       document.body.style.overflow = '';
     },
     

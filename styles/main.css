@@ -1609,12 +1609,3 @@ html {
 .card .text-slate-900 {
   color: #0f172a !important;
 }
-
-/* Ensure modal visibility when Alpine.js sets x-show */
-[x-show="true"] {
-  display: flex !important;
-}
-
-[x-show="false"] {
-  display: none !important;
-}
