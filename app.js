@@ -99,20 +99,36 @@ function app() {
       });
       return total;
     },
-    // Checkout via API
+    // Checkout via Stripe
     async checkout() {
-      if (this.cartServices.length === 0) return;
+      // Build cart items with names and prices for Stripe
+      const items = [];
+      // Add base services
+      this.cartServices.forEach(key => {
+        const svc = this.getServiceByKey(key);
+        if (svc && svc.price && svc.price.oneTime) {
+          items.push({ type: 'service', name: svc.name, price: svc.price.oneTime });
+        }
+      });
+      // Add add-ons
+      this.cartAddons.forEach(key => {
+        const addon = this.getAddonByKey(key);
+        if (addon && addon.price && addon.price.oneTime) {
+          items.push({ type: 'addon', name: addon.name, price: addon.price.oneTime });
+        }
+      });
+      if (items.length === 0) return;
       try {
         const response = await fetch('/api/checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ services: this.cartServices, addons: this.cartAddons })
+          body: JSON.stringify({ plan: 'one-time', cart: items, contact: {} })
         });
         const data = await response.json();
         if (data && data.url) {
           window.location = data.url;
         } else {
-          alert('Unable to initiate checkout.');
+          alert(data?.error || 'Unable to initiate checkout.');
         }
       } catch (err) {
         console.error(err);
