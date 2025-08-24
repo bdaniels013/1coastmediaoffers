@@ -12,54 +12,39 @@ function fmtUSD(amount) {
   }).format(amount);
 }
 
-// Global functions for onclick handlers
-// Global functions for modal control
+// Global functions for modal control (fallback for onclick handlers)
 window.openCheckoutModal = function() {
-    console.log('Opening checkout modal');
-    const modal = document.getElementById('checkout-modal');
-    if (modal) {
-        modal.hidden = false;
-        modal.style.display = 'block';
-        console.log('Modal opened successfully');
-    } else {
-        console.error('Modal element not found');
+  console.log('Global: Opening checkout modal');
+  const modal = document.getElementById('checkout-modal');
+  if (modal) {
+    modal.hidden = false;
+    modal.style.display = 'block';
+    modal.style.visibility = 'visible';
+    modal.style.opacity = '1';
+    document.body.style.overflow = 'hidden';
+    
+    // Sync with Alpine.js state if available
+    const app = document.querySelector('[x-data]')?.__x?.$data;
+    if (app) {
+      app.checkoutModalOpen = true;
     }
+  }
 };
 
 window.closeCheckoutModal = function() {
-    console.log('Closing checkout modal');
-    const modal = document.getElementById('checkout-modal');
-    if (modal) {
-        modal.hidden = true;
-        modal.style.display = 'none';
-        console.log('Modal closed successfully');
-    }
-};
-
-// Update the Alpine.js functions to use the global functions
-openCheckoutModal() {
-    window.openCheckoutModal();
-    // Keep Alpine.js state in sync
-    this.checkoutModalOpen = true;
-},
-
-closeCheckoutModal() {
-    window.closeCheckoutModal();
-    // Keep Alpine.js state in sync
-    this.checkoutModalOpen = false;
-},
-
-window.closeCheckoutModal = function() {
-  const app = window.Alpine?.store?.() || document.querySelector('[x-data]')?.__x?.$data;
-  if (app && app.closeCheckoutModal) {
-    app.closeCheckoutModal();
-  } else {
-    // Fallback direct manipulation
-    const modal = document.getElementById('checkout-modal');
-    if (modal) {
-      modal.classList.add('hidden');
-      modal.style.display = 'none';
-      document.body.style.overflow = '';
+  console.log('Global: Closing checkout modal');
+  const modal = document.getElementById('checkout-modal');
+  if (modal) {
+    modal.hidden = true;
+    modal.style.display = 'none';
+    modal.style.visibility = 'hidden';
+    modal.style.opacity = '0';
+    document.body.style.overflow = '';
+    
+    // Sync with Alpine.js state if available
+    const app = document.querySelector('[x-data]')?.__x?.$data;
+    if (app) {
+      app.checkoutModalOpen = false;
     }
   }
 };
@@ -101,205 +86,167 @@ function landingApp() {
       this.bundles = window.serviceData?.bundles || [];
       this.addons = window.serviceData?.addons || [];
       
-      this.validateData();
-      this.setupGlobalFunctions();
+      // Verify data loaded
+      console.log('📊 Data loaded:', {
+        categories: Object.keys(this.serviceCategories).length,
+        bundles: this.bundles.length,
+        addons: this.addons.length
+      });
       
-      // Debug log to verify data is loaded
-      console.log('📊 Service categories loaded:', Object.keys(this.serviceCategories));
+      // Setup global functions
+      this.setupGlobalFunctions();
     },
     
-    // Validate that service data is loaded
-    validateData() {
-      if (!window.serviceData) {
-        console.error('❌ Service data not loaded');
-        this.showNotification('error', 'Service data failed to load. Please refresh the page.');
-        return false;
-      }
-      console.log('✅ Service data loaded successfully');
-      return true;
-    },
-    
-    // Setup global functions for external access
     setupGlobalFunctions() {
-      window.openCheckoutModal = () => this.openCheckoutModal();
-      window.closeCheckoutModal = () => this.closeCheckoutModal();
-      window.openBuilder = () => this.openCheckoutModal();
-      window.testCheckout = () => this.testCheckout();
+      // Ensure global functions are available
+      if (typeof window.openCheckoutModal !== 'function') {
+        window.openCheckoutModal = () => this.openCheckoutModal();
+      }
+      if (typeof window.closeCheckoutModal !== 'function') {
+        window.closeCheckoutModal = () => this.closeCheckoutModal();
+      }
     },
     
-    // Plan management
-    setPlan(newPlan) {
-      this.plan = newPlan;
-      console.log(`📋 Plan changed to: ${newPlan}`);
+    // Modal management
+    openCheckoutModal() {
+      console.log('Alpine: Opening checkout modal');
+      this.checkoutModalOpen = true;
+      
+      // Direct DOM manipulation for reliability
+      const modal = document.getElementById('checkout-modal');
+      if (modal) {
+        modal.hidden = false;
+        modal.style.display = 'block';
+        modal.style.visibility = 'visible';
+        modal.style.opacity = '1';
+        document.body.style.overflow = 'hidden';
+      }
+    },
+    
+    closeCheckoutModal() {
+      console.log('Alpine: Closing checkout modal');
+      this.checkoutModalOpen = false;
+      
+      // Direct DOM manipulation for reliability
+      const modal = document.getElementById('checkout-modal');
+      if (modal) {
+        modal.hidden = true;
+        modal.style.display = 'none';
+        modal.style.visibility = 'hidden';
+        modal.style.opacity = '0';
+        document.body.style.overflow = '';
+      }
+    },
+    
+    openAddonsModal(serviceKey = '') {
+      this.activeAddonService = serviceKey;
+      this.showAddonsModal = true;
+      document.body.style.overflow = 'hidden';
+    },
+    
+    closeAddonsModal() {
+      this.showAddonsModal = false;
+      this.activeAddonService = '';
+      this.addonSearchQuery = '';
+      document.body.style.overflow = '';
     },
     
     // Service management
-    toggleService(serviceKey) {
-      const index = this.cartServices.indexOf(serviceKey);
-      if (index > -1) {
-        this.cartServices.splice(index, 1);
-        console.log(`➖ Removed service: ${serviceKey}`);
-      } else {
-        this.cartServices.push(serviceKey);
-        console.log(`➕ Added service: ${serviceKey}`);
-      }
-    },
-    
-    // Bundle management
-    toggleBundle(bundleKey) {
-      const index = this.cartBundles.indexOf(bundleKey);
-      if (index > -1) {
-        this.cartBundles.splice(index, 1);
-        console.log(`➖ Removed bundle: ${bundleKey}`);
-      } else {
-        this.cartBundles.push(bundleKey);
-        console.log(`➕ Added bundle: ${bundleKey}`);
-      }
-    },
-    
-    // Addon management
-    toggleAddon(addonKey) {
-      const index = this.cartAddons.indexOf(addonKey);
-      if (index > -1) {
-        this.cartAddons.splice(index, 1);
-        console.log(`➖ Removed addon: ${addonKey}`);
-        this.showNotification('info', 'Add-on removed from cart');
-      } else {
-        this.cartAddons.push(addonKey);
-        console.log(`➕ Added addon: ${addonKey}`);
-        this.showNotification('success', 'Add-on added to cart!');
-      }
-    },
-    
-    // Clear all cart items
-    clearAll() {
-      this.cartServices = [];
-      this.cartBundles = [];
-      this.cartAddons = [];
-      console.log('🗑️ Cart cleared');
-    },
-    
-    // Get service by key - Fixed to match services.js structure
-    getServiceByKey(serviceKey) {
+    getServiceByKey(key) {
       for (const category of Object.values(this.serviceCategories)) {
-        const service = category.services?.find(s => s.key === serviceKey);
+        const service = category.services?.find(s => s.key === key);
         if (service) return service;
       }
       return null;
     },
     
-    // Get bundle by key
-    getBundleByKey(bundleKey) {
-      return this.bundles.find(b => b.key === bundleKey) || null;
+    getBundleByKey(key) {
+      return this.bundles.find(b => b.key === key) || null;
     },
     
-    // Get addon by key - Fixed to match services.js structure
-    getAddonByKey(addonKey) {
-      return this.addons.find(a => a.key === addonKey) || null;
+    getAddonByKey(key) {
+      return this.addons.find(a => a.key === key) || null;
     },
     
-    // Calculate one-time total
-    getOneTimeTotal() {
+    // Cart management
+    toggleService(serviceKey) {
+      const index = this.cartServices.indexOf(serviceKey);
+      if (index > -1) {
+        this.cartServices.splice(index, 1);
+        this.showNotification('info', 'Service removed from cart');
+      } else {
+        this.cartServices.push(serviceKey);
+        this.showNotification('success', 'Service added to cart');
+      }
+    },
+    
+    toggleBundle(bundleKey) {
+      const index = this.cartBundles.indexOf(bundleKey);
+      if (index > -1) {
+        this.cartBundles.splice(index, 1);
+        this.showNotification('info', 'Bundle removed from cart');
+      } else {
+        this.cartBundles.push(bundleKey);
+        this.showNotification('success', 'Bundle added to cart');
+      }
+    },
+    
+    toggleAddon(addonKey) {
+      const index = this.cartAddons.indexOf(addonKey);
+      if (index > -1) {
+        this.cartAddons.splice(index, 1);
+        this.showNotification('info', 'Add-on removed from cart');
+      } else {
+        this.cartAddons.push(addonKey);
+        this.showNotification('success', 'Add-on added to cart');
+      }
+    },
+    
+    clearCart() {
+      this.cartServices = [];
+      this.cartBundles = [];
+      this.cartAddons = [];
+      this.showNotification('info', 'Cart cleared');
+    },
+    
+    // Cart calculations
+    getCartTotal() {
       let total = 0;
       
-      // Services
+      // Add services
       this.cartServices.forEach(serviceKey => {
         const service = this.getServiceByKey(serviceKey);
-        if (service) total += service.price.oneTime || 0;
+        if (service) total += service.price[this.plan] || 0;
       });
       
-      // Bundles
+      // Add bundles
       this.cartBundles.forEach(bundleKey => {
         const bundle = this.getBundleByKey(bundleKey);
-        if (bundle) total += bundle.price.oneTime || 0;
+        if (bundle) total += bundle.price[this.plan] || 0;
       });
       
-      // Add-ons
+      // Add addons
       this.cartAddons.forEach(addonKey => {
         const addon = this.getAddonByKey(addonKey);
-        if (addon) total += addon.price.oneTime || 0;
+        if (addon) total += addon.price[this.plan] || 0;
       });
       
       return total;
     },
     
-    // Calculate monthly total
-    getMonthlyTotal() {
-      let total = 0;
-      
-      // Services
-      this.cartServices.forEach(serviceKey => {
-        const service = this.getServiceByKey(serviceKey);
-        if (service) total += service.price.monthly || 0;
-      });
-      
-      // Bundles
-      this.cartBundles.forEach(bundleKey => {
-        const bundle = this.getBundleByKey(bundleKey);
-        if (bundle) total += bundle.price.monthly || 0;
-      });
-      
-      // Add-ons
-      this.cartAddons.forEach(addonKey => {
-        const addon = this.getAddonByKey(addonKey);
-        if (addon) total += addon.price.monthly || 0;
-      });
-      
-      return total;
+    getCartItemCount() {
+      return this.cartServices.length + this.cartBundles.length + this.cartAddons.length;
     },
     
-    // Modal management with direct DOM control
-    // Alpine.js method (for @click handlers)
-    openCheckoutModal() {
-      console.log('🛒 Opening checkout modal');
-      this.checkoutModalOpen = true;
-      
-      const modal = document.getElementById('checkout-modal');
-      if (modal) {
-        modal.classList.remove('hidden');
-        modal.style.display = 'flex';
-        modal.style.visibility = 'visible';
-        modal.style.opacity = '1';
-      }
-      
-      document.body.style.overflow = 'hidden';
-    }
-    
-    // Global function (for onclick handlers)
-    window.openCheckoutModal = function() {
-      // Direct DOM manipulation with fallback
-    }
-    
-    closeCheckoutModal() {
-      console.log('🚪 Closing checkout modal');
-      this.checkoutModalOpen = false;
-      
-      // Direct DOM manipulation
-      const modal = document.getElementById('checkout-modal');
-      if (modal) {
-        modal.classList.add('hidden');
-        modal.style.display = 'none';
-        console.log('✅ Modal closed via DOM manipulation');
-      }
-      
-      document.body.style.overflow = '';
+    hasCartItems() {
+      return this.getCartItemCount() > 0;
     },
     
-    // Add-ons modal management
-    openAddons(serviceKey = '') {
-      console.log(`🔧 Opening addons for service: ${serviceKey}`);
-      this.activeAddonService = serviceKey;
-      this.showAddonsModal = true;
-      this.addonSearchQuery = '';
+    // Service filtering and search
+    getServicesByCategory(categoryKey) {
+      return this.serviceCategories[categoryKey]?.services || [];
     },
     
-    closeAddonsModal() {
-      console.log('❌ Closing addons modal');
-      this.showAddonsModal = false;
-      this.addonSearchQuery = '';
-    },
-    
-    // Get available services for addon modal
     getAvailableServices() {
       const allServices = [];
       for (const category of Object.values(this.serviceCategories)) {
@@ -310,7 +257,6 @@ function landingApp() {
       return allServices;
     },
     
-    // Get filtered addons for current service
     getFilteredAddons() {
       let filteredAddons = this.addons.filter(addon => 
         addon.applicableServices.includes('all') || 
@@ -328,16 +274,16 @@ function landingApp() {
       
       // Apply sorting
       switch(this.addonSortBy) {
-        case 'price-asc':
-          filteredAddons.sort((a, b) => (a.price.oneTime || 0) - (b.price.oneTime || 0));
+        case 'price-low':
+          filteredAddons.sort((a, b) => (a.price[this.plan] || 0) - (b.price[this.plan] || 0));
           break;
-        case 'price-desc':
-          filteredAddons.sort((a, b) => (b.price.oneTime || 0) - (a.price.oneTime || 0));
+        case 'price-high':
+          filteredAddons.sort((a, b) => (b.price[this.plan] || 0) - (a.price[this.plan] || 0));
           break;
-        case 'alpha':
+        case 'name':
           filteredAddons.sort((a, b) => a.name.localeCompare(b.name));
           break;
-        default: // popular
+        default: // 'popular'
           // Keep original order
           break;
       }
@@ -345,7 +291,7 @@ function landingApp() {
       return filteredAddons;
     },
     
-    // Form submission
+    // Checkout and order processing
     async submitOrder() {
       console.log('📤 Submitting order to Stripe');
       
@@ -356,7 +302,7 @@ function landingApp() {
         return;
       }
       
-      // Build cart array for Stripe API
+      // Build cart items
       const cart = [];
       
       // Add services to cart
@@ -364,10 +310,11 @@ function landingApp() {
         const service = this.getServiceByKey(serviceKey);
         if (service) {
           cart.push({
-            service: serviceKey,
+            type: 'service',
+            key: serviceKey,
             name: service.name,
-            base: this.plan === 'monthly' ? service.price.monthly : service.price.oneTime,
-            addons: []
+            price: service.price[this.plan] || 0,
+            billing: this.plan
           });
         }
       });
@@ -377,10 +324,25 @@ function landingApp() {
         const bundle = this.getBundleByKey(bundleKey);
         if (bundle) {
           cart.push({
-            service: bundleKey,
+            type: 'bundle',
+            key: bundleKey,
             name: bundle.name,
-            base: this.plan === 'monthly' ? bundle.price.monthly : bundle.price.oneTime,
-            addons: []
+            price: bundle.price[this.plan] || 0,
+            billing: this.plan
+          });
+        }
+      });
+      
+      // Add addons to cart
+      this.cartAddons.forEach(addonKey => {
+        const addon = this.getAddonByKey(addonKey);
+        if (addon) {
+          cart.push({
+            type: 'addon',
+            key: addonKey,
+            name: addon.name,
+            price: addon.price[this.plan] || 0,
+            billing: this.plan
           });
         }
       });
@@ -392,24 +354,18 @@ function landingApp() {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            plan: this.plan,
+            customer: form.data,
             cart: cart,
-            contact: {
-              name: form.data.name,
-              email: form.data.email,
-              phone: form.data.phone || '',
-              company: form.data.company || '',
-              notes: form.data.notes || ''
-            }
+            total: this.getCartTotal()
           })
         });
         
         const result = await response.json();
         
-        if (response.ok && result.url) {
-          window.location.href = result.url;
+        if (result.success && result.checkoutUrl) {
+          window.location.href = result.checkoutUrl;
         } else {
-          throw new Error(result.error || 'Checkout failed');
+          throw new Error(result.message || 'Checkout failed');
         }
       } catch (error) {
         console.error('Checkout error:', error);
@@ -417,7 +373,6 @@ function landingApp() {
       }
     },
     
-    // Validate order form
     validateOrderForm() {
       const name = document.getElementById('checkout-name')?.value?.trim();
       const email = document.getElementById('checkout-email')?.value?.trim();
@@ -444,7 +399,6 @@ function landingApp() {
       };
     },
     
-    // Clear order form
     clearOrderForm() {
       const fields = ['checkout-name', 'checkout-email', 'checkout-phone', 'checkout-company', 'checkout-notes'];
       fields.forEach(id => {
@@ -456,7 +410,7 @@ function landingApp() {
       if (terms) terms.checked = false;
     },
     
-    // Notification system
+    // Notifications
     showNotification(type, message) {
       this.messageType = type;
       this.messageText = message;
@@ -468,7 +422,7 @@ function landingApp() {
       }, 5000);
     },
     
-    // Test function
+    // Testing and debugging
     testCheckout() {
       console.log('🧪 Testing checkout system');
       
@@ -481,32 +435,30 @@ function landingApp() {
         this.cartBundles.push(this.bundles[0].key);
       }
       
-      // Open modal
       this.openCheckoutModal();
-      
       this.showNotification('info', 'Test items added to cart!');
     },
     
-    // Utility methods for formatting
+    // Utility functions
     fmtUSD(amount) {
       return fmtUSD(amount);
     }
   };
 }
 
-// Expose functions globally
+// Export functions for global access
 window.landingApp = landingApp;
 window.fmtUSD = fmtUSD;
 
-// Initialize when DOM is ready
+// Initialize Alpine.js when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('🌐 DOM loaded, Alpine.js should initialize soon');
+  console.log('🌊 DOM loaded, Alpine.js should initialize');
   
-  // Check if Alpine.js is available
-  if (typeof Alpine !== 'undefined') {
-    console.log('✅ Alpine.js is available');
+  // Verify Alpine.js is available
+  if (typeof Alpine === 'undefined') {
+    console.error('❌ Alpine.js not found! Make sure it\'s loaded.');
   } else {
-    console.log('⏳ Waiting for Alpine.js to load...');
+    console.log('✅ Alpine.js is available');
   }
 });
 
