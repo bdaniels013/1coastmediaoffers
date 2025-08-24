@@ -1,7 +1,7 @@
 // 1CoastMedia Landing Page Application
-// Clean Alpine.js implementation with working checkout modal
+// Simple, working Alpine.js implementation
 
-// Global utility functions
+// Global utility function
 function fmtUSD(amount) {
   if (!amount || amount === 0) return '$0';
   return new Intl.NumberFormat('en-US', {
@@ -12,40 +12,24 @@ function fmtUSD(amount) {
   }).format(amount);
 }
 
-// Global functions for modal control (fallback for onclick handlers)
+// Simple global modal functions
 window.openCheckoutModal = function() {
-  console.log('Global: Opening checkout modal');
+  console.log('Opening checkout modal');
   const modal = document.getElementById('checkout-modal');
   if (modal) {
     modal.hidden = false;
     modal.style.display = 'block';
-    modal.style.visibility = 'visible';
-    modal.style.opacity = '1';
     document.body.style.overflow = 'hidden';
-    
-    // Sync with Alpine.js state if available
-    const app = document.querySelector('[x-data]')?.__x?.$data;
-    if (app) {
-      app.checkoutModalOpen = true;
-    }
   }
 };
 
 window.closeCheckoutModal = function() {
-  console.log('Global: Closing checkout modal');
+  console.log('Closing checkout modal');
   const modal = document.getElementById('checkout-modal');
   if (modal) {
     modal.hidden = true;
     modal.style.display = 'none';
-    modal.style.visibility = 'hidden';
-    modal.style.opacity = '0';
     document.body.style.overflow = '';
-    
-    // Sync with Alpine.js state if available
-    const app = document.querySelector('[x-data]')?.__x?.$data;
-    if (app) {
-      app.checkoutModalOpen = false;
-    }
   }
 };
 
@@ -72,7 +56,7 @@ function landingApp() {
     addonSearchQuery: '',
     addonSortBy: 'popular',
     
-    // Data references - initialize as empty, will be populated in init()
+    // Data references
     serviceCategories: {},
     bundles: [],
     addons: [],
@@ -81,61 +65,29 @@ function landingApp() {
     init() {
       console.log('🚀 1CoastMedia app initialized');
       
-      // Load data after DOM is ready
+      // Load data
       this.serviceCategories = window.serviceData?.serviceCategories || {};
       this.bundles = window.serviceData?.bundles || [];
       this.addons = window.serviceData?.addons || [];
       
-      // Verify data loaded
       console.log('📊 Data loaded:', {
         categories: Object.keys(this.serviceCategories).length,
         bundles: this.bundles.length,
         addons: this.addons.length
       });
-      
-      // Setup global functions
-      this.setupGlobalFunctions();
-    },
-    
-    setupGlobalFunctions() {
-      // Ensure global functions are available
-      if (typeof window.openCheckoutModal !== 'function') {
-        window.openCheckoutModal = () => this.openCheckoutModal();
-      }
-      if (typeof window.closeCheckoutModal !== 'function') {
-        window.closeCheckoutModal = () => this.closeCheckoutModal();
-      }
     },
     
     // Modal management
     openCheckoutModal() {
       console.log('Alpine: Opening checkout modal');
       this.checkoutModalOpen = true;
-      
-      // Direct DOM manipulation for reliability
-      const modal = document.getElementById('checkout-modal');
-      if (modal) {
-        modal.hidden = false;
-        modal.style.display = 'block';
-        modal.style.visibility = 'visible';
-        modal.style.opacity = '1';
-        document.body.style.overflow = 'hidden';
-      }
+      window.openCheckoutModal();
     },
     
     closeCheckoutModal() {
       console.log('Alpine: Closing checkout modal');
       this.checkoutModalOpen = false;
-      
-      // Direct DOM manipulation for reliability
-      const modal = document.getElementById('checkout-modal');
-      if (modal) {
-        modal.hidden = true;
-        modal.style.display = 'none';
-        modal.style.visibility = 'hidden';
-        modal.style.opacity = '0';
-        document.body.style.overflow = '';
-      }
+      window.closeCheckoutModal();
     },
     
     openAddonsModal(serviceKey = '') {
@@ -209,26 +161,66 @@ function landingApp() {
       this.showNotification('info', 'Cart cleared');
     },
     
-    // Cart calculations
+    // Cart calculations - FIXED: Added missing functions
     getCartTotal() {
+      return this.getOneTimeTotal() + this.getMonthlyTotal();
+    },
+    
+    getOneTimeTotal() {
       let total = 0;
       
-      // Add services
+      // Add one-time services
       this.cartServices.forEach(serviceKey => {
         const service = this.getServiceByKey(serviceKey);
-        if (service) total += service.price[this.plan] || 0;
+        if (service && this.plan === 'oneTime') {
+          total += service.price.oneTime || 0;
+        }
       });
       
-      // Add bundles
+      // Add one-time bundles
       this.cartBundles.forEach(bundleKey => {
         const bundle = this.getBundleByKey(bundleKey);
-        if (bundle) total += bundle.price[this.plan] || 0;
+        if (bundle) {
+          total += bundle.price.oneTime || 0;
+        }
       });
       
-      // Add addons
+      // Add one-time addons
       this.cartAddons.forEach(addonKey => {
         const addon = this.getAddonByKey(addonKey);
-        if (addon) total += addon.price[this.plan] || 0;
+        if (addon && this.plan === 'oneTime') {
+          total += addon.price.oneTime || 0;
+        }
+      });
+      
+      return total;
+    },
+    
+    getMonthlyTotal() {
+      let total = 0;
+      
+      // Add monthly services
+      this.cartServices.forEach(serviceKey => {
+        const service = this.getServiceByKey(serviceKey);
+        if (service && this.plan === 'monthly') {
+          total += service.price.monthly || 0;
+        }
+      });
+      
+      // Add monthly bundles
+      this.cartBundles.forEach(bundleKey => {
+        const bundle = this.getBundleByKey(bundleKey);
+        if (bundle) {
+          total += bundle.price.monthly || 0;
+        }
+      });
+      
+      // Add monthly addons
+      this.cartAddons.forEach(addonKey => {
+        const addon = this.getAddonByKey(addonKey);
+        if (addon && this.plan === 'monthly') {
+          total += addon.price.monthly || 0;
+        }
       });
       
       return total;
@@ -283,8 +275,7 @@ function landingApp() {
         case 'name':
           filteredAddons.sort((a, b) => a.name.localeCompare(b.name));
           break;
-        default: // 'popular'
-          // Keep original order
+        default:
           break;
       }
       
@@ -293,7 +284,7 @@ function landingApp() {
     
     // Checkout and order processing
     async submitOrder() {
-      console.log('📤 Submitting order to Stripe');
+      console.log('📤 Submitting order');
       
       // Validate form
       const form = this.validateOrderForm();
@@ -450,13 +441,12 @@ function landingApp() {
 window.landingApp = landingApp;
 window.fmtUSD = fmtUSD;
 
-// Initialize Alpine.js when DOM is ready
+// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
   console.log('🌊 DOM loaded, Alpine.js should initialize');
   
-  // Verify Alpine.js is available
   if (typeof Alpine === 'undefined') {
-    console.error('❌ Alpine.js not found! Make sure it\'s loaded.');
+    console.error('❌ Alpine.js not found!');
   } else {
     console.log('✅ Alpine.js is available');
   }
