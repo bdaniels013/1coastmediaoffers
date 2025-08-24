@@ -86,8 +86,12 @@ function app() {
       let total = 0;
       this.cartServices.forEach(key => {
         const svc = this.getServiceByKey(key);
-        if (svc && svc.price && svc.price.oneTime) {
-          total += svc.price.oneTime;
+        if (svc && svc.price) {
+          // Use one-time price if defined and > 0, otherwise fall back to monthly
+          const price = svc.price.oneTime && svc.price.oneTime > 0
+            ? svc.price.oneTime
+            : (svc.price.monthly || 0);
+          total += price;
         }
       });
       // Add-ons total

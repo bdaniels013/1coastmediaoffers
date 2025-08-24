@@ -60,7 +60,11 @@
                 </div>
               </div>
               <div class="mt-4 flex items-center justify-between">
-                <div class="font-semibold" x-text="fmtUSD(svc.price.oneTime)"></div>
+                <div class="font-semibold">
+                  <!-- Show one-time price if present, else show monthly price with /mo suffix -->
+                  <span x-show="svc.price && svc.price.oneTime && svc.price.oneTime > 0" x-text="fmtUSD(svc.price.oneTime)"></span>
+                  <span x-show="(!svc.price.oneTime || svc.price.oneTime === 0) && svc.price && svc.price.monthly && svc.price.monthly > 0" x-text="fmtUSD(svc.price.monthly) + ' / mo'"></span>
+                </div>
                 <button @click="toggleService(svc.key)"
                         class="px-3 py-1.5 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
                         :class="cartServices.includes(svc.key) ? 'bg-red-600 text-white' : 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white'">
@@ -90,7 +94,10 @@
             <div class="text-xs text-gray-400" x-text="getServiceByKey(svcKey)?.outcome"></div>
           </div>
           <div class="text-right">
-            <div class="font-semibold" x-text="fmtUSD(getServiceByKey(svcKey)?.price.oneTime)"></div>
+            <div class="font-semibold">
+              <span x-show="getServiceByKey(svcKey)?.price && getServiceByKey(svcKey)?.price.oneTime && getServiceByKey(svcKey).price.oneTime > 0" x-text="fmtUSD(getServiceByKey(svcKey).price.oneTime)"></span>
+              <span x-show="(!getServiceByKey(svcKey)?.price.oneTime || getServiceByKey(svcKey).price.oneTime === 0) && getServiceByKey(svcKey)?.price && getServiceByKey(svcKey).price.monthly && getServiceByKey(svcKey).price.monthly > 0" x-text="fmtUSD(getServiceByKey(svcKey).price.monthly) + ' / mo'"></span>
+            </div>
             <button @click="toggleService(svcKey)" class="text-xs text-red-400 hover:underline mt-1">Remove</button>
           </div>
         </div>
