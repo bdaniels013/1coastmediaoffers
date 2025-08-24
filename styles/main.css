@@ -72,13 +72,57 @@ body {
   transform: translateY(-1px);
 }
 
+/* Updated Color Scheme - Modern Vibrant Palette */
+:root {
+  --ink: #1e293b;           /* Rich dark slate */
+  --primary: #7c3aed;       /* Vibrant purple */
+  --secondary: #06b6d4;     /* Bright cyan */
+  --accent: #10b981;        /* Fresh emerald */
+  --gradient-start: #7c3aed;
+  --gradient-middle: #06b6d4;
+  --gradient-end: #10b981;
+}
+
 .btn-primary {
-  background: #4f46e5;
-  color: #fff;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
 }
 
 .btn-primary:hover {
-  background: #4338ca;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4);
+}
+
+/* Update gradient backgrounds */
+.mesh {
+  background: linear-gradient(135deg, 
+    rgba(124, 58, 237, 0.1) 0%, 
+    rgba(6, 182, 212, 0.1) 50%, 
+    rgba(16, 185, 129, 0.1) 100%);
+}
+
+/* Update gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Enhanced card styles */
+.card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
 .btn-outline {
