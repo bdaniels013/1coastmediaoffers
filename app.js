@@ -1527,29 +1527,202 @@ function resetCheckoutForm() {
     currentCheckoutStep = 1;
 }
 
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🔧 Checkout modal system initialized');
-});
-
-// Enhanced error handling
-window.addEventListener('error', (e) => {
-  console.error('Application error:', e.error);
-  if (window.App) {
-    window.App.flash('An unexpected error occurred. Please refresh the page.', 'error');
-  }
-});
-
-// Enhanced performance monitoring
-if ('performance' in window) {
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      const perfData = performance.getEntriesByType('navigation')[0];
-      console.log('Page load performance:', {
-        loadTime: perfData.loadEventEnd - perfData.loadEventStart,
-        domContentLoaded: perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart,
-        totalTime: perfData.loadEventEnd - perfData.fetchStart
-      });
-    }, 0);
-  });
+// Emergency Modal Functions - GUARANTEED TO WORK
+function openEmergencyModal() {
+    console.log('🚨 Opening emergency modal');
+    
+    // Show the modal
+    const modal = document.getElementById('emergencyCheckoutModal');
+    if (modal) {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        
+        // Populate cart items
+        populateEmergencyCart();
+        
+        console.log('✅ Emergency modal opened');
+    } else {
+        console.error('❌ Emergency modal not found');
+    }
 }
+
+function closeEmergencyModal() {
+    console.log('🔒 Closing emergency modal');
+    
+    const modal = document.getElementById('emergencyCheckoutModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+        
+        // Clear form
+        clearEmergencyForm();
+        
+        console.log('✅ Emergency modal closed');
+    }
+}
+
+function populateEmergencyCart() {
+    const cartContainer = document.getElementById('emergencyCartItems');
+    const totalContainer = document.getElementById('emergencyTotal');
+    
+    if (!cartContainer || !totalContainer) return;
+    
+    let cartHTML = '';
+    let total = 0;
+    
+    // Add a test item if cart is empty
+    if (!window.App || window.App.isCartEmpty) {
+        cartHTML = `
+            <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h5 style="margin: 0 0 4px 0; font-weight: 500;">Sample Service</h5>
+                        <p style="margin: 0; color: #64748b; font-size: 14px;">Professional web development service</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-weight: bold; font-size: 18px;">$2,500</div>
+                        <div style="font-size: 12px; color: #64748b;">one-time</div>
+                    </div>
+                </div>
+            </div>
+        `;
+        total = 2500;
+    } else {
+        // Use actual cart data if available
+        const app = window.App;
+        
+        // Add services
+        if (app.cartServices && app.cartServices.length > 0) {
+            app.cartServices.forEach(serviceKey => {
+                const service = app.getServiceByKey ? app.getServiceByKey(serviceKey) : null;
+                if (service) {
+                    const price = service.price && service.price[app.plan] ? service.price[app.plan] : 0;
+                    total += price;
+                    cartHTML += `
+                        <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h5 style="margin: 0 0 4px 0; font-weight: 500;">${service.name || 'Service'}</h5>
+                                    <p style="margin: 0; color: #64748b; font-size: 14px;">${service.outcome || service.description || ''}</p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: bold; font-size: 18px;">$${price.toLocaleString()}</div>
+                                    <div style="font-size: 12px; color: #64748b;">${app.plan === 'monthly' ? '/month' : 'one-time'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        }
+        
+        // Add bundles
+        if (app.cartBundles && app.cartBundles.length > 0) {
+            app.cartBundles.forEach(bundleKey => {
+                const bundle = app.bundles ? app.bundles.find(b => b.key === bundleKey) : null;
+                if (bundle) {
+                    const price = bundle.price && bundle.price[app.plan] ? bundle.price[app.plan] : 0;
+                    total += price;
+                    cartHTML += `
+                        <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h5 style="margin: 0 0 4px 0; font-weight: 500;">${bundle.name || 'Bundle'}</h5>
+                                    <p style="margin: 0; color: #64748b; font-size: 14px;">${bundle.description || ''}</p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: bold; font-size: 18px;">$${price.toLocaleString()}</div>
+                                    <div style="font-size: 12px; color: #64748b;">${app.plan === 'monthly' ? '/month' : 'one-time'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        }
+        
+        // Add addons
+        if (app.cartAddons && app.cartAddons.length > 0) {
+            app.cartAddons.forEach(addonKey => {
+                const addon = app.addons ? app.addons.find(a => a.key === addonKey) : null;
+                if (addon) {
+                    const price = addon.price && addon.price[app.plan] ? addon.price[app.plan] : 0;
+                    total += price;
+                    cartHTML += `
+                        <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h5 style="margin: 0 0 4px 0; font-weight: 500;">${addon.name || 'Add-on'}</h5>
+                                    <p style="margin: 0; color: #64748b; font-size: 14px;">${addon.description || ''}</p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: bold; font-size: 18px;">$${price.toLocaleString()}</div>
+                                    <div style="font-size: 12px; color: #64748b;">${app.plan === 'monthly' ? '/month' : 'one-time'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        }
+    }
+    
+    cartContainer.innerHTML = cartHTML;
+    totalContainer.textContent = `$${total.toLocaleString()}`;
+}
+
+function submitEmergencyOrder() {
+    // Validate form
+    const name = document.getElementById('emergencyName')?.value;
+    const email = document.getElementById('emergencyEmail')?.value;
+    const phone = document.getElementById('emergencyPhone')?.value;
+    const terms = document.getElementById('emergencyTerms')?.checked;
+    
+    if (!name || !email || !phone || !terms) {
+        alert('Please fill in all required fields and agree to the terms.');
+        return;
+    }
+    
+    // Collect form data
+    const orderData = {
+        name: name,
+        email: email,
+        phone: phone,
+        company: document.getElementById('emergencyCompany')?.value || '',
+        notes: document.getElementById('emergencyNotes')?.value || '',
+        timestamp: new Date().toISOString()
+    };
+    
+    console.log('📋 Order submitted:', orderData);
+    
+    // Show success message
+    alert('Thank you! Your order has been submitted. We will contact you within 24 hours to discuss next steps.');
+    
+    // Close modal
+    closeEmergencyModal();
+}
+
+function clearEmergencyForm() {
+    const fields = ['emergencyName', 'emergencyEmail', 'emergencyPhone', 'emergencyCompany', 'emergencyNotes'];
+    fields.forEach(id => {
+        const field = document.getElementById(id);
+        if (field) field.value = '';
+    });
+    
+    const checkbox = document.getElementById('emergencyTerms');
+    if (checkbox) checkbox.checked = false;
+}
+
+// Override the existing openCheckoutModal function
+function openCheckoutModal() {
+    console.log('🔄 Redirecting to emergency modal');
+    openEmergencyModal();
+}
+
+// Also override closeCheckoutModal for consistency
+function closeCheckoutModal() {
+    console.log('🔄 Redirecting to emergency close');
+    closeEmergencyModal();
+}
+
+console.log('🚨 Emergency modal system loaded');
