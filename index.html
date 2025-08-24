@@ -28,26 +28,46 @@
   </header>
 
   <!-- Services Listing -->
-  <main class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+  <!-- Services Listing -->
+  <main class="max-w-7xl mx-auto px-4 py-8 space-y-12">
+    <!-- Iterate over categories -->
     <template x-for="(category, catKey) in serviceCategories" :key="catKey">
-      <div>
-        <h2 class="text-lg font-bold mb-3" x-text="category.name"></h2>
-        <template x-for="svc in category.services" :key="svc.key">
-          <div class="bg-white p-4 rounded-xl shadow mb-4 flex flex-col justify-between">
-            <div>
-              <h3 class="font-semibold" x-text="svc.name"></h3>
-              <p class="text-sm text-slate-600 mt-1" x-text="svc.outcome"></p>
+      <section class="space-y-4">
+        <!-- Category heading and description -->
+        <div>
+          <h2 class="text-2xl font-bold" x-text="formatCategoryTitle(catKey)"></h2>
+          <p class="text-sm text-slate-600 mt-1" x-text="category.description"></p>
+        </div>
+        <!-- Services in category -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <template x-for="svc in category.services" :key="svc.key">
+            <div class="bg-white p-4 rounded-xl shadow flex flex-col justify-between">
+              <div>
+                <h3 class="font-semibold text-lg" x-text="svc.name"></h3>
+                <p class="text-sm text-slate-600 mt-1" x-text="svc.outcome"></p>
+                <!-- Details toggle -->
+                <button @click="toggleDetails(svc.key)" class="mt-2 text-xs text-indigo-600 hover:underline focus:outline-none">
+                  <span x-text="detailsOpen[svc.key] ? 'Hide details' : 'View details'"></span>
+                </button>
+                <div x-show="detailsOpen[svc.key]" x-transition class="mt-2 text-sm text-slate-700">
+                  <ul class="list-disc list-inside space-y-1">
+                    <template x-for="item in svc.deliverables" :key="item"><li x-text="item"></li></template>
+                  </ul>
+                  <p class="mt-1 text-xs text-slate-500" x-show="svc.sla">SLA: <span x-text="svc.sla"></span></p>
+                </div>
+              </div>
+              <div class="mt-4 flex items-center justify-between">
+                <div class="font-semibold" x-text="fmtUSD(svc.price.oneTime)"></div>
+                <button @click="toggleService(svc.key)"
+                        class="px-3 py-1.5 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500"
+                        :class="cartServices.includes(svc.key) ? 'bg-red-600 text-white' : 'bg-indigo-600 text-white'">
+                  <span x-text="cartServices.includes(svc.key) ? 'Remove' : 'Add'"></span>
+                </button>
+              </div>
             </div>
-            <div class="mt-4 flex items-center justify-between">
-              <div class="font-semibold" x-text="fmtUSD(svc.price.oneTime)"></div>
-              <button @click="toggleService(svc.key)" class="px-3 py-1.5 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500"
-                      :class="cartServices.includes(svc.key) ? 'bg-red-600 text-white' : 'bg-indigo-600 text-white'">
-                <span x-text="cartServices.includes(svc.key) ? 'Remove' : 'Add'"></span>
-              </button>
-            </div>
-          </div>
-        </template>
-      </div>
+          </template>
+        </div>
+      </section>
     </template>
   </main>
 

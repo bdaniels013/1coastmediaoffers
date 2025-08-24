@@ -3,6 +3,8 @@ function app() {
   return {
     // UI state
     cartOpen: false,
+    // details open state per service key
+    detailsOpen: {},
     // Data collections
     serviceCategories: {},
     cartServices: [],
@@ -11,7 +13,21 @@ function app() {
     // Init loads services from global `serviceData`
     init() {
       this.serviceCategories = window.serviceData?.serviceCategories || {};
-      this.addons = window.serviceData?.addons || [];
+      // load addons (top-level or nested)
+      if (window.serviceData?.addons) {
+        this.addons = window.serviceData.addons;
+      } else if (window.serviceData?.serviceCategories?.addons) {
+        // some older data structures place addons alongside serviceCategories
+        this.addons = window.serviceData.serviceCategories.addons;
+      } else {
+        this.addons = [];
+      }
+      // initialize detailsOpen map
+      for (const category of Object.values(this.serviceCategories)) {
+        for (const svc of category.services) {
+          this.$set ? this.$set(this.detailsOpen, svc.key, false) : (this.detailsOpen[svc.key] = false);
+        }
+      }
     },
     // Format a number as USD
     fmtUSD(amount) {
@@ -92,6 +108,24 @@ function app() {
         console.error(err);
         alert('Checkout error.');
       }
+    }
+
+    ,
+    /**
+     * Toggle details view for a service
+     * @param {string} key
+     */
+    toggleDetails(key) {
+      this.detailsOpen[key] = !this.detailsOpen[key];
+    },
+    /**
+     * Convert a category key to a human-friendly title.
+     * E.g. "signature" → "Signature", "local-authority" → "Local Authority"
+     * @param {string} key
+     */
+    formatCategoryTitle(key) {
+      if (!key) return '';
+      return key.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
     }
   };
 }
