@@ -261,38 +261,35 @@ function landingApp(){
       const subject = encodeURIComponent('1CoastMedia Service Quote');
       const body = encodeURIComponent(`Hi,\n\nPlease find my service quote below:\n\n${this.quoteNote}\n\nTotal: ${this.fmtUSD(this.total)}\n\nThanks!`);
       window.open(`mailto:${this.quoteEmail}?subject=${subject}&body=${body}`);
+    },
+
+    toggleAddon(addonKey) {
+      const index = this.cartAddons.indexOf(addonKey);
+      if (index > -1) {
+        this.cartAddons.splice(index, 1);
+      } else {
+        this.cartAddons.push(addonKey);
+      }
+    },
+
+    proceedToCheckout() {
+      console.log('Proceeding to checkout with:', {
+        services: this.cartServices,
+        addons: this.cartAddons,
+        plan: this.plan,
+        total: this.total
+      });
+      this.closeBuilder();
+    },
+
+    sendQuote() {
+      const subject = encodeURIComponent('1CoastMedia Service Quote');
+      const body = encodeURIComponent(`Hi,\n\nHere's my service quote:\n\nServices: ${this.cartServices.length}\nAdd-ons: ${this.cartAddons.length}\nTotal: ${this.fmtUSD(this.total)}${this.plan === 'monthly' ? '/month' : ''}\n\n${this.quoteNote || ''}\n\nThanks!`);
+      window.open(`mailto:${this.quoteEmail}?subject=${subject}&body=${body}`);
+      this.closeQuote();
     }
   };
 }
 
 // Make landingApp globally available
 window.landingApp = landingApp;
-
-
-toggleAddon(addonKey) {
-  const index = this.cartAddons.indexOf(addonKey);
-  if (index > -1) {
-    this.cartAddons.splice(index, 1);
-  } else {
-    this.cartAddons.push(addonKey);
-  }
-  this.save();
-},
-
-proceedToCheckout() {
-  // Implement Stripe checkout logic
-  console.log('Proceeding to checkout with:', {
-    services: this.cartServices,
-    addons: this.cartAddons,
-    plan: this.plan,
-    total: this.total
-  });
-  // Add actual Stripe integration here
-},
-
-sendQuote() {
-  const subject = encodeURIComponent('1CoastMedia Service Quote');
-  const body = encodeURIComponent(`Hi,\n\nHere's my service quote:\n\nServices: ${this.cartServices.length}\nAdd-ons: ${this.cartAddons.length}\nTotal: ${this.fmtUSD(this.total)}${this.plan === 'monthly' ? '/month' : ''}\n\n${this.quoteNote || ''}\n\nThanks!`);
-  window.open(`mailto:${this.quoteEmail}?subject=${subject}&body=${body}`);
-  this.closeQuote();
-},
