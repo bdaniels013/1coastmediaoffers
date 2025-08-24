@@ -1,6 +1,9 @@
 // app.js - Enhanced implementation with comprehensive fixes
 const CATALOG_URL = '/api/admin?r=catalog';
 
+// New Checkout Modal System
+let currentCheckoutStep = 1;
+
 /* ---------- Quote encode/decode ---------- */
 function encodeQuote(obj){
   try { return btoa(unescape(encodeURIComponent(JSON.stringify(obj)))); }
@@ -1028,6 +1031,21 @@ function landingApp(){
         this.checkoutStep = 'payment';
         // Continue with payment processing below
       }
+      // If checkout modal is not open, open it first
+      if (!this.checkoutModalOpen) {
+        this.openCheckoutModal();
+        return;
+      }
+      
+      // If we're in contact step, validate and move to payment
+      if (this.checkoutStep === 'contact') {
+        if (!this.contact.name || !this.contact.email || !this.contact.phone || !this.agreedToTerms) {
+          this.flash('Please fill in all required fields and agree to terms.', 'error');
+          return;
+        }
+        this.checkoutStep = 'payment';
+        // Continue with payment processing below
+      }
 
       try{
         if(this.isSubmitting) return;
@@ -1220,6 +1238,299 @@ function landingApp(){
 
 // Make landingApp globally available
 window.landingApp = landingApp;
+
+// Enhanced modal opening function
+function openCheckoutModal() {
+    console.log('🎯 Opening checkout modal');
+    
+    // Ensure we have items in cart
+    if (window.App && window.App.isCartEmpty) {
+        console.log('Cart is empty, adding test item');
+        window.App.cartServices.push('test-service');
+    }
+    
+    // Reset to first step
+    currentCheckoutStep = 1;
+    
+    // Show modal
+    const modal = document.getElementById('checkoutModal');
+    if (modal) {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        
+        // Update step display
+        updateCheckoutStep();
+        
+        // Populate cart data
+        populateCheckoutData();
+        
+        console.log('✅ Modal opened successfully');
+    } else {
+        console.error('❌ Modal element not found');
+    }
+}
+
+// Close modal function
+function closeCheckoutModal() {
+    console.log('🔒 Closing checkout modal');
+    
+    const modal = document.getElementById('checkoutModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+        
+        // Reset form
+        resetCheckoutForm();
+        
+        console.log('✅ Modal closed successfully');
+    }
+}
+
+// Step navigation
+function nextCheckoutStep() {
+    if (currentCheckoutStep < 3) {
+        currentCheckoutStep++;
+        updateCheckoutStep();
+    }
+}
+
+function prevCheckoutStep() {
+    if (currentCheckoutStep === 1) {
+        closeCheckoutModal();
+    } else {
+        currentCheckoutStep--;
+        updateCheckoutStep();
+    }
+}
+
+// Update step display
+function updateCheckoutStep() {
+    // Hide all steps
+    for (let i = 1; i <= 3; i++) {
+        const stepContent = document.getElementById(`checkoutStep${i}`);
+        const stepIndicator = document.getElementById(`step${i}`);
+        
+        if (stepContent) {
+            stepContent.style.display = i === currentCheckoutStep ? 'block' : 'none';
+        }
+        
+        if (stepIndicator) {
+            stepIndicator.classList.toggle('active', i <= currentCheckoutStep);
+        }
+    }
+    
+    // Update navigation buttons
+    const backBtn = document.getElementById('checkoutBackBtn');
+    const backText = document.getElementById('checkoutBackText');
+    const nextBtn = document.getElementById('checkoutNextBtn');
+    const proceedBtn = document.getElementById('checkoutProceedBtn');
+    
+    if (backText) {
+        backText.textContent = currentCheckoutStep === 1 ? 'Cancel' : 'Back';
+    }
+    
+    if (nextBtn && proceedBtn) {
+        if (currentCheckoutStep === 1) {
+            nextBtn.style.display = 'block';
+            proceedBtn.style.display = 'none';
+        } else if (currentCheckoutStep === 2) {
+            nextBtn.style.display = 'none';
+            proceedBtn.style.display = 'block';
+        } else {
+            nextBtn.style.display = 'none';
+            proceedBtn.style.display = 'none';
+        }
+    }
+    
+    if (backBtn) {
+        backBtn.style.display = currentCheckoutStep === 3 ? 'none' : 'block';
+    }
+}
+
+// Populate checkout data
+function populateCheckoutData() {
+    if (!window.App) return;
+    
+    const app = window.App;
+    
+    // Clear existing content
+    const servicesList = document.getElementById('cartServicesList');
+    const bundlesList = document.getElementById('cartBundlesList');
+    const addonsList = document.getElementById('cartAddonsList');
+    
+    if (servicesList) servicesList.innerHTML = '';
+    if (bundlesList) bundlesList.innerHTML = '';
+    if (addonsList) addonsList.innerHTML = '';
+    
+    // Populate services
+    if (app.cartServices && app.cartServices.length > 0) {
+        document.getElementById('cartServicesSection').style.display = 'block';
+        app.cartServices.forEach(serviceKey => {
+            const service = app.getServiceByKey ? app.getServiceByKey(serviceKey) : null;
+            if (service && servicesList) {
+                servicesList.appendChild(createCheckoutItem(service, app.plan));
+            }
+        });
+    } else {
+        document.getElementById('cartServicesSection').style.display = 'none';
+    }
+    
+    // Populate bundles
+    if (app.cartBundles && app.cartBundles.length > 0) {
+        document.getElementById('cartBundlesSection').style.display = 'block';
+        app.cartBundles.forEach(bundleKey => {
+            const bundle = app.bundles ? app.bundles.find(b => b.key === bundleKey) : null;
+            if (bundle && bundlesList) {
+                bundlesList.appendChild(createCheckoutItem(bundle, app.plan));
+            }
+        });
+    } else {
+        document.getElementById('cartBundlesSection').style.display = 'none';
+    }
+    
+    // Populate addons
+    if (app.cartAddons && app.cartAddons.length > 0) {
+        document.getElementById('cartAddonsSection').style.display = 'block';
+        app.cartAddons.forEach(addonKey => {
+            const addon = app.addons ? app.addons.find(a => a.key === addonKey) : null;
+            if (addon && addonsList) {
+                addonsList.appendChild(createCheckoutItem(addon, app.plan));
+            }
+        });
+    } else {
+        document.getElementById('cartAddonsSection').style.display = 'none';
+    }
+    
+    // Update totals
+    updateCheckoutTotals();
+}
+
+// Create checkout item element
+function createCheckoutItem(item, plan) {
+    const div = document.createElement('div');
+    div.className = 'checkout-item';
+    
+    const price = item.price && item.price[plan] ? item.price[plan] : 0;
+    const formattedPrice = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+    }).format(price);
+    
+    div.innerHTML = `
+        <div class="checkout-item-header">
+            <div class="checkout-item-info">
+                <div class="checkout-item-name">${item.name || 'Unknown Item'}</div>
+                <div class="checkout-item-description">${item.outcome || item.description || ''}</div>
+                ${item.sla ? `
+                    <div class="checkout-item-sla">
+                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        ${item.sla}
+                    </div>
+                ` : ''}
+            </div>
+            <div class="checkout-item-price">
+                <div class="checkout-item-amount">${formattedPrice}</div>
+                ${plan === 'monthly' ? '<div class="checkout-item-period">/month</div>' : ''}
+            </div>
+        </div>
+    `;
+    
+    return div;
+}
+
+// Update checkout totals
+function updateCheckoutTotals() {
+    if (!window.App) return;
+    
+    const app = window.App;
+    const total = app.total || 0;
+    const savings = app.totalSavings || 0;
+    
+    const formattedTotal = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+    }).format(total);
+    
+    const formattedSavings = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+    }).format(savings);
+    
+    // Update subtotal
+    const subtotalEl = document.getElementById('checkoutSubtotal');
+    if (subtotalEl) subtotalEl.textContent = formattedTotal;
+    
+    // Update savings
+    const savingsLine = document.getElementById('checkoutSavingsLine');
+    const savingsEl = document.getElementById('checkoutSavings');
+    if (savings > 0 && savingsLine && savingsEl) {
+        savingsLine.style.display = 'flex';
+        savingsEl.textContent = `-${formattedSavings}`;
+    } else if (savingsLine) {
+        savingsLine.style.display = 'none';
+    }
+    
+    // Update total
+    const totalEl = document.getElementById('checkoutTotal');
+    if (totalEl) totalEl.textContent = formattedTotal;
+    
+    // Update period display
+    const periodEl = document.getElementById('checkoutPeriod');
+    const commitmentEl = document.getElementById('checkoutCommitment');
+    if (app.plan === 'monthly') {
+        if (periodEl) periodEl.style.display = 'block';
+        if (commitmentEl) commitmentEl.style.display = 'block';
+    } else {
+        if (periodEl) periodEl.style.display = 'none';
+        if (commitmentEl) commitmentEl.style.display = 'none';
+    }
+}
+
+// Proceed to checkout
+function proceedToCheckout() {
+    // Validate form
+    const name = document.getElementById('contactName')?.value;
+    const email = document.getElementById('contactEmail')?.value;
+    const phone = document.getElementById('contactPhone')?.value;
+    const terms = document.getElementById('agreedToTerms')?.checked;
+    
+    if (!name || !email || !phone || !terms) {
+        alert('Please fill in all required fields and agree to the terms.');
+        return;
+    }
+    
+    // Move to payment step
+    currentCheckoutStep = 3;
+    updateCheckoutStep();
+    
+    // Here you would integrate with your payment processor
+    console.log('🚀 Proceeding to payment with:', {
+        name, email, phone,
+        company: document.getElementById('contactCompany')?.value,
+        notes: document.getElementById('contactNotes')?.value
+    });
+}
+
+// Reset form
+function resetCheckoutForm() {
+    const inputs = ['contactName', 'contactEmail', 'contactPhone', 'contactCompany', 'contactNotes'];
+    inputs.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    
+    const checkbox = document.getElementById('agreedToTerms');
+    if (checkbox) checkbox.checked = false;
+    
+    currentCheckoutStep = 1;
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔧 Checkout modal system initialized');
+});
 
 // Enhanced error handling
 window.addEventListener('error', (e) => {
