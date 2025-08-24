@@ -13,11 +13,17 @@ function fmtUSD(amount) {
 }
 
 // Simple global modal functions
+// Modal helpers that ensure the checkout overlay is properly shown/hidden.
+// We remove and add both the `hidden` attribute and utility class so that
+// Alpine’s x-cloak or Tailwind utilities don’t conflict with dynamic state.
 window.openCheckoutModal = function() {
   console.log('Opening checkout modal');
   const modal = document.getElementById('checkout-modal');
   if (modal) {
+    // Unhide the modal by clearing attributes/classes and enabling display
     modal.hidden = false;
+    modal.classList.remove('hidden');
+    modal.removeAttribute('hidden');
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
   }
@@ -27,7 +33,9 @@ window.closeCheckoutModal = function() {
   console.log('Closing checkout modal');
   const modal = document.getElementById('checkout-modal');
   if (modal) {
+    // Hide the modal and restore the page scroll
     modal.hidden = true;
+    modal.classList.add('hidden');
     modal.style.display = 'none';
     document.body.style.overflow = '';
   }
