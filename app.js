@@ -205,14 +205,16 @@ function landingApp() {
       console.log('Alpine data context:', this);
       document.body.style.overflow = 'hidden';
       
-      // Force a DOM update
       this.$nextTick(() => {
         console.log('Next tick - modal should be visible');
-        const modalElement = document.querySelector('[x-show="checkoutModalOpen"]');
+        const modalElement = document.getElementById('checkout-modal');
         console.log('Modal element found:', modalElement);
         if (modalElement) {
           console.log('Modal element style:', modalElement.style.display);
           console.log('Modal element computed style:', window.getComputedStyle(modalElement).display);
+          // Force the modal to be visible
+          modalElement.style.display = 'flex';
+          modalElement.style.visibility = 'visible';
         }
       });
     },
