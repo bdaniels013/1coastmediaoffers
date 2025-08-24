@@ -199,8 +199,22 @@ function landingApp() {
     // Modal management
     openCheckoutModal() {
       console.log('🛒 Opening checkout modal');
+      console.log('Before:', this.checkoutModalOpen);
       this.checkoutModalOpen = true;
+      console.log('After:', this.checkoutModalOpen);
+      console.log('Alpine data context:', this);
       document.body.style.overflow = 'hidden';
+      
+      // Force a DOM update
+      this.$nextTick(() => {
+        console.log('Next tick - modal should be visible');
+        const modalElement = document.querySelector('[x-show="checkoutModalOpen"]');
+        console.log('Modal element found:', modalElement);
+        if (modalElement) {
+          console.log('Modal element style:', modalElement.style.display);
+          console.log('Modal element computed style:', window.getComputedStyle(modalElement).display);
+        }
+      });
     },
     
     closeCheckoutModal() {

@@ -100,6 +100,14 @@
 </head>
 
 <body class="mesh text-slate-800" x-data="landingApp()" x-init="init()" x-cloak>
+  <!-- TEMPORARY DEBUG SECTION - Remove after fixing -->
+  <div class="fixed top-20 right-4 z-50 bg-red-500 text-white p-4 rounded-lg" style="background: red; color: white; padding: 10px; position: fixed; top: 80px; right: 10px; z-index: 9999;">
+    <div>Modal State: <span x-text="checkoutModalOpen ? 'OPEN' : 'CLOSED'"></span></div>
+    <button @click="checkoutModalOpen = true; console.log('Direct toggle:', checkoutModalOpen)" style="background: white; color: black; padding: 5px; margin: 5px; border-radius: 3px;">Force Open Modal</button>
+    <button @click="openCheckoutModal(); console.log('Function call:', checkoutModalOpen)" style="background: white; color: black; padding: 5px; margin: 5px; border-radius: 3px;">Test Function</button>
+    <button @click="console.log('Alpine data:', $data)" style="background: white; color: black; padding: 5px; margin: 5px; border-radius: 3px;">Log Data</button>
+  </div>
+  
   <!-- NAV -->
   <header class="sticky top-0 z-50 backdrop-blur bg-white/80 border-b border-slate-200/70">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -499,7 +507,9 @@
                  x-transition:leave-start="opacity-100"
                  x-transition:leave-end="opacity-0"
                  class="fixed inset-0 z-50 bg-slate-900/50 overflow-y-auto p-4 sm:p-6"
-                 @click.self="closeCheckoutModal()">
+                 @click.self="closeCheckoutModal()"
+                 x-init="console.log('Modal element initialized, checkoutModalOpen:', checkoutModalOpen)"
+                 style="background-color: rgba(15, 23, 42, 0.5) !important;">
               
               <div class="flex min-h-full items-center justify-center">
                 <div class="bg-white rounded-2xl shadow-2xl ring-1 ring-slate-200 w-full max-w-4xl max-h-[90vh] overflow-hidden"
