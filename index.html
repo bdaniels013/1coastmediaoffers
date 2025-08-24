@@ -241,25 +241,78 @@
         </template>
       </div>
 
-      <!-- Bundles Section -->
+      <!-- Enhanced Bundles Section -->
       <div class="mt-12">
-        <h3 class="text-2xl font-bold text-center mb-6">Value Bundles</h3>
+        <div class="text-center mb-8">
+          <h3 class="text-3xl font-bold bg-gradient-to-r from-purple-600 via-cyan-500 to-emerald-500 bg-clip-text text-transparent mb-2">Value Bundles</h3>
+          <p class="text-slate-600">Save big with our curated service packages</p>
+        </div>
         <div class="grid md:grid-cols-3 gap-6">
           <template x-for="bundle in bundles" :key="bundle.key">
-            <div class="card p-6 text-center">
-              <h4 class="font-bold text-lg mb-2" x-text="bundle.name"></h4>
-              <p class="text-sm text-slate-600 mb-4" x-text="bundle.description"></p>
-              <div class="text-sm text-slate-500 mb-4">
-                <span class="font-medium">Includes:</span>
-                <span x-text="bundle.includes.join(', ')"></span>
+            <div class="relative group">
+              <!-- Bundle Card -->
+              <div class="card p-6 text-center h-full flex flex-col justify-between transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1"
+                   :class="cartBundles.includes(bundle.key) ? 'ring-2 ring-emerald-500 bg-emerald-50' : ''">
+                
+                <!-- Bundle Header -->
+                <div>
+                  <h4 class="font-bold text-xl mb-3 text-slate-900" x-text="bundle.name"></h4>
+                  <p class="text-sm text-slate-600 mb-4" x-text="bundle.description"></p>
+                  
+                  <!-- Savings Badge -->
+                  <div x-show="bundle.savings" class="inline-block bg-gradient-to-r from-emerald-500 to-cyan-500 text-white text-xs font-bold px-3 py-1 rounded-full mb-4">
+                    <span x-text="bundle.savings"></span>
+                  </div>
+                  
+                  <!-- Includes List -->
+                  <div class="bg-slate-50 rounded-lg p-3 mb-4">
+                    <div class="text-xs font-medium text-slate-700 mb-2">INCLUDES:</div>
+                    <div class="text-sm text-slate-600 leading-relaxed" x-text="bundle.includes.join(' • ')"></div>
+                  </div>
+                </div>
+                
+                <!-- Pricing -->
+                <div class="mb-4">
+                  <div class="text-2xl font-bold text-slate-900 mb-1">
+                    <span x-show="bundle.price.oneTime" x-text="fmtUSD(bundle.price.oneTime)"></span>
+                    <span x-show="bundle.price.monthly" class="text-lg text-slate-600">
+                      <span x-show="bundle.price.oneTime"> + </span>
+                      <span x-text="fmtUSD(bundle.price.monthly) + '/mo'"></span>
+                    </span>
+                  </div>
+                  <div x-show="bundle.billing" class="text-xs text-slate-500" x-text="bundle.billing"></div>
+                  <div x-show="bundle.note" class="text-xs text-slate-500 mt-1" x-text="bundle.note"></div>
+                </div>
+                
+                <!-- Action Button -->
+                <button @click="toggleBundle(bundle.key)" 
+                        class="w-full px-4 py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105"
+                        :class="cartBundles.includes(bundle.key) ? 
+                          'bg-emerald-500 text-white hover:bg-emerald-600' : 
+                          'bg-gradient-to-r from-purple-600 to-cyan-500 text-white hover:from-purple-700 hover:to-cyan-600'">
+                  <span x-text="cartBundles.includes(bundle.key) ? '✓ Added to Cart' : 'Add Bundle'"></span>
+                </button>
               </div>
-              <div class="text-xl font-bold text-slate-900 mb-4">
-                <span x-show="bundle.price.oneTime" x-text="fmtUSD(bundle.price.oneTime) + ' + '"></span>
-                <span x-text="bundle.price.monthly ? fmtUSD(bundle.price.monthly) + '/mo' : (bundle.price.quarterly ? fmtUSD(bundle.price.quarterly) + '/qtr' : '')"></span>
+              
+              <!-- Selected Indicator -->
+              <div x-show="cartBundles.includes(bundle.key)" 
+                   class="absolute -top-2 -right-2 bg-emerald-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
+                ✓
               </div>
-              <button class="w-full btn bg-slate-900 text-white rounded-xl px-4 py-2 font-semibold">Select Bundle</button>
             </div>
           </template>
+        </div>
+        
+        <!-- Bundle Summary -->
+        <div x-show="cartBundles.length > 0" class="mt-8 text-center">
+          <div class="inline-block bg-white rounded-xl shadow-lg ring-1 ring-slate-200 p-4">
+            <div class="text-sm text-slate-600 mb-2">
+              <span class="font-semibold" x-text="cartBundles.length"></span> bundle<span x-show="cartBundles.length !== 1">s</span> selected
+            </div>
+            <button @click="openBuilder()" class="btn-primary px-6 py-2 text-sm">
+              Review Selection
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -354,176 +407,379 @@
     </div>
   </div>
 
-  <!-- ADDONS MODAL -->
-  <div x-show="addonsOpen" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
+  <!-- BUNDLES MODAL -->
+  <div x-show="bundlesOpen" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
     <div class="flex min-h-full items-end sm:items-center justify-center p-4">
-      <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" @click="closeAddons()"></div>
-      <div class="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-4xl modal-shell overflow-hidden">
+      <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" @click="closeBundles()"></div>
+      <div class="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-5xl modal-shell overflow-hidden">
         <!-- Header -->
         <div class="sticky top-0 bg-white border-b border-slate-200 px-6 py-4">
           <div class="flex items-center justify-between">
-            <h2 class="text-xl font-bold">Add-Ons</h2>
-            <button @click="closeAddons()" class="p-2 hover:bg-slate-100 rounded-lg">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <h2 class="text-xl font-bold">Service Bundles</h2>
+            <button @click="closeBundles()" class="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
               </svg>
             </button>
           </div>
-          <p class="text-slate-600 mt-1">Enhance your service with these add-ons</p>
+          
+          <!-- Search -->
+          <div class="mt-4">
+            <input 
+              type="text" 
+              x-model="bundleQuery"
+              placeholder="Search bundles..."
+              class="w-full form-input"
+            >
+          </div>
         </div>
         
         <!-- Content -->
         <div class="p-6 max-h-96 overflow-y-auto">
-          <template x-for="addon in serviceData.addons" :key="addon.key">
-            <div class="border border-slate-200 rounded-lg p-4 mb-4 hover:border-slate-300 transition-colors">
-              <div class="flex items-start justify-between">
-                <div class="flex-1">
-                  <h3 class="font-semibold" x-text="addon.name"></h3>
-                  <p class="text-slate-600 text-sm mt-1" x-text="addon.description"></p>
+          <div class="grid gap-6 md:grid-cols-2">
+            <template x-for="bundle in visibleBundles" :key="bundle.key">
+              <div class="card service-card p-6 hover:shadow-xl transition-all duration-300">
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex-1">
+                    <h3 class="text-xl font-bold mb-2" x-text="bundle.name"></h3>
+                    <p class="text-slate-600 mb-3" x-text="bundle.description"></p>
+                    
+                    <!-- Includes -->
+                    <div class="mb-4">
+                      <h4 class="font-semibold text-sm text-slate-700 mb-2">Includes:</h4>
+                      <ul class="text-sm text-slate-600 space-y-1">
+                        <template x-for="item in bundle.includes" :key="item">
+                          <li class="flex items-center">
+                            <svg class="w-4 h-4 text-emerald-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span x-text="item"></span>
+                          </li>
+                        </template>
+                      </ul>
+                    </div>
+                    
+                    <!-- Savings -->
+                    <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3 mb-4" x-show="bundle.savings">
+                      <p class="text-emerald-700 font-semibold text-sm" x-text="bundle.savings"></p>
+                    </div>
+                  </div>
                 </div>
-                <div class="text-right ml-4">
-                  <div class="font-bold" x-text="fmtUSD(addon.price[plan])"></div>
-                  <button 
-                    @click="toggleAddon(addon.key)"
-                    class="mt-2 px-3 py-1 text-sm rounded-lg transition-colors"
-                    :class="cartAddons.includes(addon.key) ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
-                    x-text="cartAddons.includes(addon.key) ? 'Remove' : 'Add'"
-                  ></button>
+              </div>
+              
+              <!-- Pricing and Action -->
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="price-display" x-text="fmtUSD(bundle.price[plan])"></div>
+                  <span class="text-sm text-slate-500" x-show="plan === 'monthly'">/month</span>
+                  <span class="text-sm text-slate-500" x-show="bundle.billing" x-text="bundle.billing"></span>
                 </div>
+                <button 
+                  @click="toggleBundle(bundle.key)"
+                  class="btn transition-all duration-300"
+                  :class="cartBundles.includes(bundle.key) ? 'btn-secondary' : 'btn-primary'"
+                >
+                  <span x-text="cartBundles.includes(bundle.key) ? 'Remove' : 'Add Bundle'"></span>
+                </button>
               </div>
             </div>
           </template>
         </div>
-        
-        <!-- Footer -->
-        <div class="sticky bottom-0 bg-white border-t border-slate-200 px-6 py-4">
-          <div class="flex justify-between items-center">
-            <span class="text-slate-600">Selected: <strong x-text="cartAddons.length"></strong> add-ons</span>
-            <button @click="closeAddons()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">Done</button>
-          </div>
+      </div>
+      
+      <!-- Footer -->
+      <div class="sticky bottom-0 bg-white border-t border-slate-200 px-6 py-4">
+        <div class="flex justify-between items-center">
+          <span class="text-slate-600">Selected: <strong x-text="cartBundles.length"></strong> bundles</span>
+          <button @click="closeBundles()" class="btn-primary">Done</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- BUILDER MODAL -->
-  <div x-show="builderOpen" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
-    <div class="flex min-h-full items-end sm:items-center justify-center p-4">
-      <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" @click="closeBuilder()"></div>
-      <div class="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-4xl modal-shell overflow-hidden">
-        <!-- Header -->
-        <div class="sticky top-0 bg-white border-b border-slate-200 px-6 py-4">
-          <div class="flex items-center justify-between">
-            <h2 class="text-xl font-bold">Review & Checkout</h2>
-            <button @click="closeBuilder()" class="p-2 hover:bg-slate-100 rounded-lg">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <!-- CHECKOUT MODAL -->
+  <div x-show="checkoutModalOpen" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
+    <div class="flex min-h-full items-center justify-center p-4">
+      <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" @click="closeCheckoutModal()"></div>
+      <div class="relative bg-white rounded-2xl shadow-xl max-w-4xl w-full overflow-hidden">
+        
+        <!-- Header with Steps -->
+        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-4">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold">Secure Checkout</h2>
+            <button @click="closeCheckoutModal()" class="p-2 hover:bg-white/20 rounded-lg transition-colors">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
               </svg>
             </button>
           </div>
-        </div>
-        
-        <!-- Content -->
-        <div class="p-6 max-h-96 overflow-y-auto">
-          <!-- Selected Services -->
-          <div class="mb-6">
-            <h3 class="font-semibold mb-3">Selected Services</h3>
-            <template x-for="serviceKey in cartServices" :key="serviceKey">
-              <div class="border border-slate-200 rounded-lg p-4 mb-3">
-                <div class="flex justify-between items-start">
-                  <div>
-                    <h4 class="font-medium" x-text="getServiceByKey(serviceKey)?.name"></h4>
-                    <p class="text-slate-600 text-sm" x-text="getServiceByKey(serviceKey)?.outcome"></p>
-                  </div>
-                  <div class="text-right">
-                    <div class="font-bold" x-text="fmtUSD(getServiceByKey(serviceKey)?.price[plan])"></div>
-                    <span class="text-xs text-slate-500" x-show="plan === 'monthly'">/month</span>
-                  </div>
-                </div>
-              </div>
-            </template>
-          </div>
           
-          <!-- Selected Add-ons -->
-          <div class="mb-6" x-show="cartAddons.length > 0">
-            <h3 class="font-semibold mb-3">Selected Add-ons</h3>
-            <template x-for="addonKey in cartAddons" :key="addonKey">
-              <div class="border border-slate-200 rounded-lg p-4 mb-3">
-                <div class="flex justify-between items-start">
-                  <div>
-                    <h4 class="font-medium" x-text="serviceData.addons.find(a => a.key === addonKey)?.name"></h4>
-                    <p class="text-slate-600 text-sm" x-text="serviceData.addons.find(a => a.key === addonKey)?.description"></p>
-                  </div>
-                  <div class="font-bold" x-text="fmtUSD(serviceData.addons.find(a => a.key === addonKey)?.price[plan])"></div>
-                </div>
+          <!-- Step Indicator -->
+          <div class="flex items-center space-x-4">
+            <div class="flex items-center">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold"
+                   :class="checkoutStep === 'review' || checkoutStep === 'contact' || checkoutStep === 'payment' ? 'bg-white text-indigo-600' : 'bg-white/20 text-white'">
+                1
               </div>
-            </template>
-          </div>
-          
-          <!-- Total -->
-          <div class="border-t border-slate-200 pt-4">
-            <div class="flex justify-between items-center text-lg font-bold">
-              <span>Total:</span>
-              <span x-text="fmtUSD(total) + (plan === 'monthly' ? '/month' : '')"></span>
+              <span class="ml-2 text-sm font-medium">Review</span>
+            </div>
+            <div class="w-8 h-0.5 bg-white/30"></div>
+            <div class="flex items-center">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold"
+                   :class="checkoutStep === 'contact' || checkoutStep === 'payment' ? 'bg-white text-indigo-600' : 'bg-white/20 text-white'">
+                2
+              </div>
+              <span class="ml-2 text-sm font-medium">Contact</span>
+            </div>
+            <div class="w-8 h-0.5 bg-white/30"></div>
+            <div class="flex items-center">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold"
+                   :class="checkoutStep === 'payment' ? 'bg-white text-indigo-600' : 'bg-white/20 text-white'">
+                3
+              </div>
+              <span class="ml-2 text-sm font-medium">Payment</span>
             </div>
           </div>
         </div>
-        
-        <!-- Footer -->
-        <div class="sticky bottom-0 bg-white border-t border-slate-200 px-6 py-4">
-          <div class="flex gap-3">
-            <button @click="closeBuilder()" class="flex-1 bg-slate-100 text-slate-700 px-4 py-3 rounded-lg hover:bg-slate-200">Continue Shopping</button>
-            <button @click="proceedToCheckout()" class="flex-1 bg-indigo-600 text-white px-4 py-3 rounded-lg hover:bg-indigo-700">Proceed to Checkout</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- QUOTE MODAL -->
-  <div x-show="quoteOpen" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
-    <div class="flex min-h-full items-center justify-center p-4">
-      <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" @click="closeQuote()"></div>
-      <div class="relative bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xl font-bold">Email Quote</h2>
-          <button @click="closeQuote()" class="p-2 hover:bg-slate-100 rounded-lg">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
+        <!-- Step 1: Review Order -->
+        <div x-show="checkoutStep === 'review'" class="p-6">
+          <h3 class="text-lg font-semibold mb-4">Review Your Order</h3>
+          
+          <div class="grid lg:grid-cols-2 gap-6">
+            <!-- Order Summary -->
+            <div class="space-y-4">
+              <!-- Selected Services -->
+              <div x-show="cartServices.length > 0">
+                <h4 class="font-medium text-slate-700 mb-3">Services</h4>
+                <template x-for="serviceKey in cartServices" :key="serviceKey">
+                  <div class="border border-slate-200 rounded-lg p-4">
+                    <div class="flex justify-between items-start">
+                      <div class="flex-1">
+                        <h5 class="font-medium" x-text="getServiceByKey(serviceKey)?.name"></h5>
+                        <p class="text-slate-600 text-sm mt-1" x-text="getServiceByKey(serviceKey)?.outcome"></p>
+                        <div class="text-xs text-slate-500 mt-2" x-show="getServiceByKey(serviceKey)?.sla">
+                          <span class="inline-flex items-center px-2 py-1 rounded-full bg-slate-100">
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span x-text="getServiceByKey(serviceKey)?.sla"></span>
+                          </span>
+                        </div>
+                      </div>
+                      <div class="text-right ml-4">
+                        <div class="font-bold text-lg" x-text="fmtUSD(getServiceByKey(serviceKey)?.price[plan])"></div>
+                        <span class="text-xs text-slate-500" x-show="plan === 'monthly'">/month</span>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </div>
+              
+              <!-- Selected Bundles -->
+              <div x-show="cartBundles.length > 0">
+                <h4 class="font-medium text-slate-700 mb-3">Bundles</h4>
+                <template x-for="bundleKey in cartBundles" :key="bundleKey">
+                  <div class="border border-slate-200 rounded-lg p-4">
+                    <div class="flex justify-between items-start">
+                      <div class="flex-1">
+                        <h5 class="font-medium" x-text="bundles.find(b => b.key === bundleKey)?.name"></h5>
+                        <p class="text-slate-600 text-sm mt-1" x-text="bundles.find(b => b.key === bundleKey)?.description"></p>
+                        <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-2 mt-2" x-show="bundles.find(b => b.key === bundleKey)?.savings">
+                          <p class="text-emerald-700 font-semibold text-xs" x-text="bundles.find(b => b.key === bundleKey)?.savings"></p>
+                        </div>
+                      </div>
+                      <div class="text-right ml-4">
+                        <div class="font-bold text-lg" x-text="fmtUSD(bundles.find(b => b.key === bundleKey)?.price[plan])"></div>
+                        <span class="text-xs text-slate-500" x-show="plan === 'monthly'">/month</span>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </div>
+              
+              <!-- Selected Add-ons -->
+              <div x-show="cartAddons.length > 0">
+                <h4 class="font-medium text-slate-700 mb-3">Add-ons</h4>
+                <template x-for="addonKey in cartAddons" :key="addonKey">
+                  <div class="border border-slate-200 rounded-lg p-4">
+                    <div class="flex justify-between items-start">
+                      <div class="flex-1">
+                        <h5 class="font-medium" x-text="addons.find(a => a.key === addonKey)?.name"></h5>
+                        <p class="text-slate-600 text-sm mt-1" x-text="addons.find(a => a.key === addonKey)?.description"></p>
+                      </div>
+                      <div class="text-right ml-4">
+                        <div class="font-bold text-lg" x-text="fmtUSD(addons.find(a => a.key === addonKey)?.price[plan])"></div>
+                        <span class="text-xs text-slate-500" x-show="plan === 'monthly'">/month</span>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+            
+            <!-- Pricing Summary -->
+            <div class="lg:sticky lg:top-6">
+              <div class="bg-slate-50 rounded-xl p-6">
+                <h4 class="font-semibold mb-4">Order Summary</h4>
+                
+                <div class="space-y-3">
+                  <div class="flex justify-between text-sm">
+                    <span>Subtotal</span>
+                    <span x-text="fmtUSD(total)"></span>
+                  </div>
+                  
+                  <div class="flex justify-between text-sm text-emerald-600" x-show="totalSavings > 0">
+                    <span>Bundle Savings</span>
+                    <span x-text="'-' + fmtUSD(totalSavings)"></span>
+                  </div>
+                  
+                  <div class="border-t border-slate-200 pt-3">
+                    <div class="flex justify-between items-center">
+                      <span class="font-semibold text-lg">Total</span>
+                      <div class="text-right">
+                        <div class="font-bold text-xl" x-text="fmtUSD(total)"></div>
+                        <span class="text-sm text-slate-500" x-show="plan === 'monthly'">/month</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="text-xs text-slate-500 mt-4" x-show="plan === 'monthly'">
+                    <p>Monthly services require a 3-month minimum commitment.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
-            <input 
-              type="email" 
-              x-model="quoteEmail"
-              class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="your@email.com"
+
+        <!-- Step 2: Contact Information -->
+        <div x-show="checkoutStep === 'contact'" class="p-6">
+          <h3 class="text-lg font-semibold mb-4">Contact Information</h3>
+          
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Full Name *</label>
+                <input 
+                  type="text" 
+                  x-model="contact.name"
+                  class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="John Doe"
+                  required
+                >
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Email Address *</label>
+                <input 
+                  type="email" 
+                  x-model="contact.email"
+                  class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="john@example.com"
+                  required
+                >
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Phone Number *</label>
+                <input 
+                  type="tel" 
+                  x-model="contact.phone"
+                  class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="(555) 123-4567"
+                  required
+                >
+              </div>
+            </div>
+            
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Company Name</label>
+                <input 
+                  type="text" 
+                  x-model="contact.company"
+                  class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Your Company LLC"
+                >
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Project Notes</label>
+                <textarea 
+                  x-model="contact.notes"
+                  rows="4"
+                  class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Tell us about your project goals, timeline, or any special requirements..."
+                ></textarea>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Terms Agreement -->
+          <div class="mt-6 p-4 bg-slate-50 rounded-lg">
+            <label class="flex items-start space-x-3">
+              <input 
+                type="checkbox" 
+                x-model="agreedToTerms"
+                class="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-slate-300 rounded"
+                required
+              >
+              <span class="text-sm text-slate-700">
+                I agree to the <a href="#" class="text-indigo-600 hover:text-indigo-500 underline">Terms of Service</a> and <a href="#" class="text-indigo-600 hover:text-indigo-500 underline">Privacy Policy</a>. I understand that monthly services require a 3-month minimum commitment.
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Step 3: Payment Processing -->
+        <div x-show="checkoutStep === 'payment'" class="p-6">
+          <div class="text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-full mb-4">
+              <svg class="w-8 h-8 text-indigo-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold mb-2">Processing Your Order</h3>
+            <p class="text-slate-600 mb-4">Please wait while we set up your secure payment...</p>
+            <div class="text-sm text-slate-500">
+              <p>You'll be redirected to Stripe to complete your payment securely.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Navigation -->
+        <div class="bg-slate-50 px-6 py-4 flex justify-between items-center">
+          <button 
+            @click="prevCheckoutStep()"
+            class="px-4 py-2 text-slate-600 hover:text-slate-800 font-medium"
+            x-show="checkoutStep !== 'payment'"
+          >
+            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            <span x-text="checkoutStep === 'review' ? 'Cancel' : 'Back'"></span>
+          </button>
+          
+          <div class="flex items-center space-x-3">
+            <button 
+              x-show="checkoutStep === 'review'"
+              @click="nextCheckoutStep()"
+              class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium"
             >
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Note (Optional)</label>
-            <textarea 
-              x-model="quoteNote"
-              rows="3"
-              class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="Add any special requirements or questions..."
-            ></textarea>
-          </div>
-          
-          <div class="bg-slate-50 rounded-lg p-3">
-            <div class="text-sm text-slate-600 mb-1">Quote Summary:</div>
-            <div class="font-semibold" x-text="cartServices.length + ' services, ' + cartAddons.length + ' add-ons'"></div>
-            <div class="font-bold text-lg" x-text="fmtUSD(total) + (plan === 'monthly' ? '/month' : '')"></div>
-          </div>
-          
-          <div class="flex gap-3 pt-2">
-            <button @click="closeQuote()" class="flex-1 bg-slate-100 text-slate-700 px-4 py-2 rounded-lg hover:bg-slate-200">Cancel</button>
-            <button @click="sendQuote()" class="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">Send Quote</button>
+              Continue to Contact
+            </button>
+            
+            <button 
+              x-show="checkoutStep === 'contact'"
+              @click="proceedToCheckout()"
+              class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium"
+              :disabled="!contact.name || !contact.email || !contact.phone || !agreedToTerms"
+              :class="(!contact.name || !contact.email || !contact.phone || !agreedToTerms) ? 'opacity-50 cursor-not-allowed' : ''"
+            >
+              Proceed to Payment
+            </button>
           </div>
         </div>
       </div>
