@@ -75,13 +75,13 @@
   </main>
 
   <!-- Cart Sidebar -->
-  <div class="fixed top-0 right-0 w-80 max-w-full h-full bg-gray-900/95 backdrop-blur-lg shadow-xl z-50 transform transition-transform duration-300"
+  <div class="fixed top-0 right-0 w-80 max-w-full h-full bg-gray-900/95 backdrop-blur-lg shadow-xl z-50 transform transition-transform duration-300 flex flex-col"
        :class="cartOpen ? 'translate-x-0' : 'translate-x-full'">
     <div class="p-4 border-b border-white/20 flex justify-between items-center">
       <h2 class="text-lg font-bold">Your Cart</h2>
       <button @click="cartOpen = false" class="text-gray-400 text-2xl leading-none hover:text-gray-200">&times;</button>
     </div>
-    <div class="p-4 overflow-y-auto h-[calc(100%-7rem)]">
+    <div class="flex-1 p-4 overflow-y-auto">
       <div x-show="cartServices.length === 0" class="text-gray-400 text-sm">Your cart is empty.</div>
       <template x-for="svcKey in cartServices" :key="svcKey">
         <div class="flex justify-between items-center mb-3 border-b border-white/20 pb-2">
