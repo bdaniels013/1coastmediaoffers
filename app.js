@@ -51,15 +51,21 @@ function landingApp(){
     // Enhanced cart state
     cartServices: [],
     cartAddons: [],
-    cartBundles: [], // New: Bundle support
+    cartBundles: [],
     
     // Modal states
     builderOpen: false,
     addonsOpen: false,
     quoteOpen: false,
     dependencyModalOpen: false,
-    bundleModalOpen: false, // New: Bundle modal
-    checkoutModalOpen: false, // New: Checkout modal
+    bundleModalOpen: false,
+    checkoutModalOpen: false,
+
+    // ADD MISSING VARIABLES HERE:
+    bundlesOpen: false,
+    bundleQuery: '',
+    dependencyReason: '',
+    missingDependencies: [],
     
     // Enhanced contact form with validation
     contact: { 
@@ -206,6 +212,17 @@ function landingApp(){
                addon.description.toLowerCase().includes(query) ||
                addon.tags?.some(tag => tag.toLowerCase().includes(query));
       });
+    },
+
+    get visibleBundles() {
+      if (!this.bundleQuery.trim()) {
+        return this.bundles;
+      }
+      const query = this.bundleQuery.toLowerCase();
+      return this.bundles.filter(bundle => 
+        bundle.name.toLowerCase().includes(query) ||
+        bundle.description.toLowerCase().includes(query)
+      );
     },
     
     get cartItemCount() {
@@ -502,6 +519,12 @@ function landingApp(){
 
     /* ---------- Enhanced Modal Management ---------- */
     openBuilder() {
+      // If cart has items, this should be checkout, not builder
+      if (!this.isCartEmpty) {
+        this.openCheckoutModal();
+        return;
+      }
+      // Otherwise, open the builder as normal
       this.builderOpen = true;
       document.body.classList.add('no-scroll');
     },
