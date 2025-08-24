@@ -120,7 +120,16 @@
         <span>Total</span>
         <span x-text="fmtUSD(cartTotal())"></span>
       </div>
-      <button @click="checkout()" class="w-full py-2 rounded-lg text-center bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 text-white font-medium">Checkout</button>
+      <button
+        @click="checkout()"
+        :disabled="cartServices.length === 0 && cartAddons.length === 0"
+        class="w-full py-2 rounded-lg text-center font-medium transition"
+        :class="(cartServices.length === 0 && cartAddons.length === 0)
+          ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+          : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 text-white'"
+      >
+        Checkout
+      </button>
     </div>
   </div>
 
