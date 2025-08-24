@@ -32,18 +32,63 @@
   <meta name="twitter:description" content="Premium Web & App, Video/Audio, Events, and UGC services. Transparent pricing. Fast turnarounds." />
   <meta name="twitter:image" content="https://1coastmedia.com/assets/1coastmedia_wordmark_horizontal_3000.jpg" />
 
-  <!-- Where to POST -->
+  <!-- API endpoints -->
   <meta name="checkout-endpoint" content="/api/checkout" />
-
-  <!-- Stripe publishable key (client fallback) -->
   <meta name="stripe-publishable-key" content="pk_live_51O4Qh0KoF1Q8iKteAbGsSkEj65fg0tSGOG6dcJCcLyvz0PHC5y8jEAkMDfDFfCTdEeRyPcOtZ7O13MBNZkDhBMR900NqzTN4LN" />
 
-  <!-- Tailwind (CDN) -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config = { theme:{ extend:{} } };</script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
 
-  <script defer src="/data/services.js"></script>
-  <script defer src="/app.js"></script>
+  <!-- Custom Styles -->
+  <style>
+    [x-cloak] { display: none !important; }
+    
+    .mesh {
+      background-image: 
+        radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+    }
+    
+    .halo {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1));
+      border-radius: 1.5rem;
+    }
+    
+    .card {
+      @apply bg-white rounded-xl ring-1 ring-slate-200 shadow-sm;
+    }
+    
+    .btn {
+      @apply inline-flex items-center justify-center font-semibold transition-all duration-200;
+    }
+    
+    .btn-primary {
+      @apply bg-slate-900 text-white hover:bg-slate-800 shadow-sm hover:shadow-lg;
+    }
+    
+    .f-ring {
+      @apply focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 rounded-lg;
+    }
+    
+    .tap {
+      @apply active:scale-95 transition-transform;
+    }
+  </style>
+
+  <!-- Load data and app scripts BEFORE Alpine.js -->
+  <script src="/data/services.js"></script>
+  <script src="/app.js"></script>
 
   <!-- Alpine.js Collapse Plugin -->
   <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
@@ -51,29 +96,13 @@
   <!-- Alpine.js -->
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-  <!-- Stripe.js (for sessionId fallback) -->
+  <!-- External libraries -->
   <script src="https://js.stripe.com/v3/"></script>
-
-  <!-- PDF & DOCX generators -->
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script defer src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
-
-  <!-- Custom Styles -->
-  <link rel="stylesheet" href="/styles/main.css">
-  
-  <!-- Add this CSS rule for x-cloak -->
-  <style>
-    [x-cloak] { display: none !important; }
-  </style>
-
-  <!-- Service Data -->
-  <script src="/data/services.js"></script>
-
-  <!-- Main App Logic -->
-  <script src="/app.js"></script>
 </head>
 
-<body class="mesh text-slate-800" x-data="landingApp()" x-init="init()">
+<body class="mesh text-slate-800" x-data="landingApp()" x-init="init()" x-cloak>
   <!-- NAV -->
   <header class="sticky top-0 z-50 backdrop-blur bg-white/80 border-b border-slate-200/70">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -95,9 +124,9 @@
         <button @click="openAddons('web')" class="hover:text-slate-900 text-slate-600 f-ring">Explore Add-Ons</button>
         <a href="#faq" class="hover:text-slate-900 text-slate-600 f-ring">FAQ</a>
         <a href="#contact" class="hover:text-slate-900 text-slate-600 f-ring">Contact</a>
-        <button @click="openBuilder()" class="tap btn inline-flex items-center gap-2 rounded-xl bg-slate-900 text-white px-3 py-2 font-semibold shadow-sm hover:shadow-lg">Build Your Package</button>
+        <button @click="openCheckoutModal()" class="tap btn btn-primary rounded-xl px-3 py-2">Build Your Package</button>
       </nav>
-      <button @click="openBuilder()" class="md:hidden inline-flex items-center justify-center h-10 px-3 rounded-lg bg-slate-900 text-white text-sm font-semibold">Build</button>
+      <button @click="openCheckoutModal()" class="md:hidden btn btn-primary rounded-lg px-3 py-2 text-sm">Build</button>
     </div>
   </header>
 
@@ -108,8 +137,8 @@
         <h1 class="text-5xl font-black leading-tight tracking-tight">Gulf Coast Growth, <span class="bg-gradient-to-r from-slate-900 via-blue-600 to-indigo-500 bg-clip-text text-transparent">On Demand</span></h1>
         <p class="mt-4 text-slate-600 max-w-prose">Pick a base service, stack add-ons, or build from scratch. One-time for quick wins, monthly for momentum.</p>
         <div class="mt-8 flex flex-wrap items-center gap-3">
-          <a href="#services" class="tap btn inline-flex items-center gap-2 rounded-xl bg-slate-900 text-white px-5 py-3 font-semibold shadow-sm hover:shadow-lg">See Base Services</a>
-          <button @click="openAddons('web')" class="tap btn inline-flex items-center gap-2 rounded-xl ring-1 ring-slate-200 bg-white px-5 py-3 font-semibold hover:bg-slate-50">Explore Add-Ons</button>
+          <a href="#services" class="tap btn btn-primary rounded-xl px-5 py-3">See Base Services</a>
+          <button @click="openAddons('web')" class="tap btn ring-1 ring-slate-200 bg-white px-5 py-3 hover:bg-slate-50 rounded-xl">Explore Add-Ons</button>
         </div>
         <div class="mt-6 text-xs text-slate-500">Email <a class="underline" href="mailto:1coastmedia@gmail.com">1coastmedia@gmail.com</a> • Free 30-min call <a class="underline" href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noreferrer">here</a>.</div>
       </div>
@@ -124,22 +153,6 @@
             <p class="mt-4 text-sm text-slate-600">Built for creators, real estate, tourism & local brands.</p>
           </div>
         </div>
-      </div>
-    </div>
-
-    <img
-      src="/assets/1coastmedia_wordmark_horizontal_3000.jpg"
-      alt="1CoastMedia wordmark"
-      class="mt-6 max-w-full sm:max-w-xl rounded-xl ring-1 ring-slate-200 shadow-sm"
-      width="3000" height="512"
-    />
-
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-6">
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 opacity-80">
-        <div class="card p-3 text-center text-xs">Tourism & Events</div>
-        <div class="card p-3 text-center text-xs">Real Estate</div>
-        <div class="card p-3 text-center text-xs">Local Brands</div>
-        <div class="card p-3 text-center text-xs">Creators</div>
       </div>
     </div>
   </section>
@@ -157,7 +170,7 @@
     </div>
   </section>
 
-  <!-- SERVICES SECTION WITH TABS -->
+  <!-- SERVICES SECTION -->
   <section id="services" class="py-10">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-8">
@@ -252,7 +265,7 @@
         </template>
       </div>
 
-      <!-- Enhanced Bundles Section -->
+      <!-- Bundles Section -->
       <div class="mt-12">
         <div class="text-center mb-8">
           <h3 class="text-3xl font-bold bg-gradient-to-r from-purple-600 via-cyan-500 to-emerald-500 bg-clip-text text-transparent mb-2">Value Bundles</h3>
@@ -261,28 +274,23 @@
         <div class="grid md:grid-cols-3 gap-6">
           <template x-for="bundle in bundles" :key="bundle.key">
             <div class="relative group">
-              <!-- Bundle Card -->
               <div class="card p-6 text-center h-full flex flex-col justify-between transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1"
                    :class="cartBundles.includes(bundle.key) ? 'ring-2 ring-emerald-500 bg-emerald-50' : ''">
                 
-                <!-- Bundle Header -->
                 <div>
                   <h4 class="font-bold text-xl mb-3 text-slate-900" x-text="bundle.name"></h4>
                   <p class="text-sm text-slate-600 mb-4" x-text="bundle.description"></p>
                   
-                  <!-- Savings Badge -->
                   <div x-show="bundle.savings" class="inline-block bg-gradient-to-r from-emerald-500 to-cyan-500 text-white text-xs font-bold px-3 py-1 rounded-full mb-4">
                     <span x-text="bundle.savings"></span>
                   </div>
                   
-                  <!-- Includes List -->
                   <div class="bg-slate-50 rounded-lg p-3 mb-4">
                     <div class="text-xs font-medium text-slate-700 mb-2">INCLUDES:</div>
                     <div class="text-sm text-slate-600 leading-relaxed" x-text="bundle.includes.join(' • ')"></div>
                   </div>
                 </div>
                 
-                <!-- Pricing -->
                 <div class="mb-4">
                   <div class="text-2xl font-bold text-slate-900 mb-1">
                     <span x-show="bundle.price.oneTime" x-text="fmtUSD(bundle.price.oneTime)"></span>
@@ -295,7 +303,6 @@
                   <div x-show="bundle.note" class="text-xs text-slate-500 mt-1" x-text="bundle.note"></div>
                 </div>
                 
-                <!-- Action Button -->
                 <button @click="toggleBundle(bundle.key)" 
                         class="w-full px-4 py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105"
                         :class="cartBundles.includes(bundle.key) ? 
@@ -305,7 +312,6 @@
                 </button>
               </div>
               
-              <!-- Selected Indicator -->
               <div x-show="cartBundles.includes(bundle.key)" 
                    class="absolute -top-2 -right-2 bg-emerald-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
                 ✓
@@ -313,24 +319,12 @@
             </div>
           </template>
         </div>
-        
-        <!-- Bundle Summary -->
-        <div x-show="cartBundles.length > 0" class="mt-8 text-center">
-          <div class="inline-block bg-white rounded-xl shadow-lg ring-1 ring-slate-200 p-4">
-            <div class="text-sm text-slate-600 mb-2">
-              <span class="font-semibold" x-text="cartBundles.length"></span> bundle<span x-show="cartBundles.length !== 1">s</span> selected
-            </div>
-            <button @click="openBuilder()" class="btn-primary px-6 py-2 text-sm">
-              Review Selection
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   </section>
 
-  <!-- Sticky Summary -->
-  <div x-show="cartServices.length > 0" class="fixed bottom-4 right-4 bg-white rounded-xl shadow-lg ring-1 ring-slate-200 p-4 max-w-sm">
+  <!-- Sticky Cart Summary -->
+  <div x-show="cartServices.length > 0 || cartBundles.length > 0" class="fixed bottom-4 right-4 bg-white rounded-xl shadow-lg ring-1 ring-slate-200 p-4 max-w-sm z-40">
     <div class="flex items-center justify-between mb-2">
       <span class="font-semibold">Cart Summary</span>
       <button @click="clearAll()" class="text-xs text-slate-500 hover:text-slate-700">Clear</button>
@@ -344,348 +338,52 @@
         <span>Monthly:</span>
         <span x-text="fmtUSD(getMonthlyTotal())"></span>
       </div>
-      <div x-show="getMinTermsInfo() && plan === 'monthly'" class="flex justify-between text-xs text-slate-500 mt-1 pt-1 border-t border-slate-100">
-        <span>Min commitment:</span>
-        <span x-text="getMinTermsInfo()"></span>
-      </div>
     </div>
-    <button @click="openBuilder()" class="w-full btn bg-slate-900 text-white rounded-lg px-4 py-2 font-semibold text-sm">Review & Checkout</button>
-  </div>
-
-  <!-- Summary bar -->
-  <section class="py-6">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="rounded-2xl bg-white ring-1 ring-slate-200 p-4 flex items-center justify-between gap-3">
-        <div class="text-sm text-slate-600">Selected: <strong x-text="cartServices.length"></strong> base • <strong x-text="cartAddons.length"></strong> add-ons</div>
-        <div class="text-sm text-slate-600">Est. total: <strong x-text="fmtUSD(total)"></strong><span class="text-slate-500" x-show="plan==='monthly'">/mo</span></div>
-        <div class="flex gap-2 flex-wrap justify-end">
-          <button @click="openAddons(activeService)" class="tap rounded-xl ring-1 ring-slate-200 bg-white px-4 py-2 text-sm font-semibold f-ring">Add-Ons</button>
-          <button @click="downloadQuoteFile()" class="rounded-xl ring-1 ring-slate-200 bg-white text-slate-700 px-4 py-2 text-sm f-ring">Save Quote</button>
-          <button @click="openQuote()" class="rounded-xl ring-1 ring-slate-200 bg-white text-slate-700 px-4 py-2 text-sm f-ring">Email Quote</button>
-          <button @click="clearAll()" class="tap rounded-xl ring-1 ring-rose-200 bg-white text-rose-700 px-4 py-2 text-sm font-semibold f-ring hover:bg-rose-50" title="Remove all selected base services and add-ons">Clear Cart</button>
-          <button @click="openBuilder()" class="tap rounded-xl bg-indigo-600 text-white px-4 py-2 text-sm font-semibold f-ring hover:bg-indigo-700">Review & Checkout</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- DEPENDENCY MODAL -->
-  <div x-show="dependencyModalOpen" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
-    <div class="flex min-h-full items-center justify-center p-4">
-      <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" @click="dependencyModalOpen = false"></div>
-      <div class="relative bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-bold text-slate-900">Dependencies Required</h3>
-          <button @click="dependencyModalOpen = false" class="text-slate-400 hover:text-slate-600">
-            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        
-        <div class="mb-4">
-          <p class="text-sm text-slate-600 mb-3" x-text="dependencyReason"></p>
-          
-          <div class="bg-slate-50 rounded-lg p-3 mb-4">
-            <div class="text-xs font-medium text-slate-700 mb-2">Missing Dependencies:</div>
-            <ul class="space-y-1">
-              <template x-for="dep in missingDependencies" :key="dep.key">
-                <li class="flex items-center justify-between text-sm">
-                  <span x-text="dep.name"></span>
-                  <span class="font-medium" x-text="fmtUSD(dep.price[plan] || 0)"></span>
-                </li>
-              </template>
-            </ul>
-          </div>
-          
-          <div class="text-sm text-slate-600">
-            <div class="flex justify-between">
-              <span>Additional cost:</span>
-              <span class="font-medium" x-text="fmtUSD(missingDependencies.reduce((sum, dep) => sum + (dep.price[plan] || 0), 0))"></span>
-            </div>
-          </div>
-        </div>
-        
-        <div class="flex gap-3">
-          <button @click="addServiceWithDependencies()" class="flex-1 bg-slate-900 text-white rounded-xl px-4 py-2 font-semibold hover:bg-slate-800">
-            Add All
-          </button>
-          <button @click="addServiceWithoutDependencies()" class="flex-1 bg-white border border-slate-200 text-slate-700 rounded-xl px-4 py-2 font-semibold hover:bg-slate-50">
-            Add Without Dependencies
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- BUNDLES MODAL -->
-  <div x-show="bundlesOpen" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
-    <div class="flex min-h-full items-end sm:items-center justify-center p-4">
-      <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" @click="closeBundles()"></div>
-      <div class="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-5xl modal-shell overflow-hidden">
-        <!-- Header -->
-        <div class="sticky top-0 bg-white border-b border-slate-200 px-6 py-4">
-          <div class="flex items-center justify-between">
-            <h2 class="text-xl font-bold">Service Bundles</h2>
-            <button @click="closeBundles()" class="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-            </button>
-          </div>
-          
-          <!-- Search -->
-          <div class="mt-4">
-            <input 
-              type="text" 
-              x-model="bundleQuery"
-              placeholder="Search bundles..."
-              class="w-full form-input"
-            >
-          </div>
-        </div>
-        
-        <!-- Content -->
-        <div class="p-6 max-h-96 overflow-y-auto">
-          <div class="grid gap-6 md:grid-cols-2">
-            <template x-for="bundle in visibleBundles" :key="bundle.key">
-              <div class="card service-card p-6 hover:shadow-xl transition-all duration-300">
-                <div class="flex items-start justify-between mb-4">
-                  <div class="flex-1">
-                    <h3 class="text-xl font-bold mb-2" x-text="bundle.name"></h3>
-                    <p class="text-slate-600 mb-3" x-text="bundle.description"></p>
-                    
-                    <!-- Includes -->
-                    <div class="mb-4">
-                      <h4 class="font-semibold text-sm text-slate-700 mb-2">Includes:</h4>
-                      <ul class="text-sm text-slate-600 space-y-1">
-                        <template x-for="item in bundle.includes" :key="item">
-                          <li class="flex items-center">
-                            <svg class="w-4 h-4 text-emerald-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                            </svg>
-                            <span x-text="item"></span>
-                          </li>
-                        </template>
-                      </ul>
-                    </div>
-                    
-                    <!-- Savings -->
-                    <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3 mb-4" x-show="bundle.savings">
-                      <p class="text-emerald-700 font-semibold text-sm" x-text="bundle.savings"></p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Pricing and Action -->
-              <div class="flex items-center justify-between">
-                <div>
-                  <div class="price-display" x-text="fmtUSD(bundle.price[plan])"></div>
-                  <span class="text-sm text-slate-500" x-show="plan === 'monthly'">/month</span>
-                  <span class="text-sm text-slate-500" x-show="bundle.billing" x-text="bundle.billing"></span>
-                </div>
-                <button 
-                  @click="toggleBundle(bundle.key)"
-                  class="btn transition-all duration-300"
-                  :class="cartBundles.includes(bundle.key) ? 'btn-secondary' : 'btn-primary'"
-                >
-                  <span x-text="cartBundles.includes(bundle.key) ? 'Remove' : 'Add Bundle'"></span>
-                </button>
-              </div>
-            </div>
-          </template>
-        </div>
-      </div>
-      
-      <!-- Footer -->
-      <div class="sticky bottom-0 bg-white border-t border-slate-200 px-6 py-4">
-        <div class="flex justify-between items-center">
-          <span class="text-slate-600">Selected: <strong x-text="cartBundles.length"></strong> bundles</span>
-          <button @click="closeBundles()" class="btn-primary">Done</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- CHECKOUT MODAL - EMERGENCY SIMPLE VERSION -->
-  <div id="emergencyCheckoutModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999; background: rgba(0,0,0,0.5);">
-    <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;">
-      <div style="background: white; border-radius: 12px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px rgba(0,0,0,0.25);">
-        
-        <!-- Header -->
-        <div style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; padding: 24px; border-radius: 12px 12px 0 0;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="margin: 0; font-size: 24px; font-weight: bold;">Checkout</h2>
-            <button onclick="closeEmergencyModal()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 18px;">✕</button>
-          </div>
-        </div>
-        
-        <!-- Content -->
-        <div style="padding: 24px;">
-          <h3 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 600;">Your Order</h3>
-          
-          <div id="emergencyCartItems" style="margin-bottom: 24px;">
-            <!-- Cart items will be populated here -->
-          </div>
-          
-          <div style="border-top: 1px solid #e2e8f0; padding-top: 16px; margin-bottom: 24px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-weight: 600; font-size: 18px;">Total:</span>
-              <span id="emergencyTotal" style="font-weight: bold; font-size: 20px; color: #4f46e5;">$0</span>
-            </div>
-          </div>
-          
-          <!-- Contact Form -->
-          <div style="margin-bottom: 24px;">
-            <h4 style="margin: 0 0 16px 0; font-size: 16px; font-weight: 600;">Contact Information</h4>
-            
-            <div style="display: grid; gap: 16px;">
-              <div>
-                <label for="emergencyName" style="display: block; margin-bottom: 4px; font-weight: 500;">Name *</label>
-                <input id="emergencyName" name="emergencyName" type="text" placeholder="Your Name" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 16px;" required autocomplete="name">
-              </div>
-              
-              <div>
-                <label for="emergencyEmail" style="display: block; margin-bottom: 4px; font-weight: 500;">Email *</label>
-                <input id="emergencyEmail" name="emergencyEmail" type="email" placeholder="your@email.com" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 16px;" required autocomplete="email">
-              </div>
-              
-              <div>
-                <label for="emergencyPhone" style="display: block; margin-bottom: 4px; font-weight: 500;">Phone *</label>
-                <input id="emergencyPhone" name="emergencyPhone" type="tel" placeholder="(555) 123-4567" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 16px;" required autocomplete="tel">
-              </div>
-              
-              <div>
-                <label for="emergencyCompany" style="display: block; margin-bottom: 4px; font-weight: 500;">Company</label>
-                <input id="emergencyCompany" name="emergencyCompany" type="text" placeholder="Your Company (Optional)" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 16px;" autocomplete="organization">
-              </div>
-              
-              <div>
-                <label for="emergencyNotes" style="display: block; margin-bottom: 4px; font-weight: 500;">Project Notes</label>
-                <textarea id="emergencyNotes" name="emergencyNotes" placeholder="Tell us about your project..." style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 16px; min-height: 80px; resize: vertical;"></textarea>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Terms -->
-          <div style="margin-bottom: 24px; padding: 16px; background: #f8fafc; border-radius: 8px;">
-            <label for="emergencyTerms" style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer;">
-              <input id="emergencyTerms" name="emergencyTerms" type="checkbox" style="margin-top: 2px;" required>
-              <span style="font-size: 14px; color: #374151;">I agree to the Terms of Service and Privacy Policy. I understand monthly services require a 3-month minimum commitment.</span>
-            </label>
-          </div>
-          
-          <!-- Actions -->
-          <div style="display: flex; gap: 12px; justify-content: flex-end;">
-            <button onclick="closeEmergencyModal()" style="padding: 12px 24px; background: #f1f5f9; color: #64748b; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">Cancel</button>
-            <button onclick="submitEmergencyOrder()" style="padding: 12px 24px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">Submit Order</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <button @click="openCheckoutModal()" class="w-full btn btn-primary rounded-lg px-4 py-2 text-sm">Review & Checkout</button>
   </div>
 
   <!-- FAQ SECTION -->
-  <section id="faq" class="py-16">
-    <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+  <section id="faq" class="py-16 bg-slate-50">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-12">
         <h2 class="text-3xl font-extrabold tracking-tight">Frequently Asked Questions</h2>
-        <p class="mt-2 text-slate-600">Everything you need to know about working with 1CoastMedia.</p>
+        <p class="mt-2 text-slate-600">Everything you need to know about working with 1CoastMedia</p>
       </div>
       
-      <div x-data="{ openFaq: null }" class="space-y-4">
-        <!-- Contract Terms -->
-        <div class="card overflow-hidden">
-          <button @click="openFaq = openFaq === 'contracts' ? null : 'contracts'" class="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-slate-50">
-            <span class="font-semibold">How do contracts and commitments work?</span>
-            <svg class="w-5 h-5 transform transition-transform" :class="openFaq === 'contracts' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </button>
-          <div x-show="openFaq === 'contracts'" x-collapse class="px-6 pb-4 text-slate-600">
-            <p>Monthly services require a 3-month minimum commitment to ensure quality results. One-time services have no ongoing commitment. You can pause or cancel monthly services with 30 days notice after the minimum term.</p>
-          </div>
+      <div class="space-y-6">
+        <div class="card p-6">
+          <h3 class="font-semibold text-lg mb-2">How fast can you deliver?</h3>
+          <p class="text-slate-600">Most projects are completed within 3-7 days. Rush delivery available for urgent needs.</p>
         </div>
-
-        <!-- Pauses -->
-        <div class="card overflow-hidden">
-          <button @click="openFaq = openFaq === 'pauses' ? null : 'pauses'" class="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-slate-50">
-            <span class="font-semibold">Can I pause my monthly services?</span>
-            <svg class="w-5 h-5 transform transition-transform" :class="openFaq === 'pauses' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </button>
-          <div x-show="openFaq === 'pauses'" x-collapse class="px-6 pb-4 text-slate-600">
-            <p>Yes! After your minimum 3-month commitment, you can pause monthly services for up to 2 months per year. Just give us 30 days notice. Perfect for seasonal businesses or temporary budget adjustments.</p>
-          </div>
+        
+        <div class="card p-6">
+          <h3 class="font-semibold text-lg mb-2">What's included in the pricing?</h3>
+          <p class="text-slate-600">All pricing is transparent and includes everything listed in the deliverables. No hidden fees or surprise charges.</p>
         </div>
-
-        <!-- Revisions -->
-        <div class="card overflow-hidden">
-          <button @click="openFaq = openFaq === 'revisions' ? null : 'revisions'" class="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-slate-50">
-            <span class="font-semibold">How do revisions and changes work?</span>
-            <svg class="w-5 h-5 transform transition-transform" :class="openFaq === 'revisions' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </button>
-          <div x-show="openFaq === 'revisions'" x-collapse class="px-6 pb-4 text-slate-600">
-            <p>Each deliverable includes 2 rounds of revisions. Additional changes are billed at $75/hour. We'll always discuss scope changes before proceeding to avoid surprises.</p>
-          </div>
+        
+        <div class="card p-6">
+          <h3 class="font-semibold text-lg mb-2">Do you offer revisions?</h3>
+          <p class="text-slate-600">Yes! We include reasonable revisions to ensure you're completely satisfied with the final deliverable.</p>
         </div>
-
-        <!-- Ownership -->
-        <div class="card overflow-hidden">
-          <button @click="openFaq = openFaq === 'ownership' ? null : 'ownership'" class="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-slate-50">
-            <span class="font-semibold">Who owns the work and intellectual property?</span>
-            <svg class="w-5 h-5 transform transition-transform" :class="openFaq === 'ownership' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </button>
-          <div x-show="openFaq === 'ownership'" x-collapse class="px-6 pb-4 text-slate-600">
-            <p>You own everything we create for you - designs, code, content, and all intellectual property. We provide full source files and documentation. No vendor lock-in, ever.</p>
-          </div>
-        </div>
-
-        <!-- Delivery Speeds -->
-        <div class="card overflow-hidden">
-          <button @click="openFaq = openFaq === 'delivery' ? null : 'delivery'" class="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-slate-50">
-            <span class="font-semibold">How fast can you deliver projects?</span>
-            <svg class="w-5 h-5 transform transition-transform" :class="openFaq === 'delivery' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </button>
-          <div x-show="openFaq === 'delivery'" x-collapse class="px-6 pb-4 text-slate-600">
-            <p>Delivery times vary by service: Landing pages (3-5 days), Websites (1-2 weeks), Apps (2-4 weeks). Monthly services deliver ongoing work within 5-7 business days per task. Rush delivery available for 50% surcharge.</p>
-          </div>
+        
+        <div class="card p-6">
+          <h3 class="font-semibold text-lg mb-2">Can I cancel my monthly service?</h3>
+          <p class="text-slate-600">Monthly services can be cancelled anytime after the minimum term commitment is met.</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- CONTACT SECTION -->
-  <section id="contact" class="py-16 bg-slate-50">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl font-extrabold tracking-tight">Ready to Get Started?</h2>
-        <p class="mt-2 text-slate-600">Let's discuss your project and build something amazing together.</p>
-      </div>
+  <section id="contact" class="py-16">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-extrabold tracking-tight mb-4">Ready to Get Started?</h2>
+      <p class="text-slate-600 mb-8">Let's discuss your project and find the perfect solution for your needs.</p>
       
-      <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-        <div class="card p-6">
-          <h3 class="font-bold text-lg mb-4">Quick Start</h3>
-          <p class="text-slate-600 mb-4">Ready to jump in? Build your package and get started immediately.</p>
-          <button @click="openBuilder()" class="w-full btn bg-slate-900 text-white rounded-xl px-4 py-3 font-semibold">Build Your Package</button>
-        </div>
-        
-        <div class="card p-6">
-          <h3 class="font-bold text-lg mb-4">Let's Talk</h3>
-          <p class="text-slate-600 mb-4">Have questions? Want to discuss a custom project? Let's connect.</p>
-          <div class="space-y-2">
-            <a href="mailto:1coastmedia@gmail.com" class="block text-sm text-slate-600 hover:text-slate-900">📧 1coastmedia@gmail.com</a>
-            <a href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noreferrer" class="block text-sm text-slate-600 hover:text-slate-900">📅 Schedule a free 30-min call</a>
-          </div>
-        </div>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="mailto:1coastmedia@gmail.com" class="btn btn-primary rounded-xl px-6 py-3">Email Us</a>
+        <a href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noreferrer" class="btn ring-1 ring-slate-200 bg-white px-6 py-3 hover:bg-slate-50 rounded-xl">Schedule Call</a>
+        <button @click="openCheckoutModal()" class="btn bg-emerald-600 text-white hover:bg-emerald-700 rounded-xl px-6 py-3">Build Package</button>
       </div>
     </div>
   </section>
@@ -693,23 +391,24 @@
   <!-- FOOTER -->
   <footer class="bg-slate-900 text-white py-12">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="grid md:grid-cols-4 gap-8">
-        <div class="md:col-span-2">
-          <div class="inline-flex items-center gap-2 mb-4">
-            <span class="inline-grid place-items-center h-8 w-8 rounded-lg bg-white overflow-hidden">
+      <div class="grid md:grid-cols-3 gap-8">
+        <div>
+          <div class="flex items-center gap-2 mb-4">
+            <span class="inline-grid place-items-center h-8 w-8 rounded-lg bg-white/10 overflow-hidden">
               <img src="/assets/1coastmedia_logo_A_primary_mark_2048.jpg" alt="1CoastMedia logo" class="h-8 w-8 object-cover" />
             </span>
-            <span class="font-extrabold tracking-tight">1CoastMedia</span>
+            <span class="font-bold">1CoastMedia</span>
           </div>
-          <p class="text-slate-400 max-w-md">Gulf Coast digital services for creators, real estate, tourism, and local brands. Transparent pricing, fast turnarounds, measurable results.</p>
+          <p class="text-slate-400 text-sm">Gulf Coast digital services for creators, real estate, tourism & local brands.</p>
         </div>
         
         <div>
           <h4 class="font-semibold mb-4">Services</h4>
           <ul class="space-y-2 text-sm text-slate-400">
-            <li><a href="#services" class="hover:text-white">Base Services</a></li>
-            <li><button @click="openAddons('web')" class="hover:text-white">Add-Ons</button></li>
-            <li><a href="#faq" class="hover:text-white">FAQ</a></li>
+            <li><a href="#services" class="hover:text-white">Web & App Development</a></li>
+            <li><a href="#services" class="hover:text-white">Video & Audio Production</a></li>
+            <li><a href="#services" class="hover:text-white">Event Management</a></li>
+            <li><a href="#services" class="hover:text-white">UGC & Content Creation</a></li>
           </ul>
         </div>
         
@@ -717,7 +416,7 @@
           <h4 class="font-semibold mb-4">Contact</h4>
           <ul class="space-y-2 text-sm text-slate-400">
             <li><a href="mailto:1coastmedia@gmail.com" class="hover:text-white">1coastmedia@gmail.com</a></li>
-            <li><a href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noreferrer" class="hover:text-white">Schedule Call</a></li>
+            <li><a href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noreferrer" class="hover:text-white">Schedule a Call</a></li>
           </ul>
         </div>
       </div>
@@ -727,231 +426,200 @@
       </div>
     </div>
   </footer>
-</body>
-</html>
 
-<style>
-  .checkout-total-period {
-    font-size: 0.875rem;
-    color: #64748b;
-  }
+  <!-- CHECKOUT MODAL -->
+  <div x-show="checkoutModalOpen" 
+       x-transition:enter="transition ease-out duration-300"
+       x-transition:enter-start="opacity-0"
+       x-transition:enter-end="opacity-100"
+       x-transition:leave="transition ease-in duration-200"
+       x-transition:leave-start="opacity-100"
+       x-transition:leave-end="opacity-0"
+       class="fixed inset-0 z-50 overflow-y-auto"
+       @click.self="closeCheckoutModal()">
+    
+    <div class="flex min-h-full items-center justify-center p-4">
+      <div class="bg-white rounded-2xl shadow-2xl ring-1 ring-slate-200 w-full max-w-4xl max-h-[90vh] overflow-hidden"
+           @click.stop>
+        
+        <!-- Modal Header -->
+        <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xl font-bold text-slate-900">Your Package</h2>
+            <button @click="closeCheckoutModal()" class="text-slate-400 hover:text-slate-600">
+              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Modal Content -->
+        <div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+          
+          <!-- Cart Items -->
+          <div class="mb-8">
+            <h3 class="font-semibold text-lg mb-4">Selected Services</h3>
+            
+            <!-- Services -->
+            <div x-show="cartServices.length > 0" class="space-y-3 mb-6">
+              <template x-for="serviceKey in cartServices" :key="serviceKey">
+                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                  <div class="flex-1">
+                    <div class="font-medium" x-text="getServiceByKey(serviceKey)?.name"></div>
+                    <div class="text-sm text-slate-600" x-text="getServiceByKey(serviceKey)?.outcome"></div>
+                  </div>
+                  <div class="text-right">
+                    <div class="font-semibold" x-text="fmtUSD(getServiceByKey(serviceKey)?.price[plan])"></div>
+                    <button @click="toggleService(serviceKey)" class="text-xs text-red-600 hover:text-red-800">Remove</button>
+                  </div>
+                </div>
+              </template>
+            </div>
+            
+            <!-- Bundles -->
+            <div x-show="cartBundles.length > 0" class="space-y-3 mb-6">
+              <template x-for="bundleKey in cartBundles" :key="bundleKey">
+                <div class="flex items-center justify-between p-4 bg-emerald-50 rounded-lg">
+                  <div class="flex-1">
+                    <div class="font-medium" x-text="getBundleByKey(bundleKey)?.name"></div>
+                    <div class="text-sm text-slate-600" x-text="getBundleByKey(bundleKey)?.description"></div>
+                  </div>
+                  <div class="text-right">
+                    <div class="font-semibold">
+                      <span x-show="getBundleByKey(bundleKey)?.price.oneTime" x-text="fmtUSD(getBundleByKey(bundleKey)?.price.oneTime)"></span>
+                      <span x-show="getBundleByKey(bundleKey)?.price.monthly" class="text-sm text-slate-600">
+                        <span x-show="getBundleByKey(bundleKey)?.price.oneTime"> + </span>
+                        <span x-text="fmtUSD(getBundleByKey(bundleKey)?.price.monthly) + '/mo'"></span>
+                      </span>
+                    </div>
+                    <button @click="toggleBundle(bundleKey)" class="text-xs text-red-600 hover:text-red-800">Remove</button>
+                  </div>
+                </div>
+              </template>
+            </div>
+            
+            <!-- Empty State -->
+            <div x-show="cartServices.length === 0 && cartBundles.length === 0" class="text-center py-8 text-slate-500">
+              <p>No services selected yet.</p>
+              <button @click="closeCheckoutModal()" class="mt-2 text-slate-600 hover:text-slate-800 underline">Browse services</button>
+            </div>
+          </div>
+          
+          <!-- Totals -->
+          <div x-show="cartServices.length > 0 || cartBundles.length > 0" class="border-t border-slate-200 pt-6 mb-8">
+            <div class="space-y-2">
+              <div class="flex justify-between text-lg">
+                <span>One-time Total:</span>
+                <span class="font-semibold" x-text="fmtUSD(getOneTimeTotal())"></span>
+              </div>
+              <div class="flex justify-between text-lg">
+                <span>Monthly Total:</span>
+                <span class="font-semibold" x-text="fmtUSD(getMonthlyTotal())"></span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Contact Form -->
+          <div x-show="cartServices.length > 0 || cartBundles.length > 0" class="space-y-4">
+            <h3 class="font-semibold text-lg">Contact Information</h3>
+            
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <label for="checkout-name" class="block text-sm font-medium text-slate-700 mb-1">Name *</label>
+                <input type="text" id="checkout-name" name="name" required 
+                       class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                       autocomplete="name">
+              </div>
+              
+              <div>
+                <label for="checkout-email" class="block text-sm font-medium text-slate-700 mb-1">Email *</label>
+                <input type="email" id="checkout-email" name="email" required 
+                       class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                       autocomplete="email">
+              </div>
+              
+              <div>
+                <label for="checkout-phone" class="block text-sm font-medium text-slate-700 mb-1">Phone</label>
+                <input type="tel" id="checkout-phone" name="phone" 
+                       class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                       autocomplete="tel">
+              </div>
+              
+              <div>
+                <label for="checkout-company" class="block text-sm font-medium text-slate-700 mb-1">Company</label>
+                <input type="text" id="checkout-company" name="company" 
+                       class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                       autocomplete="organization">
+              </div>
+            </div>
+            
+            <div>
+              <label for="checkout-notes" class="block text-sm font-medium text-slate-700 mb-1">Project Notes</label>
+              <textarea id="checkout-notes" name="notes" rows="3" 
+                        class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                        placeholder="Tell us about your project, timeline, or any specific requirements..."></textarea>
+            </div>
+            
+            <div class="flex items-start gap-3">
+              <input type="checkbox" id="checkout-terms" name="terms" required 
+                     class="mt-1 h-4 w-4 text-slate-600 focus:ring-slate-500 border-slate-300 rounded">
+              <label for="checkout-terms" class="text-sm text-slate-600">
+                I agree to the terms of service and understand that 1CoastMedia will contact me to discuss project details and finalize the agreement.
+              </label>
+            </div>
+          </div>
+          
+          <!-- Action Buttons -->
+          <div x-show="cartServices.length > 0 || cartBundles.length > 0" class="flex gap-3 mt-8">
+            <button @click="closeCheckoutModal()" 
+                    class="flex-1 btn ring-1 ring-slate-200 bg-white px-6 py-3 hover:bg-slate-50 rounded-xl">
+              Continue Shopping
+            </button>
+            <button @click="submitOrder()" 
+                    class="flex-1 btn btn-primary rounded-xl px-6 py-3">
+              Submit Order
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  .checkout-commitment {
-    font-size: 0.75rem;
-    color: #64748b;
-    margin-top: 1rem;
-  }
+  <!-- Success/Error Messages -->
+  <div x-show="showMessage" 
+       x-transition:enter="transition ease-out duration-300"
+       x-transition:enter-start="opacity-0 translate-y-4"
+       x-transition:enter-end="opacity-100 translate-y-0"
+       x-transition:leave="transition ease-in duration-200"
+       x-transition:leave-start="opacity-100 translate-y-0"
+       x-transition:leave-end="opacity-0 translate-y-4"
+       class="fixed top-4 right-4 z-50 max-w-sm">
+    <div class="bg-white rounded-lg shadow-lg ring-1 ring-slate-200 p-4"
+         :class="messageType === 'success' ? 'ring-emerald-200 bg-emerald-50' : 'ring-red-200 bg-red-50'">
+      <div class="flex items-start gap-3">
+        <div class="flex-shrink-0">
+          <svg x-show="messageType === 'success'" class="h-5 w-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+          <svg x-show="messageType === 'error'" class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="flex-1">
+          <p class="text-sm font-medium" 
+             :class="messageType === 'success' ? 'text-emerald-800' : 'text-red-800'" 
+             x-text="messageText"></p>
+        </div>
+        <button @click="showMessage = false" 
+                class="flex-shrink-0 text-slate-400 hover:text-slate-600">
+          <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
 
-  .checkout-contact-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
-  }
-
-  @media (min-width: 768px) {
-    .checkout-contact-grid {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-
-  .checkout-form-group {
-    margin-bottom: 1rem;
-  }
-
-  .checkout-form-label {
-    display: block;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #374151;
-    margin-bottom: 0.25rem;
-  }
-
-  .checkout-form-input {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #d1d5db;
-    border-radius: 0.5rem;
-    font-size: 1rem;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-
-  .checkout-form-input:focus {
-    outline: none;
-    border-color: #4f46e5;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-  }
-
-  .checkout-terms {
-    padding: 1rem;
-    background: #f8fafc;
-    border-radius: 0.5rem;
-  }
-
-  .checkout-terms-label {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-    cursor: pointer;
-  }
-
-  .checkout-terms-checkbox {
-    margin-top: 0.25rem;
-    width: 1rem;
-    height: 1rem;
-    color: #4f46e5;
-    border: 1px solid #d1d5db;
-    border-radius: 0.25rem;
-  }
-
-  .checkout-terms-text {
-    font-size: 0.875rem;
-    color: #374151;
-  }
-
-  .checkout-link {
-    color: #4f46e5;
-    text-decoration: underline;
-  }
-
-  .checkout-link:hover {
-    color: #3730a3;
-  }
-
-  .checkout-payment-processing {
-    text-align: center;
-    padding: 2rem;
-  }
-
-  .checkout-processing-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 4rem;
-    height: 4rem;
-    background: #eef2ff;
-    border-radius: 50%;
-    margin-bottom: 1rem;
-  }
-
-  .checkout-spinner {
-    width: 2rem;
-    height: 2rem;
-    color: #4f46e5;
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-
-  .checkout-processing-title {
-    font-size: 1.125rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-  }
-
-  .checkout-processing-text {
-    color: #64748b;
-    margin-bottom: 1rem;
-  }
-
-  .checkout-processing-note {
-    font-size: 0.875rem;
-    color: #64748b;
-  }
-
-  .checkout-footer {
-    background: #f8fafc;
-    padding: 1.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-top: 1px solid #e2e8f0;
-  }
-
-  .checkout-back-btn {
-    padding: 0.5rem 1rem;
-    color: #64748b;
-    background: none;
-    border: none;
-    font-weight: 500;
-    cursor: pointer;
-    border-radius: 0.5rem;
-    transition: color 0.2s;
-  }
-
-  .checkout-back-btn:hover {
-    color: #1e293b;
-  }
-
-  .checkout-next-container {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .checkout-next-btn,
-  .checkout-proceed-btn {
-    padding: 0.75rem 1.5rem;
-    background: #4f46e5;
-    color: white;
-    border: none;
-    border-radius: 0.5rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-
-  .checkout-next-btn:hover,
-  .checkout-proceed-btn:hover {
-    background: #3730a3;
-  }
-
-  .checkout-proceed-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-<script>
-// Initialize emergency modal and checkout system
-document.addEventListener('DOMContentLoaded', function() {
-  console.log('🔧 Initializing checkout system integration');
-  
-  // Test emergency modal availability
-  if (document.getElementById('emergencyCheckoutModal')) {
-    console.log('✅ Emergency modal found');
-  } else {
-    console.error('❌ Emergency modal not found');
-  }
-  
-  // Test Alpine.js integration
-  setTimeout(() => {
-    if (window.App) {
-      console.log('✅ Alpine.js app connected');
-      
-      // Override Alpine.js checkout functions to use emergency modal
-      const originalOpenCheckout = window.App.openCheckoutModal;
-      window.App.openCheckoutModal = function() {
-        console.log('🔄 Redirecting Alpine checkout to emergency modal');
-        openEmergencyModal();
-      }
-      
-    } else {
-      console.warn('⚠️ Alpine.js app not found, emergency modal will work independently');
-    }
-  }, 1000);
-});
-
-// Global function to test the checkout system
-function testCheckout() {
-  console.log('🧪 Testing checkout system');
-  openEmergencyModal();
-}
-
-// Make test function available globally
-window.testCheckout = testCheckout;
-</script>
 </body>
 </html>
