@@ -134,213 +134,145 @@
   <section id="top" class="relative">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 md:py-20 grid lg:grid-cols-2 gap-12 items-center">
       <div>
-        <h1 class="text-5xl font-black leading-tight tracking-tight">Gulf Coast Growth, <span class="bg-gradient-to-r from-slate-900 via-blue-600 to-indigo-500 bg-clip-text text-transparent">On Demand</span></h1>
-        <p class="mt-4 text-slate-600 max-w-prose">Pick a base service, stack add-ons, or build from scratch. One-time for quick wins, monthly for momentum.</p>
+        <h1 class="text-5xl font-black leading-tight tracking-tight">Your Gulf Coast Growth Partner — <span class="bg-gradient-to-r from-slate-900 via-blue-600 to-indigo-500 bg-clip-text text-transparent">Fast, Clear, Measurable.</span></h1>
+        <p class="mt-4 text-slate-600 max-w-prose">We launch websites, campaigns, and content that actually move the needle. One-time for quick wins. Monthly for momentum. Transparent pricing, fast turnarounds, zero fluff.</p>
         <div class="mt-8 flex flex-wrap items-center gap-3">
-          <a href="#services" class="tap btn btn-primary rounded-xl px-5 py-3">See Base Services</a>
-          <button @click="openAddons('web')" class="tap btn ring-1 ring-slate-200 bg-white px-5 py-3 hover:bg-slate-50 rounded-xl">Explore Add-Ons</button>
+          <button @click="openCheckoutModal()" class="tap btn btn-primary rounded-xl px-5 py-3">👉 Build Your Package</button>
+          <a href="#services" class="tap btn ring-1 ring-slate-200 bg-white px-5 py-3 hover:bg-slate-50 rounded-xl">See Services →</a>
         </div>
         <div class="mt-6 text-xs text-slate-500">Email <a class="underline" href="mailto:1coastmedia@gmail.com">1coastmedia@gmail.com</a> • Free 30-min call <a class="underline" href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noreferrer">here</a>.</div>
       </div>
       <div class="relative">
         <div class="halo p-0.5">
           <div class="rounded-[1.25rem] bg-white ring-1 ring-slate-200 p-6 shadow-sm">
+            <!-- Trust/Proof Strip -->
             <div class="grid sm:grid-cols-3 gap-4 w-full">
               <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4"><div class="text-3xl font-black text-slate-900">3-7d</div><div class="text-xs text-slate-500">Website turnarounds</div></div>
-              <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4"><div class="text-3xl font-black text-slate-900">30k+</div><div class="text-xs text-slate-500">UGC views/campaign</div></div>
-              <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4"><div class="text-3xl font-black text-slate-900">100%</div><div class="text-xs text-slate-500">Transparent pricing</div></div>
+              <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4"><div class="text-3xl font-black text-slate-900">30k+</div><div class="text-xs text-slate-500">UGC views per campaign</div></div>
+              <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4"><div class="text-3xl font-black text-slate-900">100%</div><div class="text-xs text-slate-500">Upfront pricing clarity</div></div>
             </div>
-            <p class="mt-4 text-sm text-slate-600">Built for creators, real estate, tourism & local brands.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHO WE SERVE -->
+  <section class="py-16 bg-slate-50">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <h2 class="text-3xl font-black tracking-tight">Built for brands that need results yesterday.</h2>
+        <div class="mt-8 grid md:grid-cols-4 gap-6">
+          <div class="text-center">
+            <div class="text-4xl mb-2">🏖️</div>
+            <div class="font-semibold">Tourism & events</div>
+          </div>
+          <div class="text-center">
+            <div class="text-4xl mb-2">🏠</div>
+            <div class="font-semibold">Real estate professionals</div>
+          </div>
+          <div class="text-center">
+            <div class="text-4xl mb-2">🏪</div>
+            <div class="font-semibold">Local businesses & retailers</div>
+          </div>
+          <div class="text-center">
+            <div class="text-4xl mb-2">🎬</div>
+            <div class="font-semibold">Creators & influencers</div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- PLAN TOGGLE -->
-  <section class="pt-8">
+  <!-- VALUE PROPOSITION -->
+  <section class="py-16">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between gap-3">
-        <div class="text-sm text-slate-600">Plan</div>
-        <div class="inline-flex rounded-xl bg-slate-100 p-1 ring-1 ring-slate-200">
-          <button @click="setPlan('oneTime')" :class="plan==='oneTime' ? 'bg-white shadow text-slate-900' : 'text-slate-700'" class="px-3 py-1.5 rounded-lg text-sm font-semibold f-ring">One-time</button>
-          <button @click="setPlan('monthly')" :class="plan==='monthly' ? 'bg-white shadow text-slate-900' : 'text-slate-700'" class="px-3 py-1.5 rounded-lg text-sm font-semibold f-ring">Monthly</button>
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-black tracking-tight">Why 1CoastMedia?</h2>
+      </div>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="text-center">
+          <div class="text-4xl mb-4">⚡</div>
+          <h3 class="font-bold text-lg mb-2">Speed Sprints</h3>
+          <p class="text-slate-600">Funnels in 48h, sites in a week.</p>
+        </div>
+        <div class="text-center">
+          <div class="text-4xl mb-4">📍</div>
+          <h3 class="font-bold text-lg mb-2">Local SEO Authority</h3>
+          <p class="text-slate-600">GBP, citations, geo-pages.</p>
+        </div>
+        <div class="text-center">
+          <div class="text-4xl mb-4">🎥</div>
+          <h3 class="font-bold text-lg mb-2">Creator Content Engine</h3>
+          <p class="text-slate-600">UGC + short-form video.</p>
+        </div>
+        <div class="text-center">
+          <div class="text-4xl mb-4">🎉</div>
+          <h3 class="font-bold text-lg mb-2">Event Surge Kits</h3>
+          <p class="text-slate-600">Fill seats, capture leads, boost revenue.</p>
+        </div>
+        <div class="text-center md:col-span-2 lg:col-span-2">
+          <div class="text-4xl mb-4">✅</div>
+          <h3 class="font-bold text-lg mb-2">Risk-Free Guarantees</h3>
+          <p class="text-slate-600">QA pass or we fix it. KPI lift or extra month free.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- SERVICES SECTION -->
-  <section id="services" class="py-10">
+  <!-- FEATURED SIGNATURE OFFERS -->
+  <section class="py-16 bg-slate-50">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-8">
-        <h2 class="text-3xl font-extrabold tracking-tight">1CoastMedia — Full Service Catalog (2025)</h2>
-        <p class="mt-2 text-slate-600 max-w-2xl mx-auto">Real deliverables. Fast turnarounds. Measurable outcomes.</p>
-        <div class="mt-4 text-sm text-slate-500">
-          <span class="font-semibold">Promise:</span> Speed sprints • Local SEO mastery • Event + Creator programs • Risk-Reversal guarantees
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-black tracking-tight">Featured Signature Offers</h2>
+        <p class="mt-4 text-slate-600">Homepage highlights</p>
+      </div>
+      <div class="grid md:grid-cols-2 gap-8">
+        <div class="bg-white rounded-xl p-6 ring-1 ring-slate-200">
+          <h3 class="font-bold text-lg mb-2">48-Hour Launch Funnel</h3>
+          <p class="text-slate-600 mb-4">A tracked lead-gen system live in 2 days.</p>
+          <div class="text-2xl font-bold text-green-600">$1,950</div>
+        </div>
+        <div class="bg-white rounded-xl p-6 ring-1 ring-slate-200">
+          <h3 class="font-bold text-lg mb-2">Local Authority Sprint</h3>
+          <p class="text-slate-600 mb-4">Your business everywhere it counts in 7 days.</p>
+          <div class="text-2xl font-bold text-green-600">$1,500</div>
+        </div>
+        <div class="bg-white rounded-xl p-6 ring-1 ring-slate-200">
+          <h3 class="font-bold text-lg mb-2">Site-in-a-Week</h3>
+          <p class="text-slate-600 mb-4">Six responsive pages, live and optimized in 7 days.</p>
+          <div class="text-2xl font-bold text-green-600">$3,500</div>
+        </div>
+        <div class="bg-white rounded-xl p-6 ring-1 ring-slate-200">
+          <h3 class="font-bold text-lg mb-2">Event Surge Kit</h3>
+          <p class="text-slate-600 mb-4">Flyers, page, promos, and ads — event-ready in a week.</p>
+          <div class="text-2xl font-bold text-green-600">$1,200</div>
         </div>
       </div>
-
-      <!-- Service Category Tabs -->
-      <div class="flex justify-center mb-8">
-        <div class="inline-flex rounded-xl bg-slate-100 p-1 ring-1 ring-slate-200">
-          <button @click="activeTab='signature'" :class="activeTab==='signature' ? 'bg-white shadow text-slate-900' : 'text-slate-700'" class="px-4 py-2 rounded-lg text-sm font-semibold f-ring">★ Signature</button>
-          <button @click="activeTab='core'" :class="activeTab==='core' ? 'bg-white shadow text-slate-900' : 'text-slate-700'" class="px-4 py-2 rounded-lg text-sm font-semibold f-ring">Core</button>
-          <button @click="activeTab='oneTime'" :class="activeTab==='oneTime' ? 'bg-white shadow text-slate-900' : 'text-slate-700'" class="px-4 py-2 rounded-lg text-sm font-semibold f-ring">One-Time</button>
-          <button @click="activeTab='monthly'" :class="activeTab==='monthly' ? 'bg-white shadow text-slate-900' : 'text-slate-700'" class="px-4 py-2 rounded-lg text-sm font-semibold f-ring">Monthly</button>
-        </div>
-      </div>
-
-      <!-- Category Description -->
-      <div class="text-center mb-6">
-        <p class="text-slate-600" x-text="serviceCategories[activeTab]?.description"></p>
-      </div>
-
-      <!-- Service Cards Grid -->
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <template x-for="service in serviceCategories[activeTab]?.services || []" :key="service.key">
-          <div class="halo p-0.5">
-            <div class="card p-6 h-full flex flex-col">
-              <!-- Service Header -->
-              <div class="flex items-start justify-between gap-3 mb-4">
-                <div class="flex-1">
-                  <div class="flex items-center gap-2 mb-2">
-                    <h3 class="text-lg font-bold text-slate-900" x-text="service.name"></h3>
-                    <span x-show="service.badge" class="text-xs px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 font-medium" x-text="service.badge"></span>
-                  </div>
-                  <p class="text-sm font-medium text-slate-900" x-text="service.outcome"></p>
-                </div>
-                <div class="text-right">
-                  <div class="text-xs text-slate-500" x-text="service.sla"></div>
-                  <div class="text-xl font-extrabold text-slate-900">
-                    <span x-show="service.price[plan]" x-text="fmtUSD(service.price[plan])"></span>
-                    <span x-show="!service.price[plan] && typeof service.price[plan] === 'string'" x-text="service.price[plan]"></span>
-                    <span x-show="!service.price[plan] && !service.price[plan === 'oneTime' ? 'monthly' : 'oneTime']" class="text-slate-400">N/A</span>
-                  </div>
-                  <div x-show="service.minTerm" class="text-xs text-slate-500" x-text="'Min: ' + service.minTerm"></div>
-                </div>
-              </div>
-
-              <!-- Deliverables -->
-              <div class="flex-1 mb-4">
-                <div class="text-xs font-medium text-slate-700 mb-2">Deliverables:</div>
-                <ul class="text-sm text-slate-600 space-y-1">
-                  <template x-for="item in service.deliverables" :key="item">
-                    <li class="flex items-start gap-2">
-                      <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></span>
-                      <span x-text="item"></span>
-                    </li>
-                  </template>
-                </ul>
-              </div>
-
-              <!-- Acceptance Criteria -->
-              <div x-show="service.acceptance" class="mb-4">
-                <div class="text-xs font-medium text-slate-700 mb-1">Acceptance:</div>
-                <p class="text-xs text-slate-500" x-text="service.acceptance"></p>
-              </div>
-
-              <!-- Guarantee -->
-              <div x-show="service.guarantee" class="mb-4">
-                <div class="text-xs font-medium text-emerald-700 mb-1">Guarantee:</div>
-                <p class="text-xs text-emerald-600" x-text="service.guarantee"></p>
-              </div>
-
-              <!-- CTA Button -->
-              <button 
-                @click="toggleService(service.key)" 
-                :class="cartServices.includes(service.key) ? 'bg-emerald-600 text-white' : 'bg-slate-900 text-white hover:bg-slate-800'"
-                class="w-full tap btn rounded-xl px-4 py-3 font-semibold shadow-sm hover:shadow-lg transition-colors"
-              >
-                <span x-show="!cartServices.includes(service.key)">Add to Cart</span>
-                <span x-show="cartServices.includes(service.key)" class="flex items-center justify-center gap-2">
-                  <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                  </svg>
-                  Added
-                </span>
-              </button>
-            </div>
-          </div>
-        </template>
-      </div>
-
-      <!-- Bundles Section -->
-      <div class="mt-12">
-        <div class="text-center mb-8">
-          <h3 class="text-3xl font-bold bg-gradient-to-r from-purple-600 via-cyan-500 to-emerald-500 bg-clip-text text-transparent mb-2">Value Bundles</h3>
-          <p class="text-slate-600">Save big with our curated service packages</p>
-        </div>
-        <div class="grid md:grid-cols-3 gap-6">
-          <template x-for="bundle in bundles" :key="bundle.key">
-            <div class="relative group">
-              <div class="card p-6 text-center h-full flex flex-col justify-between transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1"
-                   :class="cartBundles.includes(bundle.key) ? 'ring-2 ring-emerald-500 bg-emerald-50' : ''">
-                
-                <div>
-                  <h4 class="font-bold text-xl mb-3 text-slate-900" x-text="bundle.name"></h4>
-                  <p class="text-sm text-slate-600 mb-4" x-text="bundle.description"></p>
-                  
-                  <div x-show="bundle.savings" class="inline-block bg-gradient-to-r from-emerald-500 to-cyan-500 text-white text-xs font-bold px-3 py-1 rounded-full mb-4">
-                    <span x-text="bundle.savings"></span>
-                  </div>
-                  
-                  <div class="bg-slate-50 rounded-lg p-3 mb-4">
-                    <div class="text-xs font-medium text-slate-700 mb-2">INCLUDES:</div>
-                    <div class="text-sm text-slate-600 leading-relaxed" x-text="bundle.includes.join(' • ')"></div>
-                  </div>
-                </div>
-                
-                <div class="mb-4">
-                  <div class="text-2xl font-bold text-slate-900 mb-1">
-                    <span x-show="bundle.price.oneTime" x-text="fmtUSD(bundle.price.oneTime)"></span>
-                    <span x-show="bundle.price.monthly" class="text-lg text-slate-600">
-                      <span x-show="bundle.price.oneTime"> + </span>
-                      <span x-text="fmtUSD(bundle.price.monthly) + '/mo'"></span>
-                    </span>
-                  </div>
-                  <div x-show="bundle.billing" class="text-xs text-slate-500" x-text="bundle.billing"></div>
-                  <div x-show="bundle.note" class="text-xs text-slate-500 mt-1" x-text="bundle.note"></div>
-                </div>
-                
-                <button @click="toggleBundle(bundle.key)" 
-                        class="w-full px-4 py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105"
-                        :class="cartBundles.includes(bundle.key) ? 
-                          'bg-emerald-500 text-white hover:bg-emerald-600' : 
-                          'bg-gradient-to-r from-purple-600 to-cyan-500 text-white hover:from-purple-700 hover:to-cyan-600'">
-                  <span x-text="cartBundles.includes(bundle.key) ? '✓ Added to Cart' : 'Add Bundle'"></span>
-                </button>
-              </div>
-              
-              <div x-show="cartBundles.includes(bundle.key)" 
-                   class="absolute -top-2 -right-2 bg-emerald-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
-                ✓
-              </div>
-            </div>
-          </template>
-        </div>
+      <div class="text-center mt-8">
+        <button @click="openCheckoutModal()" class="tap btn btn-primary rounded-xl px-6 py-3">Explore Signature Programs</button>
       </div>
     </div>
   </section>
 
-  <!-- Sticky Cart Summary -->
-  <div x-show="cartServices.length > 0 || cartBundles.length > 0" class="fixed bottom-4 right-4 bg-white rounded-xl shadow-lg ring-1 ring-slate-200 p-4 max-w-sm z-40">
-    <div class="flex items-center justify-between mb-2">
-      <span class="font-semibold">Cart Summary</span>
-      <button @click="clearAll()" class="text-xs text-slate-500 hover:text-slate-700">Clear</button>
+  <!-- SOCIAL PROOF -->
+  <section class="py-16">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+      <blockquote class="text-xl italic text-slate-700 mb-4">
+        "We needed a site live before our event — they delivered in 5 days. Bookings doubled."
+      </blockquote>
+      <cite class="text-slate-500">— Local Venue Owner, Biloxi MS</cite>
     </div>
-    <div class="text-sm text-slate-600 mb-2">
-      <div class="flex justify-between">
-        <span>One-time:</span>
-        <span x-text="fmtUSD(getOneTimeTotal())"></span>
-      </div>
-      <div class="flex justify-between">
-        <span>Monthly:</span>
-        <span x-text="fmtUSD(getMonthlyTotal())"></span>
-      </div>
+  </section>
+
+  <!-- CTA BLOCK -->
+  <section class="py-16 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-black mb-4">Ready to grow your brand?</h2>
+      <p class="text-xl mb-8">Pick a base service, stack add-ons, or build from scratch.</p>
+      <button @click="openCheckoutModal()" class="tap bg-white text-blue-600 font-bold px-8 py-4 rounded-xl hover:bg-slate-50 transition-colors">👉 Build My Package</button>
     </div>
-    <button @click="openCheckoutModal()" class="w-full btn btn-primary rounded-lg px-4 py-2 text-sm">Review & Checkout</button>
-  </div>
+  </section>
 
   <!-- FAQ SECTION -->
   <section id="faq" class="py-16 bg-slate-50">
