@@ -524,6 +524,10 @@ function landingApp(){
         this.openCheckoutModal();
         return;
       }
+      // If cart is empty and this was a checkout attempt, show helpful message
+      if (event && event.target && event.target.textContent.includes('Checkout')) {
+        this.flash('Please select some services first, then click Review & Checkout', 'info');
+      }
       // Otherwise, open the builder as normal
       this.builderOpen = true;
       document.body.classList.add('no-scroll');
