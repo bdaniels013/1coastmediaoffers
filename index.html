@@ -431,6 +431,23 @@
               </template>
             </div>
             
+            <!-- Add-ons in cart -->
+            <div x-show="cartAddons.length > 0" class="space-y-3 mb-6">
+              <h4 class="font-medium text-slate-900">Add-ons</h4>
+              <template x-for="addonKey in cartAddons" :key="addonKey">
+                <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                  <div class="flex-1">
+                    <div class="font-medium text-sm" x-text="getAddonByKey(addonKey)?.name"></div>
+                    <div class="text-xs text-slate-600" x-text="getAddonByKey(addonKey)?.short"></div>
+                  </div>
+                  <div class="text-right">
+                    <div class="font-semibold text-sm" x-text="fmtUSD(getAddonByKey(addonKey)?.price[plan])"></div>
+                    <button @click="toggleAddon(addonKey)" class="text-xs text-red-600 hover:text-red-800">Remove</button>
+                  </div>
+                </div>
+              </template>
+            </div>
+            
             <!-- Empty State -->
             <div x-show="cartServices.length === 0 && cartBundles.length === 0" class="text-center py-8 text-slate-500">
               <p>No services selected yet.</p>
@@ -549,6 +566,154 @@
             <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
           </svg>
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD-ONS MODAL -->
+  <div x-show="showAddonsModal" 
+       x-transition:enter="transition ease-out duration-300"
+       x-transition:enter-start="opacity-0"
+       x-transition:enter-end="opacity-100"
+       x-transition:leave="transition ease-in duration-200"
+       x-transition:leave-start="opacity-100"
+       x-transition:leave-end="opacity-0"
+       class="fixed inset-0 z-50 bg-slate-900/50 overflow-y-auto p-4 sm:p-6"
+       role="dialog" aria-modal="true">
+    <div class="mx-auto w-full max-w-4xl">
+      <div x-transition:enter="transition ease-out duration-300"
+           x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+           x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+           x-transition:leave="transition ease-in duration-200"
+           x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+           x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+           class="glass rounded-2xl shadow-xl max-h-[90vh] overflow-hidden">
+        
+        <!-- Header -->
+        <div class="sticky top-0 z-10 bg-white/95 backdrop-blur px-6 py-4 border-b border-slate-200">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-slate-900">Add-Ons</h2>
+              <p class="text-sm text-slate-600 mt-1" x-text="`Enhance your ${getServiceByKey(activeAddonService)?.name || 'service'} package`"></p>
+            </div>
+            <button @click="closeAddonsModal()" 
+                    class="h-10 w-10 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600">
+              <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          </div>
+          
+          <!-- Filters -->
+          <div class="flex items-center gap-4 mt-4">
+            <div class="flex items-center gap-2">
+              <label class="text-sm font-medium text-slate-700">Service:</label>
+              <select x-model="activeAddonService" @change="loadAddonsForService()" 
+                      class="px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500">
+                <template x-for="service in getAvailableServices()" :key="service.key">
+                  <option :value="service.key" x-text="service.name"></option>
+                </template>
+              </select>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <label class="text-sm font-medium text-slate-700">Sort:</label>
+              <select x-model="addonSortBy" 
+                      class="px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500">
+                <option value="popular">Popular First</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="alpha">Alphabetical</option>
+              </select>
+            </div>
+            
+            <div class="flex-1">
+              <input type="text" x-model="addonSearchQuery" 
+                     placeholder="Search add-ons..." 
+                     class="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500">
+            </div>
+          </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="p-6 overflow-y-auto" style="max-height: calc(90vh - 140px);">
+          <!-- Add-ons Grid -->
+          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <template x-for="addon in getFilteredAddons()" :key="addon.key">
+              <div class="relative bg-white rounded-xl ring-1 ring-slate-200 p-4 hover:ring-slate-300 transition-all duration-200"
+                   :class="cartAddons.includes(addon.key) ? 'ring-2 ring-slate-900 bg-slate-50' : ''">
+                
+                <!-- Popular Badge -->
+                <div x-show="addon.popular" 
+                     class="absolute -top-2 -right-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
+                  Popular
+                </div>
+                
+                <!-- Badge -->
+                <div x-show="addon.badge" 
+                     class="inline-block bg-slate-100 text-slate-700 text-xs font-medium px-2 py-1 rounded-full mb-3"
+                     x-text="addon.badge"></div>
+                
+                <!-- Content -->
+                <div class="mb-4">
+                  <h3 class="font-semibold text-slate-900 mb-1" x-text="addon.name"></h3>
+                  <p x-show="addon.short" class="text-sm text-slate-600 mb-2" x-text="addon.short"></p>
+                  <p class="text-sm text-slate-500" x-text="addon.description"></p>
+                </div>
+                
+                <!-- Pricing -->
+                <div class="mb-4">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <div class="text-lg font-bold text-slate-900" x-text="fmtUSD(addon.price[plan])"></div>
+                      <div class="text-xs text-slate-500" x-text="plan === 'monthly' ? 'per month' : 'one-time'"></div>
+                    </div>
+                    <div x-show="plan === 'monthly' && addon.price.oneTime > 0" class="text-right">
+                      <div class="text-sm text-slate-600" x-text="'+ ' + fmtUSD(addon.price.oneTime)"></div>
+                      <div class="text-xs text-slate-500">setup</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Action Button -->
+                <button @click="toggleAddon(addon.key)" 
+                        class="w-full py-2 px-4 rounded-lg font-medium transition-all duration-200"
+                        :class="cartAddons.includes(addon.key) 
+                          ? 'bg-slate-900 text-white hover:bg-slate-800' 
+                          : 'bg-slate-100 text-slate-900 hover:bg-slate-200'">
+                  <span x-show="!cartAddons.includes(addon.key)">Add to Cart</span>
+                  <span x-show="cartAddons.includes(addon.key)">✓ Added</span>
+                </button>
+              </div>
+            </template>
+          </div>
+          
+          <!-- Empty State -->
+          <div x-show="getFilteredAddons().length === 0" class="text-center py-12">
+            <div class="text-slate-400 text-4xl mb-4">🔍</div>
+            <h3 class="text-lg font-medium text-slate-900 mb-2">No add-ons found</h3>
+            <p class="text-slate-600">Try adjusting your search or selecting a different service.</p>
+          </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="sticky bottom-0 bg-white/95 backdrop-blur border-t border-slate-200 px-6 py-4">
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-slate-600">
+              <span x-text="cartAddons.length"></span> add-on<span x-show="cartAddons.length !== 1">s</span> selected
+            </div>
+            <div class="flex gap-3">
+              <button @click="closeAddonsModal()" 
+                      class="px-4 py-2 text-slate-600 hover:text-slate-800 font-medium">
+                Continue Shopping
+              </button>
+              <button @click="closeAddonsModal(); openCheckoutModal()" 
+                      class="btn btn-primary rounded-lg px-6 py-2">
+                View Cart
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

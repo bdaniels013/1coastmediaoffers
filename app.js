@@ -137,28 +137,22 @@ function landingApp() {
     getOneTimeTotal() {
       let total = 0;
       
-      // Add services
+      // Services
       this.cartServices.forEach(serviceKey => {
         const service = this.getServiceByKey(serviceKey);
-        if (service?.price?.oneTime) {
-          total += service.price.oneTime;
-        }
+        if (service) total += service.price.oneTime;
       });
       
-      // Add bundles
+      // Bundles
       this.cartBundles.forEach(bundleKey => {
         const bundle = this.getBundleByKey(bundleKey);
-        if (bundle?.price?.oneTime) {
-          total += bundle.price.oneTime;
-        }
+        if (bundle) total += bundle.price.oneTime || 0;
       });
       
-      // Add addons
+      // Add-ons
       this.cartAddons.forEach(addonKey => {
         const addon = this.getAddonByKey(addonKey);
-        if (addon?.price?.oneTime) {
-          total += addon.price.oneTime;
-        }
+        if (addon) total += addon.price.oneTime || 0;
       });
       
       return total;
@@ -167,28 +161,410 @@ function landingApp() {
     getMonthlyTotal() {
       let total = 0;
       
-      // Add services
+      // Services
       this.cartServices.forEach(serviceKey => {
         const service = this.getServiceByKey(serviceKey);
-        if (service?.price?.monthly) {
-          total += service.price.monthly;
-        }
+        if (service) total += service.price.monthly;
       });
       
-      // Add bundles
+      // Bundles
       this.cartBundles.forEach(bundleKey => {
         const bundle = this.getBundleByKey(bundleKey);
-        if (bundle?.price?.monthly) {
-          total += bundle.price.monthly;
+        if (bundle) total += bundle.price.monthly || 0;
+      });
+      
+      // Add-ons
+      this.cartAddons.forEach(addonKey => {
+        const addon = this.getAddonByKey(addonKey);
+        if (addon) total += addon.price.monthly || 0;
+      });
+      
+      return total;
+    },
+    
+    // Modal management
+    openCheckoutModal() {
+      console.log('🛒 Opening checkout modal');
+      this.checkoutModalOpen = true;
+      document.body.style.overflow = 'hidden';
+    },
+    
+    closeCheckoutModal() {
+      console.log('❌ Closing checkout modal');
+      this.checkoutModalOpen = false;
+      document.body.style.overflow = '';
+    },
+    
+    // Addon modal (placeholder)
+    openAddons(category) {
+      console.log(`🔧 Opening addons for category: ${category}`);
+      this.showNotification('info', 'Add-ons feature coming soon!');
+    },
+    
+    // Form submission - Updated for Stripe integration
+    async submitOrder() {
+      console.log('📤 Submitting order to Stripe');
+      
+      // Validate form
+      const form = this.validateOrderForm();
+      if (!form.isValid) {
+        this.showNotification('error', form.message);
+        return;
+      }
+      
+      // Build cart array for Stripe API
+      const cart = [];
+      
+      // Add services to cart
+      this.cartServices.forEach(serviceKey => {
+        const service = this.getServiceByKey(serviceKey);
+        if (service) {
+          cart.push({
+            service: serviceKey,
+            name: service.name,
+            base: this.plan === 'monthly' ? service.price.monthly : service.price.oneTime,
+            addons: [] // Add any service-specific addons here if needed
+          });
         }
       });
       
-      // Add addons
+      // Add bundles to cart
+      this.cartBundles.forEach(bundleKey => {
+        const bundle = this.getBundleByKey(bundleKey);
+        if (bundle) {
+          cart.push({
+            service: bundleKey,
+            name: bundle.name,
+            base: this.plan === 'monthly' ? bundle.price.monthly : bundle.price.oneTime,
+            addons: []
+          });
+        }
+      });
+      
+      // Add standalone addons to cart
       this.cartAddons.forEach(addonKey => {
         const addon = this.getAddonByKey(addonKey);
-        if (addon?.price?.monthly) {
-          total += addon.price.monthly;
+        if (addon) {
+          cart.push({
+            service: addonKey,
+            name: addon.name,
+            base: this.plan === 'monthly' ? addon.price.monthly : addon.price.oneTime,
+            addons: []
+          });
         }
+      });
+      
+      // Prepare data for Stripe API
+      const checkoutData = {
+        plan: this.plan, // 'monthly' or 'oneTime'
+        cart: cart,
+        contact: {
+          name: form.data.name,
+          email: form.data.email,
+          phone: form.data.phone || '',
+          company: form.data.company || '',
+          notes: form.data.notes || ''
+        }
+      };
+      
+      console.log('💳 Sending to Stripe:', checkoutData);
+      
+      try {
+        // Submit to Stripe checkout API
+        const response = await this.submitToStripeAPI(checkoutData);
+        
+        if (response.url) {
+          // Redirect to Stripe checkout
+          console.log('🔄 Redirecting to Stripe checkout:', response.url);
+          window.location.href = response.url;
+        } else {
+          throw new Error('No checkout URL received from Stripe');
+        }
+      } catch (error) {
+        console.error('❌ Stripe checkout error:', error);
+        this.showNotification('error', 'Failed to create checkout session. Please try again or contact us directly.');
+      }
+    },
+    
+    // Submit to Stripe API - Updated method
+    async submitToStripeAPI(checkoutData) {
+      const endpoint = '/api/checkout'; // Vercel API route
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(checkoutData)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Network error' }));
+        throw new Error(errorData.error || `HTTP ${response.status}`);
+      }
+      
+      return await response.json();
+    },
+    
+    // Validate order form
+    validateOrderForm() {
+      const name = document.getElementById('checkout-name')?.value?.trim();
+      const email = document.getElementById('checkout-email')?.value?.trim();
+      const phone = document.getElementById('checkout-phone')?.value?.trim();
+      const company = document.getElementById('checkout-company')?.value?.trim();
+      const notes = document.getElementById('checkout-notes')?.value?.trim();
+      const terms = document.getElementById('checkout-terms')?.checked;
+      
+      // Validation
+      if (!name) {
+        return { isValid: false, message: 'Name is required' };
+      }
+      
+      if (!email || !this.isValidEmail(email)) {
+        return { isValid: false, message: 'Valid email is required' };
+      }
+      
+      if (!terms) {
+        return { isValid: false, message: 'Please agree to the terms of service' };
+      }
+      
+      if (this.cartServices.length === 0 && this.cartBundles.length === 0) {
+        return { isValid: false, message: 'Please select at least one service or bundle' };
+      }
+      
+      return {
+        isValid: true,
+        data: { name, email, phone, company, notes }
+      };
+    },
+    
+    // Email validation
+    isValidEmail(email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    },
+    
+    // Clear order form
+    clearOrderForm() {
+      const fields = ['checkout-name', 'checkout-email', 'checkout-phone', 'checkout-company', 'checkout-notes'];
+      fields.forEach(id => {
+        const field = document.getElementById(id);
+        if (field) field.value = '';
+      });
+      
+      const terms = document.getElementById('checkout-terms');
+      if (terms) terms.checked = false;
+    },
+    
+    // Submit to API
+    async submitToAPI(orderData) {
+      const endpoint = document.querySelector('meta[name="checkout-endpoint"]')?.content || '/api/checkout';
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(orderData)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      return await response.json();
+    },
+    
+    // Notification system
+    showNotification(type, message) {
+      this.messageType = type;
+      this.messageText = message;
+      this.showMessage = true;
+      
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        this.showMessage = false;
+      }, 5000);
+    },
+    
+    // Test function
+    testCheckout() {
+      console.log('🧪 Testing checkout system');
+      
+      // Add test items to cart
+      if (this.serviceCategories.signature?.services?.length > 0) {
+        this.cartServices.push(this.serviceCategories.signature.services[0].key);
+      }
+      
+      if (this.bundles.length > 0) {
+        this.cartBundles.push(this.bundles[0].key);
+      }
+      
+      // Open modal
+      this.openCheckoutModal();
+      
+      this.showNotification('info', 'Test items added to cart!');
+    },
+    
+    // Utility methods for formatting
+    fmtUSD(amount) {
+      return fmtUSD(amount);
+    }
+    
+    // Add-ons modal state
+    showAddonsModal: false,
+    activeAddonService: 'web',
+    addonSearchQuery: '',
+    addonSortBy: 'popular',
+    
+    // Updated openAddons function
+    openAddons(serviceKey = 'web') {
+      console.log(`🔧 Opening addons for service: ${serviceKey}`);
+      this.activeAddonService = serviceKey;
+      this.loadAddonsForService();
+      this.showAddonsModal = true;
+    },
+    
+    closeAddonsModal() {
+      this.showAddonsModal = false;
+      this.addonSearchQuery = '';
+    },
+    
+    loadAddonsForService() {
+      // This would typically load from an API, but for now we'll use the static data
+      console.log(`Loading add-ons for service: ${this.activeAddonService}`);
+    },
+    
+    getAvailableServices() {
+      return window.serviceData?.signature || [];
+    },
+    
+    getFilteredAddons() {
+      const service = this.getServiceByKey(this.activeAddonService);
+      if (!service || !service.addOns) return [];
+      
+      let addons = [...service.addOns];
+      
+      // Apply search filter
+      const query = this.addonSearchQuery.toLowerCase().trim();
+      if (query) {
+        addons = addons.filter(addon => 
+          addon.name.toLowerCase().includes(query) ||
+          addon.description.toLowerCase().includes(query) ||
+          (addon.short || '').toLowerCase().includes(query)
+        );
+      }
+      
+      // Apply sorting
+      switch (this.addonSortBy) {
+        case 'price-asc':
+          addons.sort((a, b) => a.price[this.plan] - b.price[this.plan]);
+          break;
+        case 'price-desc':
+          addons.sort((a, b) => b.price[this.plan] - a.price[this.plan]);
+          break;
+        case 'alpha':
+          addons.sort((a, b) => a.name.localeCompare(b.name));
+          break;
+        default: // popular
+          addons.sort((a, b) => (b.popular ? 1 : 0) - (a.popular ? 1 : 0));
+      }
+      
+      return addons;
+    },
+    
+    // Updated addon management
+    toggleAddon(addonKey) {
+      const index = this.cartAddons.indexOf(addonKey);
+      if (index > -1) {
+        this.cartAddons.splice(index, 1);
+        console.log(`➖ Removed addon: ${addonKey}`);
+        this.showNotification('info', 'Add-on removed from cart');
+      } else {
+        this.cartAddons.push(addonKey);
+        console.log(`➕ Added addon: ${addonKey}`);
+        this.showNotification('success', 'Add-on added to cart!');
+      }
+    },
+    
+    getAddonByKey(key) {
+      // Search through all services for the addon
+      const allServices = [
+        ...(window.serviceData?.signature || []),
+        ...(window.serviceData?.core || []),
+        ...(window.serviceData?.oneTime || []),
+        ...(window.serviceData?.monthly || [])
+      ];
+      
+      for (const service of allServices) {
+        if (service.addOns) {
+          const addon = service.addOns.find(a => a.key === key);
+          if (addon) return addon;
+        }
+      }
+      return null;
+    },
+    
+    // Get bundle by key
+    getBundleByKey(bundleKey) {
+      return this.bundles.find(b => b.key === bundleKey) || null;
+    },
+    
+    // Get addon by key
+    getAddonByKey(addonKey) {
+      for (const category of Object.values(this.addons)) {
+        const addon = category.find(a => a.key === addonKey);
+        if (addon) return addon;
+      }
+      return null;
+    },
+    
+    // Calculate totals
+    getOneTimeTotal() {
+      let total = 0;
+      
+      // Services
+      this.cartServices.forEach(serviceKey => {
+        const service = this.getServiceByKey(serviceKey);
+        if (service) total += service.price.oneTime;
+      });
+      
+      // Bundles
+      this.cartBundles.forEach(bundleKey => {
+        const bundle = this.getBundleByKey(bundleKey);
+        if (bundle) total += bundle.price.oneTime || 0;
+      });
+      
+      // Add-ons
+      this.cartAddons.forEach(addonKey => {
+        const addon = this.getAddonByKey(addonKey);
+        if (addon) total += addon.price.oneTime || 0;
+      });
+      
+      return total;
+    },
+    
+    getMonthlyTotal() {
+      let total = 0;
+      
+      // Services
+      this.cartServices.forEach(serviceKey => {
+        const service = this.getServiceByKey(serviceKey);
+        if (service) total += service.price.monthly;
+      });
+      
+      // Bundles
+      this.cartBundles.forEach(bundleKey => {
+        const bundle = this.getBundleByKey(bundleKey);
+        if (bundle) total += bundle.price.monthly || 0;
+      });
+      
+      // Add-ons
+      this.cartAddons.forEach(addonKey => {
+        const addon = this.getAddonByKey(addonKey);
+        if (addon) total += addon.price.monthly || 0;
       });
       
       return total;
