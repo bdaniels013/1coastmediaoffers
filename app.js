@@ -213,9 +213,9 @@ function landingApp() {
       this.showNotification('info', 'Add-ons feature coming soon!');
     },
     
-    // Form submission
+    // Form submission - Updated for Stripe integration
     async submitOrder() {
-      console.log('📤 Submitting order');
+      console.log('📤 Submitting order to Stripe');
       
       // Validate form
       const form = this.validateOrderForm();
@@ -224,35 +224,99 @@ function landingApp() {
         return;
       }
       
-      // Prepare order data
-      const orderData = {
-        services: this.cartServices.map(key => this.getServiceByKey(key)).filter(Boolean),
-        bundles: this.cartBundles.map(key => this.getBundleByKey(key)).filter(Boolean),
-        addons: this.cartAddons.map(key => this.getAddonByKey(key)).filter(Boolean),
-        totals: {
-          oneTime: this.getOneTimeTotal(),
-          monthly: this.getMonthlyTotal()
-        },
-        customer: form.data,
-        timestamp: new Date().toISOString()
+      // Build cart array for Stripe API
+      const cart = [];
+      
+      // Add services to cart
+      this.cartServices.forEach(serviceKey => {
+        const service = this.getServiceByKey(serviceKey);
+        if (service) {
+          cart.push({
+            service: serviceKey,
+            name: service.name,
+            base: this.plan === 'monthly' ? service.price.monthly : service.price.oneTime,
+            addons: [] // Add any service-specific addons here if needed
+          });
+        }
+      });
+      
+      // Add bundles to cart
+      this.cartBundles.forEach(bundleKey => {
+        const bundle = this.getBundleByKey(bundleKey);
+        if (bundle) {
+          cart.push({
+            service: bundleKey,
+            name: bundle.name,
+            base: this.plan === 'monthly' ? bundle.price.monthly : bundle.price.oneTime,
+            addons: []
+          });
+        }
+      });
+      
+      // Add standalone addons to cart
+      this.cartAddons.forEach(addonKey => {
+        const addon = this.getAddonByKey(addonKey);
+        if (addon) {
+          cart.push({
+            service: addonKey,
+            name: addon.name,
+            base: this.plan === 'monthly' ? addon.price.monthly : addon.price.oneTime,
+            addons: []
+          });
+        }
+      });
+      
+      // Prepare data for Stripe API
+      const checkoutData = {
+        plan: this.plan, // 'monthly' or 'oneTime'
+        cart: cart,
+        contact: {
+          name: form.data.name,
+          email: form.data.email,
+          phone: form.data.phone || '',
+          company: form.data.company || '',
+          notes: form.data.notes || ''
+        }
       };
       
+      console.log('💳 Sending to Stripe:', checkoutData);
+      
       try {
-        // Submit to API
-        const response = await this.submitToAPI(orderData);
+        // Submit to Stripe checkout API
+        const response = await this.submitToStripeAPI(checkoutData);
         
-        if (response.success) {
-          this.showNotification('success', 'Order submitted successfully! We\'ll contact you within 24 hours.');
-          this.clearAll();
-          this.closeCheckoutModal();
-          this.clearOrderForm();
+        if (response.url) {
+          // Redirect to Stripe checkout
+          console.log('🔄 Redirecting to Stripe checkout:', response.url);
+          window.location.href = response.url;
         } else {
-          throw new Error(response.message || 'Submission failed');
+          throw new Error('No checkout URL received from Stripe');
         }
       } catch (error) {
-        console.error('❌ Order submission error:', error);
-        this.showNotification('error', 'Failed to submit order. Please try again or contact us directly.');
+        console.error('❌ Stripe checkout error:', error);
+        this.showNotification('error', 'Failed to create checkout session. Please try again or contact us directly.');
       }
+    },
+    
+    // Submit to Stripe API - Updated method
+    async submitToStripeAPI(checkoutData) {
+      const endpoint = '/api/checkout'; // Vercel API route
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(checkoutData)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Network error' }));
+        throw new Error(errorData.error || `HTTP ${response.status}`);
+      }
+      
+      return await response.json();
     },
     
     // Validate order form
