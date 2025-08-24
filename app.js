@@ -6,9 +6,12 @@ function app() {
     // Data collections
     serviceCategories: {},
     cartServices: [],
+    addons: [],
+    cartAddons: [],
     // Init loads services from global `serviceData`
     init() {
       this.serviceCategories = window.serviceData?.serviceCategories || {};
+      this.addons = window.serviceData?.addons || [];
     },
     // Format a number as USD
     fmtUSD(amount) {
@@ -32,8 +35,24 @@ function app() {
         this.cartServices.push(key);
       }
     },
+
+    // Toggle an add-on in cart
+    toggleAddon(key) {
+      const idx = this.cartAddons.indexOf(key);
+      if (idx >= 0) {
+        this.cartAddons.splice(idx, 1);
+      } else {
+        this.cartAddons.push(key);
+      }
+    },
+
+    // Get add-on by key
+    getAddonByKey(key) {
+      return this.addons.find(a => a.key === key) || null;
+    },
     // Cart count
     cartCount() {
+      // Count only base services for the badge
       return this.cartServices.length;
     },
     // Calculate cart total
@@ -45,6 +64,13 @@ function app() {
           total += svc.price.oneTime;
         }
       });
+      // Add-ons total
+       this.cartAddons.forEach(key => {
+        const addon = this.getAddonByKey(key);
+        if (addon && addon.price && addon.price.oneTime) {
+          total += addon.price.oneTime;
+        }
+      });
       return total;
     },
     // Checkout via API
@@ -54,7 +80,7 @@ function app() {
         const response = await fetch('/api/checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ services: this.cartServices })
+          body: JSON.stringify({ services: this.cartServices, addons: this.cartAddons })
         });
         const data = await response.json();
         if (data && data.url) {
