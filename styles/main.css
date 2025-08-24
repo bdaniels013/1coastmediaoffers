@@ -248,4 +248,28 @@ section {
     border-color: rgba(255,255,255,.1);
     color: #f8fafc;
   }
+  
+  /* Enhanced text contrast */
+  .text-slate-600 {
+    color: #475569 !important;
+  }
+  
+  .text-slate-700 {
+    color: #334155 !important;
+  }
+  
+  /* Better button contrast */
+  .btn {
+    font-weight: 600;
+  }
+  
+  /* Improved card text */
+  .card h3, .card h4 {
+    color: #1e293b;
+    font-weight: 600;
+  }
+  
+  .card p {
+    color: #475569;
+  }
 }

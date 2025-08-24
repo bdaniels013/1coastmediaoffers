@@ -198,9 +198,10 @@ function landingApp(){
       document.body.classList.remove('no-scroll');
     },
 
-    fmtUSD(cents) {
-      if (typeof cents !== 'number') return '$0';
-      return '$' + (cents / 100).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    fmtUSD(amount) {
+      if (typeof amount !== 'number') return '$0';
+      // Handle dollar amounts directly (not cents)
+      return '$' + amount.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
     },
 
     getOneTimeTotal() {
@@ -266,3 +267,32 @@ function landingApp(){
 
 // Make landingApp globally available
 window.landingApp = landingApp;
+
+
+toggleAddon(addonKey) {
+  const index = this.cartAddons.indexOf(addonKey);
+  if (index > -1) {
+    this.cartAddons.splice(index, 1);
+  } else {
+    this.cartAddons.push(addonKey);
+  }
+  this.save();
+},
+
+proceedToCheckout() {
+  // Implement Stripe checkout logic
+  console.log('Proceeding to checkout with:', {
+    services: this.cartServices,
+    addons: this.cartAddons,
+    plan: this.plan,
+    total: this.total
+  });
+  // Add actual Stripe integration here
+},
+
+sendQuote() {
+  const subject = encodeURIComponent('1CoastMedia Service Quote');
+  const body = encodeURIComponent(`Hi,\n\nHere's my service quote:\n\nServices: ${this.cartServices.length}\nAdd-ons: ${this.cartAddons.length}\nTotal: ${this.fmtUSD(this.total)}${this.plan === 'monthly' ? '/month' : ''}\n\n${this.quoteNote || ''}\n\nThanks!`);
+  window.open(`mailto:${this.quoteEmail}?subject=${subject}&body=${body}`);
+  this.closeQuote();
+},
