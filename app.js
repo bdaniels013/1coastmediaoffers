@@ -12,6 +12,16 @@ function app() {
     cartAddons: [],
     // Init loads services from global `serviceData`
     init() {
+      // If admin has stored a custom catalog in localStorage, load it
+      const cached = localStorage.getItem('serviceData');
+      if (cached) {
+        try {
+          window.serviceData = JSON.parse(cached);
+        } catch (e) {
+          console.warn('Failed to parse cached service data');
+        }
+      }
+      // Load categories
       this.serviceCategories = window.serviceData?.serviceCategories || {};
       // load addons (top-level or nested)
       if (window.serviceData?.addons) {

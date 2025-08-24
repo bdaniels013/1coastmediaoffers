@@ -16,18 +16,21 @@
     body { font-family: 'Inter', sans-serif; }
   </style>
 </head>
-<body class="bg-slate-50" x-data="app()" x-init="init()">
+<body class="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 text-gray-100" x-data="app()" x-init="init()">
   <!-- Header -->
-  <header class="bg-white shadow">
+  <header class="fixed top-0 inset-x-0 z-40 bg-white/10 backdrop-blur-md border-b border-white/20">
     <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-      <h1 class="text-2xl font-extrabold">1CoastMedia</h1>
-      <button @click="cartOpen = !cartOpen" class="relative bg-slate-900 text-white px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-slate-500">
+      <h1 class="text-2xl font-extrabold tracking-wide">1CoastMedia</h1>
+      <!-- Optional inline cart button in the header -->
+      <button @click="cartOpen = !cartOpen" class="relative px-4 py-2 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium shadow-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-purple-500">
         Cart (<span x-text="cartCount()"></span>)
       </button>
     </div>
   </header>
 
-  <!-- Services Listing -->
+  <!-- Spacer to offset fixed header -->
+  <div class="pt-20"></div>
+
   <!-- Services Listing -->
   <main class="max-w-7xl mx-auto px-4 py-8 space-y-12">
     <!-- Iterate over categories -->
@@ -41,26 +44,26 @@
         <!-- Services in category -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <template x-for="svc in category.services" :key="svc.key">
-            <div class="bg-white p-4 rounded-xl shadow flex flex-col justify-between">
+            <div class="p-4 rounded-xl shadow-lg border border-white/20 bg-white/10 backdrop-blur-lg flex flex-col justify-between">
               <div>
                 <h3 class="font-semibold text-lg" x-text="svc.name"></h3>
-                <p class="text-sm text-slate-600 mt-1" x-text="svc.outcome"></p>
+                <p class="text-sm text-gray-300 mt-1" x-text="svc.outcome"></p>
                 <!-- Details toggle -->
-                <button @click="toggleDetails(svc.key)" class="mt-2 text-xs text-indigo-600 hover:underline focus:outline-none">
+                <button @click="toggleDetails(svc.key)" class="mt-2 text-xs text-indigo-300 hover:underline focus:outline-none">
                   <span x-text="detailsOpen[svc.key] ? 'Hide details' : 'View details'"></span>
                 </button>
-                <div x-show="detailsOpen[svc.key]" x-transition class="mt-2 text-sm text-slate-700">
+                <div x-show="detailsOpen[svc.key]" x-transition class="mt-2 text-sm text-gray-200">
                   <ul class="list-disc list-inside space-y-1">
                     <template x-for="item in svc.deliverables" :key="item"><li x-text="item"></li></template>
                   </ul>
-                  <p class="mt-1 text-xs text-slate-500" x-show="svc.sla">SLA: <span x-text="svc.sla"></span></p>
+                  <p class="mt-1 text-xs text-gray-400" x-show="svc.sla">SLA: <span x-text="svc.sla"></span></p>
                 </div>
               </div>
               <div class="mt-4 flex items-center justify-between">
                 <div class="font-semibold" x-text="fmtUSD(svc.price.oneTime)"></div>
                 <button @click="toggleService(svc.key)"
-                        class="px-3 py-1.5 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500"
-                        :class="cartServices.includes(svc.key) ? 'bg-red-600 text-white' : 'bg-indigo-600 text-white'">
+                        class="px-3 py-1.5 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+                        :class="cartServices.includes(svc.key) ? 'bg-red-600 text-white' : 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white'">
                   <span x-text="cartServices.includes(svc.key) ? 'Remove' : 'Add'"></span>
                 </button>
               </div>
@@ -72,23 +75,23 @@
   </main>
 
   <!-- Cart Sidebar -->
-  <div class="fixed top-0 right-0 w-80 max-w-full h-full bg-white shadow-lg z-50 transform transition-transform duration-300"
+  <div class="fixed top-0 right-0 w-80 max-w-full h-full bg-gray-900/95 backdrop-blur-lg shadow-xl z-50 transform transition-transform duration-300"
        :class="cartOpen ? 'translate-x-0' : 'translate-x-full'">
-    <div class="p-4 border-b flex justify-between items-center">
+    <div class="p-4 border-b border-white/20 flex justify-between items-center">
       <h2 class="text-lg font-bold">Your Cart</h2>
-      <button @click="cartOpen = false" class="text-slate-500 text-2xl leading-none">&times;</button>
+      <button @click="cartOpen = false" class="text-gray-400 text-2xl leading-none hover:text-gray-200">&times;</button>
     </div>
     <div class="p-4 overflow-y-auto h-[calc(100%-7rem)]">
-      <div x-show="cartServices.length === 0" class="text-slate-500 text-sm">Your cart is empty.</div>
+      <div x-show="cartServices.length === 0" class="text-gray-400 text-sm">Your cart is empty.</div>
       <template x-for="svcKey in cartServices" :key="svcKey">
-        <div class="flex justify-between items-center mb-3 border-b pb-2">
+        <div class="flex justify-between items-center mb-3 border-b border-white/20 pb-2">
           <div>
             <div class="font-semibold" x-text="getServiceByKey(svcKey)?.name"></div>
-            <div class="text-xs text-slate-500" x-text="getServiceByKey(svcKey)?.outcome"></div>
+            <div class="text-xs text-gray-400" x-text="getServiceByKey(svcKey)?.outcome"></div>
           </div>
           <div class="text-right">
             <div class="font-semibold" x-text="fmtUSD(getServiceByKey(svcKey)?.price.oneTime)"></div>
-            <button @click="toggleService(svcKey)" class="text-xs text-red-600 hover:underline mt-1">Remove</button>
+            <button @click="toggleService(svcKey)" class="text-xs text-red-400 hover:underline mt-1">Remove</button>
           </div>
         </div>
       </template>
@@ -96,29 +99,42 @@
       <!-- Add-ons section -->
       <h3 class="font-semibold mt-6 mb-2" x-show="addons.length > 0">Add-ons</h3>
       <template x-for="addon in addons" :key="addon.key">
-        <div class="flex justify-between items-center mb-3 border-b pb-2">
+        <div class="flex justify-between items-center mb-3 border-b border-white/20 pb-2">
           <div>
             <div class="font-medium" x-text="addon.name"></div>
-            <div class="text-xs text-slate-500" x-text="addon.description"></div>
+            <div class="text-xs text-gray-400" x-text="addon.description"></div>
           </div>
           <div class="text-right">
             <div class="text-sm" x-text="fmtUSD(addon.price.oneTime)"></div>
             <button @click="toggleAddon(addon.key)"
                     class="text-xs mt-1 hover:underline"
-                    :class="cartAddons.includes(addon.key) ? 'text-red-600' : 'text-indigo-600'">
+                    :class="cartAddons.includes(addon.key) ? 'text-red-400' : 'text-indigo-300'">
               <span x-text="cartAddons.includes(addon.key) ? 'Remove' : 'Add'"></span>
             </button>
           </div>
         </div>
       </template>
     </div>
-    <div class="p-4 border-t">
+    <div class="p-4 border-t border-white/20">
       <div class="flex justify-between font-semibold mb-3">
         <span>Total</span>
         <span x-text="fmtUSD(cartTotal())"></span>
       </div>
-      <button @click="checkout()" class="w-full bg-slate-900 text-white py-2 rounded-lg text-center">Checkout</button>
+      <button @click="checkout()" class="w-full py-2 rounded-lg text-center bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 text-white font-medium">Checkout</button>
     </div>
   </div>
+
+  <!-- Floating cart button (bottom right) -->
+  <button
+    @click="cartOpen = !cartOpen"
+    x-show="cartServices.length > 0"
+    class="fixed bottom-5 right-5 px-4 py-3 rounded-full shadow-lg flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:opacity-90"
+    x-transition
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h14l-1.35 4.03a2 2 0 01-1.92 1.42H9.27a2 2 0 01-1.92-1.42L5 6H3" />
+    </svg>
+    <span x-text="cartServices.length"></span>
+  </button>
 </body>
 </html>
