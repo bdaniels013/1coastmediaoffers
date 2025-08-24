@@ -24,13 +24,16 @@
 </style>
 </head>
 
-<body 
-  <body
+<!--
+  The opening <body> tag was malformed with a duplicated 'body' element.
+  Consolidate into a single well-formed tag with all Alpine.js directives.
+-->
+<body
   class="bg-slate-50"
   x-data="adminApp()"
   x-init="boot()"
   x-cloak
-  :class="{'overflow-hidden': modals.service || modals.addon}"
+  :class="{ 'overflow-hidden': modals.service || modals.addon }"
 >
   <!-- Top bar -->
   <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200">
@@ -577,8 +580,16 @@ function adminApp(){
         await new Promise(r => document.addEventListener('DOMContentLoaded', r, { once:true }));
       }
       await this.checkAuth();
-      if (this.authed) { await this.refreshAll(); }
-      initReorderWidget(); // independent widget
+      if (this.authed) {
+        await this.refreshAll();
+      }
+      // Initialize reorder widget once the page has loaded.
+      // The reorder widget exposes a global `orderWidget` with a `reload` method
+      // and auto-loads itself on window load. If present, invoke reload here
+      // instead of calling an undefined initReorderWidget().
+      if (window.orderWidget && typeof window.orderWidget.reload === 'function') {
+        window.orderWidget.reload();
+      }
     },
 
     /* --- auth --- */

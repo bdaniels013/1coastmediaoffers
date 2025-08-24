@@ -293,68 +293,69 @@ function landingApp() {
         return;
       }
       
-      // Build cart items
+      // Build a simplified cart for checkout. Each selected item becomes a
+      // plain object containing its name, price, and type. We avoid sending
+      // unused keys like `billing` or `key` to simplify the API contract.
       const cart = [];
-      
-      // Add services to cart
-      this.cartServices.forEach(serviceKey => {
+
+      // Add selected services
+      this.cartServices.forEach((serviceKey) => {
         const service = this.getServiceByKey(serviceKey);
         if (service) {
           cart.push({
             type: 'service',
-            key: serviceKey,
             name: service.name,
             price: service.price[this.plan] || 0,
-            billing: this.plan
           });
         }
       });
-      
-      // Add bundles to cart
-      this.cartBundles.forEach(bundleKey => {
+
+      // Add selected bundles
+      this.cartBundles.forEach((bundleKey) => {
         const bundle = this.getBundleByKey(bundleKey);
         if (bundle) {
           cart.push({
             type: 'bundle',
-            key: bundleKey,
             name: bundle.name,
             price: bundle.price[this.plan] || 0,
-            billing: this.plan
           });
         }
       });
-      
-      // Add addons to cart
-      this.cartAddons.forEach(addonKey => {
+
+      // Add selected add‑ons
+      this.cartAddons.forEach((addonKey) => {
         const addon = this.getAddonByKey(addonKey);
         if (addon) {
           cart.push({
             type: 'addon',
-            key: addonKey,
             name: addon.name,
             price: addon.price[this.plan] || 0,
-            billing: this.plan
           });
         }
       });
-      
+
       try {
+        const payload = {
+          plan: this.plan, // 'oneTime' or 'monthly'
+          cart: cart,
+          contact: form.data,
+          // Preserve original customer field for backward compatibility
+          customer: form.data,
+        };
         const response = await fetch('/api/checkout', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            customer: form.data,
-            cart: cart,
-            total: this.getCartTotal()
-          })
+          body: JSON.stringify(payload),
         });
-        
+
         const result = await response.json();
-        
-        if (result.success && result.checkoutUrl) {
-          window.location.href = result.checkoutUrl;
+
+        // Accept either the new `url` field or legacy `checkoutUrl`/`success` keys
+        const redirectUrl = result.url || result.checkoutUrl;
+        if (response.ok && redirectUrl) {
+          window.location.href = redirectUrl;
         } else {
           throw new Error(result.message || 'Checkout failed');
         }

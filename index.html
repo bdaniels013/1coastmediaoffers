@@ -100,13 +100,7 @@
 </head>
 
 <body class="mesh text-slate-800" x-data="landingApp()" x-init="init()" x-cloak>
-  <!-- TEMPORARY DEBUG SECTION - Remove after fixing -->
-  <div class="fixed top-20 right-4 z-50 bg-red-500 text-white p-4 rounded-lg" style="background: red; color: white; padding: 10px; position: fixed; top: 80px; right: 10px; z-index: 9999;">
-    <div>Modal State: <span x-text="checkoutModalOpen ? 'OPEN' : 'CLOSED'"></span></div>
-    <button @click="checkoutModalOpen = true; console.log('Direct toggle:', checkoutModalOpen)" style="background: white; color: black; padding: 5px; margin: 5px; border-radius: 3px;">Force Open Modal</button>
-    <button @click="openCheckoutModal(); console.log('Function call:', checkoutModalOpen)" style="background: white; color: black; padding: 5px; margin: 5px; border-radius: 3px;">Test Function</button>
-    <button @click="console.log('Alpine data:', $data)" style="background: white; color: black; padding: 5px; margin: 5px; border-radius: 3px;">Log Data</button>
-  </div>
+  <!-- Debug overlay removed -->
   
   <!-- NAV -->
   <header class="sticky top-0 z-50 backdrop-blur bg-white/80 border-b border-slate-200/70">
