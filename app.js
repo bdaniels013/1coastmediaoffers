@@ -18,6 +18,8 @@ window.openCheckoutModal = function() {
   const modal = document.getElementById('checkout-modal');
   if (modal) {
     modal.hidden = false;
+    modal.classList.remove('hidden');
+    modal.removeAttribute('hidden');
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
   }
@@ -28,6 +30,7 @@ window.closeCheckoutModal = function() {
   const modal = document.getElementById('checkout-modal');
   if (modal) {
     modal.hidden = true;
+     modal.classList.add('hidden');
     modal.style.display = 'none';
     document.body.style.overflow = '';
   }
