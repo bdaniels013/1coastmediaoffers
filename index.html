@@ -121,9 +121,21 @@
         <button @click="openAddons('web')" class="hover:text-slate-900 text-slate-600 f-ring">Explore Add-Ons</button>
         <a href="#faq" class="hover:text-slate-900 text-slate-600 f-ring">FAQ</a>
         <a href="#contact" class="hover:text-slate-900 text-slate-600 f-ring">Contact</a>
-        <button @click="openCheckoutModal()" class="tap btn btn-primary rounded-xl px-3 py-2">Build Your Package</button>
+        <button @click="openCheckoutModal()" class="tap btn btn-primary rounded-xl px-3 py-2 relative">
+          Build Your Package
+          <span x-show="cartServices.length + cartBundles.length + cartAddons.length > 0" 
+                x-text="cartServices.length + cartBundles.length + cartAddons.length"
+                class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+          </span>
+        </button>
       </nav>
-      <button @click="openCheckoutModal()" class="md:hidden btn btn-primary rounded-lg px-3 py-2 text-sm">Build</button>
+      <button @click="openCheckoutModal()" class="md:hidden btn btn-primary rounded-lg px-3 py-2 text-sm relative">
+        Build
+        <span x-show="cartServices.length + cartBundles.length + cartAddons.length > 0" 
+              x-text="cartServices.length + cartBundles.length + cartAddons.length"
+              class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-bold text-[10px]">
+        </span>
+      </button>
     </div>
   </header>
 
@@ -134,7 +146,13 @@
         <h1 class="text-5xl font-black leading-tight tracking-tight">Your Gulf Coast Growth Partner — <span class="bg-gradient-to-r from-slate-900 via-blue-600 to-indigo-500 bg-clip-text text-transparent">Fast, Clear, Measurable.</span></h1>
         <p class="mt-4 text-slate-600 max-w-prose">We launch websites, campaigns, and content that actually move the needle. One-time for quick wins. Monthly for momentum. Transparent pricing, fast turnarounds, zero fluff.</p>
         <div class="mt-8 flex flex-wrap items-center gap-3">
-          <button @click="openCheckoutModal()" class="tap btn btn-primary rounded-xl px-5 py-3">👉 Build Your Package</button>
+          <button @click="openCheckoutModal()" class="tap btn btn-primary rounded-xl px-5 py-3 relative">
+            👉 Build Your Package
+            <span x-show="cartServices.length + cartBundles.length + cartAddons.length > 0" 
+                  x-text="cartServices.length + cartBundles.length + cartAddons.length"
+                  class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+            </span>
+          </button>
           <a href="#services" class="tap btn ring-1 ring-slate-200 bg-white px-5 py-3 hover:bg-slate-50 rounded-xl">See Services →</a>
         </div>
         <div class="mt-6 text-xs text-slate-500">Email <a class="underline" href="mailto:1coastmedia@gmail.com">1coastmedia@gmail.com</a> • Free 30-min call <a class="underline" href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noreferrer">here</a>.</div>
