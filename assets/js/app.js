@@ -57,7 +57,26 @@ export function landingApp(){
 
       this.rebuildIndex();
 
+      // Use window.serviceData instead of API fetch
+      if (window.serviceData && window.serviceData.serviceCategories) {
+        // Convert serviceData structure to expected format
+        this.services = [];
+        Object.values(window.serviceData.serviceCategories).forEach(category => {
+          this.services.push(...category.services);
+        });
+        
+        // Also load addons from window.serviceData
+        if (window.serviceData.addons) {
+          this.addons = window.serviceData.addons;
+        }
+        
+        this.activeService = this.services[0]?.key || this.services[0]?.key;
+        this.rebuildIndex();
+      }
+
       // Load catalog from API
+      // Remove or comment out the API fetch section:
+      /*
       try{
         const r = await fetch(CATALOG_URL, { cache:'no-store' });
         if(r.ok){
@@ -69,6 +88,7 @@ export function landingApp(){
           }
         }
       }catch{}
+      */
 
       // Restore saved cart
       try{
@@ -92,32 +112,31 @@ export function landingApp(){
     },
 
     rebuildIndex(){
-      this.addonIndex = this.services.reduce((acc, svc) => {
-        (svc.addOns||[]).forEach(a => acc[a.id] = { ...a, service: svc.key });
-        return acc;
-      }, {});
+      // Build addon index from window.serviceData.addons if available
+      if (window.serviceData && window.serviceData.addons) {
+        this.addonIndex = window.serviceData.addons.reduce((acc, addon) => {
+          acc[addon.key] = { ...addon, service: addon.applicableServices };
+          return acc;
+        }, {});
+      } else {
+        // Fallback to old structure
+        this.addonIndex = this.services.reduce((acc, svc) => {
+          (svc.addOns||[]).forEach(a => acc[a.id] = { ...a, service: svc.key });
+          return acc;
+        }, {});
+      }
     },
 
     /* ---------- computeds ---------- */
     get total(){
-      const baseSum = this.cartServices.reduce((s, key) => s + (this.services.find(x => x.key === key)?.base?.[this.plan] || 0), 0);
+      const baseSum = this.cartServices.reduce((s, key) => s + (this.services.find(x => x.key === key)?.price?.[this.plan] || 0), 0);
       const addonSum = this.cartAddons.reduce((s, id) => s + (this.addonIndex[id]?.price?.[this.plan] || 0), 0);
       return baseSum + addonSum;
-    },
-    get visibleAddons(){
-      let items = (this.services.find(s => s.key === this.activeService)?.addOns || []).slice();
-      const q = this.addonQuery.trim().toLowerCase();
-      if(q) items = items.filter(a => a.label.toLowerCase().includes(q) || a.desc.toLowerCase().includes(q) || (a.short||'').toLowerCase().includes(q));
-      if(this.sortBy==='price-asc') items.sort((a,b)=>a.price[this.plan]-b.price[this.plan]);
-      else if(this.sortBy==='price-desc') items.sort((a,b)=>b.price[this.plan]-a.price[this.plan]);
-      else if(this.sortBy==='alpha') items.sort((a,b)=>a.label.localeCompare(b.label));
-      else items.sort((a,b)=> (b.popular?1:0) - (a.popular?1:0));
-      return items;
     },
 
     /* ---------- helpers ---------- */
     serviceName(key){ return (this.services.find(s => s.key === key) || {}).name || key; },
-    serviceBase(key){ return (this.services.find(s => s.key === key) || {}).base?.[this.plan] || 0; },
+    serviceBase(key){ return (this.services.find(s => s.key === key) || {}).price?.[this.plan] || 0; },
     fmtUSD(v){ return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v); },
     emailValid(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e||''); },
 
@@ -282,7 +301,7 @@ ${note ? `Note: ${note}\n\n` : ''}You can reopen this anytime. When you’re rea
 
         const cart = this.cartServices.map(svcKey => {
           const svc = this.services.find(s => s.key === svcKey);
-          const base = svc?.base?.[this.plan] || 0;
+          const base = svc?.price?.[this.plan] || 0;
           const addons = this.cartAddons
             .filter(id => this.addonIndex[id]?.service === svcKey)
             .map(id => ({ id, name: this.addonIndex[id].label, price: this.addonIndex[id].price[this.plan] }));
@@ -315,6 +334,103 @@ ${note ? `Note: ${note}\n\n` : ''}You can reopen this anytime. When you’re rea
         this.isSubmitting = false;
       }
     }
+    
+    // Add these functions after the existing UI actions
+    
+    // Add-ons modal functions
+    showAddonsModal: false,
+    activeAddonService: '',
+    addonSearchQuery: '',
+    addonSortBy: 'popular',
+    
+    openAddonsModal(serviceKey) {
+      this.activeAddonService = serviceKey || '';
+      this.showAddonsModal = true;
+      this.addonSearchQuery = '';
+      this.addonSortBy = 'popular';
+    },
+    
+    closeAddonsModal() {
+      this.showAddonsModal = false;
+    },
+    
+    loadAddonsForService(serviceKey) {
+      if (!window.serviceData || !window.serviceData.addons) return [];
+      return window.serviceData.addons.filter(addon => 
+        addon.applicableServices.includes('all') || 
+        addon.applicableServices.includes(serviceKey)
+      );
+    },
+    
+    getAvailableServices() {
+      return this.services || [];
+    },
+    
+    getFilteredAddons() {
+      const addons = this.loadAddonsForService(this.activeAddonService);
+      let filtered = addons;
+      
+      // Apply search filter
+      if (this.addonSearchQuery.trim()) {
+        const query = this.addonSearchQuery.toLowerCase();
+        filtered = filtered.filter(addon => 
+          addon.name.toLowerCase().includes(query) ||
+          addon.description.toLowerCase().includes(query)
+        );
+      }
+      
+      // Apply sorting
+      switch(this.addonSortBy) {
+        case 'price-asc':
+          filtered.sort((a, b) => (a.price.oneTime || 0) - (b.price.oneTime || 0));
+          break;
+        case 'price-desc':
+          filtered.sort((a, b) => (b.price.oneTime || 0) - (a.price.oneTime || 0));
+          break;
+        case 'alpha':
+          filtered.sort((a, b) => a.name.localeCompare(b.name));
+          break;
+        default: // popular
+          // Keep original order
+          break;
+      }
+      
+      return filtered;
+    },
+    
+    getAddonByKey(key) {
+      if (!window.serviceData || !window.serviceData.addons) return null;
+      return window.serviceData.addons.find(addon => addon.key === key);
+    },
+    
+    // Update pricing calculations to include add-ons
+    getOneTimeTotal() {
+      const servicesTotal = this.cartServices.reduce((sum, serviceKey) => {
+        const service = this.services.find(s => s.key === serviceKey);
+        return sum + (service?.price?.oneTime || 0);
+      }, 0);
+      
+      const addonsTotal = this.cartAddons.reduce((sum, addonKey) => {
+        const addon = this.getAddonByKey(addonKey);
+        return sum + (addon?.price?.oneTime || 0);
+      }, 0);
+      
+      return servicesTotal + addonsTotal;
+    },
+    
+    getMonthlyTotal() {
+      const servicesTotal = this.cartServices.reduce((sum, serviceKey) => {
+        const service = this.services.find(s => s.key === serviceKey);
+        return sum + (service?.price?.monthly || 0);
+      }, 0);
+      
+      const addonsTotal = this.cartAddons.reduce((sum, addonKey) => {
+        const addon = this.getAddonByKey(addonKey);
+        return sum + (addon?.price?.monthly || 0);
+      }, 0);
+      
+      return servicesTotal + addonsTotal;
+    },
   }
 }
 
