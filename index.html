@@ -910,3 +910,45 @@
     opacity: 0.5;
     cursor: not-allowed;
   }
+
+<script>
+// Ensure emergency modal integration on page load
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('🔧 Initializing checkout system integration');
+  
+  // Test emergency modal availability
+  if (document.getElementById('emergencyCheckoutModal')) {
+    console.log('✅ Emergency modal found');
+  } else {
+    console.error('❌ Emergency modal not found');
+  }
+  
+  // Test Alpine.js integration
+  setTimeout(() => {
+    if (window.App) {
+      console.log('✅ Alpine.js app connected');
+      
+      // Override Alpine.js checkout functions to use emergency modal
+      const originalOpenCheckout = window.App.openCheckoutModal;
+      window.App.openCheckoutModal = function() {
+        console.log('🔄 Redirecting Alpine checkout to emergency modal');
+        openEmergencyModal();
+      };
+      
+    } else {
+      console.warn('⚠️ Alpine.js app not found, emergency modal will work independently');
+    }
+  }, 1000);
+});
+
+// Global function to test the checkout system
+function testCheckout() {
+  console.log('🧪 Testing checkout system');
+  openEmergencyModal();
+}
+
+// Make test function available globally
+window.testCheckout = testCheckout;
+</script>
+</body>
+</html>

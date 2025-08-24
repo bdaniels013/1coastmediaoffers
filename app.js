@@ -524,7 +524,8 @@ function landingApp(){
     openBuilder() {
       // If cart has items, this should be checkout, not builder
       if (!this.isCartEmpty) {
-        this.openCheckoutModal();
+        // Use the emergency modal for checkout
+        openEmergencyModal();
         return;
       }
       // If cart is empty and this was a checkout attempt, show helpful message
@@ -566,9 +567,8 @@ function landingApp(){
         this.flash('Add items to your cart first', 'error');
         return;
       }
-      this.checkoutModalOpen = true;
-      this.checkoutStep = 'review';
-      document.body.classList.add('no-scroll');
+      // Always use the emergency modal for checkout
+      openEmergencyModal();
     },
     
     closeCheckoutModal() {
