@@ -35,16 +35,25 @@ function landingApp() {
     addonSearchQuery: '',
     addonSortBy: 'popular',
     
-    // Data references
-    serviceCategories: window.serviceData?.serviceCategories || {},
-    bundles: window.serviceData?.bundles || [],
-    addons: window.serviceData?.addons || [],
+    // Data references - initialize as empty, will be populated in init()
+    serviceCategories: {},
+    bundles: [],
+    addons: [],
     
     // Initialization
     init() {
       console.log('🚀 1CoastMedia app initialized');
+      
+      // Load data after DOM is ready
+      this.serviceCategories = window.serviceData?.serviceCategories || {};
+      this.bundles = window.serviceData?.bundles || [];
+      this.addons = window.serviceData?.addons || [];
+      
       this.validateData();
       this.setupGlobalFunctions();
+      
+      // Debug log to verify data is loaded
+      console.log('📊 Service categories loaded:', Object.keys(this.serviceCategories));
     },
     
     // Validate that service data is loaded
