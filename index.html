@@ -245,575 +245,574 @@
       </div>
       
       <!-- Services Grid -->
-<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-  <template x-for="category in Object.values(serviceCategories)" :key="category.name">
-    <template x-for="service in (category.services || [])" :key="service.key">
-      <div class="bg-white rounded-xl p-6 ring-1 ring-slate-200 hover:ring-slate-300 transition-all duration-200">
-        <!-- Service Header -->
-        <div class="mb-4">
-          <div class="flex items-start justify-between mb-2">
-            <h3 class="font-bold text-lg" x-text="service.name"></h3>
-            <div x-show="service.badge" 
-                 class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full"
-                 x-text="service.badge"></div>
-          </div>
-          <p class="text-slate-600 text-sm" x-text="service.outcome"></p>
-        </div>
-        
-        <!-- Pricing -->
-        <div class="mb-4">
-          <div class="text-2xl font-bold text-slate-900" x-text="fmtUSD(service.price[plan])"></div>
-          <div class="text-xs text-slate-500" x-text="plan === 'monthly' ? 'per month' : 'one-time'"></div>
-          <div x-show="plan === 'monthly' && service.price.oneTime > 0" class="text-sm text-slate-600 mt-1">
-            + <span x-text="fmtUSD(service.price.oneTime)"></span> setup
-          </div>
-        </div>
-        
-        <!-- Deliverables List -->
-        <div class="mb-6">
-          <div x-show="service.deliverables && service.deliverables.length > 0" class="mt-3">
-            <div class="text-xs font-medium text-slate-700 mb-1">Deliverables:</div>
-            <ul class="text-xs text-slate-600 space-y-1">
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <template x-for="category in Object.values(serviceCategories)" :key="category.description">
+          <div>
+            <template x-for="service in (category.services || []).filter(s => s.price[plan] > 0)" :key="service.key">
+              <div class="bg-white rounded-xl p-6 ring-1 ring-slate-200 hover:ring-slate-300 transition-all duration-200">
+              <!-- Service Header -->
+              <div class="mb-4">
+              <div class="flex items-start justify-between mb-2">
+              <h3 class="font-bold text-lg" x-text="service.name"></h3>
+              <div x-show="service.badge" 
+              class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full"
+              x-text="service.badge"></div>
+              </div>
+              <p class="text-slate-600 text-sm" x-text="service.outcome"></p>
+              </div>
+              
+              <!-- Pricing -->
+              <div class="mb-4">
+              <div class="text-2xl font-bold text-slate-900" x-text="fmtUSD(service.price[plan])"></div>
+              <div class="text-xs text-slate-500" x-text="plan === 'monthly' ? 'per month' : 'one-time'"></div>
+              <div x-show="plan === 'monthly' && service.price.oneTime > 0" class="text-sm text-slate-600 mt-1">
+              + <span x-text="fmtUSD(service.price.oneTime)"></span> setup
+              </div>
+              </div>
+              
+              <!-- Deliverables List -->
+              <div class="mb-6">
+              <div x-show="service.deliverables && service.deliverables.length > 0" class="mt-3">
+              <div class="text-xs font-medium text-slate-700 mb-1">Deliverables:</div>
+              <ul class="text-xs text-slate-600 space-y-1">
               <template x-for="item in (service.deliverables || [])" :key="item">
-                <li class="flex items-start gap-1">
-                  <span class="text-green-600 mt-0.5">✓</span>
-                  <span x-text="item"></span>
-                </li>
+              <li class="flex items-start gap-1">
+              <span class="text-green-600 mt-0.5">✓</span>
+              <span x-text="item"></span>
+              </li>
               </template>
-            </ul>
-          </div>
-        </div>
-        
-        <!-- Action Buttons -->
-        <div class="space-y-2">
-          <button @click="toggleService(service.key)" 
-                  class="w-full py-2 px-4 rounded-lg font-medium transition-all duration-200"
-                  :class="cartServices.includes(service.key) 
-                    ? 'bg-slate-900 text-white hover:bg-slate-800' 
-                    : 'bg-slate-100 text-slate-900 hover:bg-slate-200'">
-            <span x-show="!cartServices.includes(service.key)">Add to Cart</span>
-            <span x-show="cartServices.includes(service.key)">Remove from Cart</span>
-          </button>
-        </div>
-      </div>
-    </template>
-  </template>
-</div>
-      
-      <!-- Empty State -->
-      <div x-show="Object.values(serviceCategories).every(cat => !cat.services || cat.services.length === 0)" 
-           class="text-center py-12">
-        <div class="text-slate-400 text-4xl mb-4">🔧</div>
-        <h3 class="text-lg font-medium text-slate-900 mb-2">Services Loading...</h3>
-        <p class="text-slate-600">Please wait while we load our service catalog.</p>
-      </div>
-      
-      <!-- CTA -->
-      <div class="text-center mt-12">
-        <button @click="openCheckoutModal()" class="tap btn btn-primary rounded-xl px-8 py-3">
-          Build Your Custom Package
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- FEATURED SIGNATURE OFFERS -->
-  <section class="py-16 bg-slate-50">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl font-black tracking-tight">Featured Signature Offers</h2>
-        <p class="mt-4 text-slate-600">Homepage highlights</p>
-      </div>
-      <div class="grid md:grid-cols-2 gap-8">
-        <div class="bg-white rounded-xl p-6 ring-1 ring-slate-200">
-          <h3 class="font-bold text-lg mb-2">48-Hour Launch Funnel</h3>
-          <p class="text-slate-600 mb-4">A tracked lead-gen system live in 2 days.</p>
-          <div class="text-2xl font-bold text-green-600">$1,950</div>
-        </div>
-        <div class="bg-white rounded-xl p-6 ring-1 ring-slate-200">
-          <h3 class="font-bold text-lg mb-2">Local Authority Sprint</h3>
-          <p class="text-slate-600 mb-4">Your business everywhere it counts in 7 days.</p>
-          <div class="text-2xl font-bold text-green-600">$1,500</div>
-        </div>
-        <div class="bg-white rounded-xl p-6 ring-1 ring-slate-200">
-          <h3 class="font-bold text-lg mb-2">Site-in-a-Week</h3>
-          <p class="text-slate-600 mb-4">Six responsive pages, live and optimized in 7 days.</p>
-          <div class="text-2xl font-bold text-green-600">$3,500</div>
-        </div>
-        <div class="bg-white rounded-xl p-6 ring-1 ring-slate-200">
-          <h3 class="font-bold text-lg mb-2">Event Surge Kit</h3>
-          <p class="text-slate-600 mb-4">Flyers, page, promos, and ads — event-ready in a week.</p>
-          <div class="text-2xl font-bold text-green-600">$1,200</div>
-        </div>
-      </div>
-      <div class="text-center mt-8">
-        <button @click="openCheckoutModal()" class="tap btn btn-primary rounded-xl px-6 py-3">Explore Signature Programs</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- SOCIAL PROOF -->
-  <section class="py-16">
-    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-      <blockquote class="text-xl italic text-slate-700 mb-4">
-        "We needed a site live before our event — they delivered in 5 days. Bookings doubled."
-      </blockquote>
-      <cite class="text-slate-500">— Local Venue Owner, Biloxi MS</cite>
-    </div>
-  </section>
-
-  <!-- CTA BLOCK -->
-  <section class="py-16 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-      <h2 class="text-3xl font-black mb-4">Ready to grow your brand?</h2>
-      <p class="text-xl mb-8">Pick a base service, stack add-ons, or build from scratch.</p>
-      <button @click="openCheckoutModal()" class="tap bg-white text-blue-600 font-bold px-8 py-4 rounded-xl hover:bg-slate-50 transition-colors">👉 Build My Package</button>
-    </div>
-  </section>
-
-  <!-- FAQ SECTION -->
-  <section id="faq" class="py-16 bg-slate-50">
-    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl font-extrabold tracking-tight">Frequently Asked Questions</h2>
-        <p class="mt-2 text-slate-600">Everything you need to know about working with 1CoastMedia</p>
-      </div>
-      
-      <div class="space-y-6">
-        <div class="card p-6">
-          <h3 class="font-semibold text-lg mb-2">How fast can you deliver?</h3>
-          <p class="text-slate-600">Most projects are completed within 3-7 days. Rush delivery available for urgent needs.</p>
-        </div>
-        
-        <div class="card p-6">
-          <h3 class="font-semibold text-lg mb-2">What's included in the pricing?</h3>
-          <p class="text-slate-600">All pricing is transparent and includes everything listed in the deliverables. No hidden fees or surprise charges.</p>
-        </div>
-        
-        <div class="card p-6">
-          <h3 class="font-semibold text-lg mb-2">Do you offer revisions?</h3>
-          <p class="text-slate-600">Yes! We include reasonable revisions to ensure you're completely satisfied with the final deliverable.</p>
-        </div>
-        
-        <div class="card p-6">
-          <h3 class="font-semibold text-lg mb-2">Can I cancel my monthly service?</h3>
-          <p class="text-slate-600">Monthly services can be cancelled anytime after the minimum term commitment is met.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CONTACT SECTION -->
-  <section id="contact" class="py-16">
-    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-      <h2 class="text-3xl font-extrabold tracking-tight mb-4">Ready to Get Started?</h2>
-      <p class="text-slate-600 mb-8">Let's discuss your project and find the perfect solution for your needs.</p>
-      
-      <div class="flex flex-wrap justify-center gap-4">
-        <a href="mailto:1coastmedia@gmail.com" class="btn btn-primary rounded-xl px-6 py-3">Email Us</a>
-        <a href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noreferrer" class="btn ring-1 ring-slate-200 bg-white px-6 py-3 hover:bg-slate-50 rounded-xl">Schedule Call</a>
-        <button @click="openCheckoutModal()" class="btn bg-emerald-600 text-white hover:bg-emerald-700 rounded-xl px-6 py-3">Build Package</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
-  <footer class="bg-slate-900 text-white py-12">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="grid md:grid-cols-3 gap-8">
-        <div>
-          <div class="flex items-center gap-2 mb-4">
-            <span class="inline-grid place-items-center h-8 w-8 rounded-lg bg-white/10 overflow-hidden">
-              <img src="/assets/1coastmedia_logo_A_primary_mark_2048.jpg" alt="1CoastMedia logo" class="h-8 w-8 object-cover" />
-            </span>
-            <span class="font-bold">1CoastMedia</span>
-          </div>
-          <p class="text-slate-400 text-sm">Gulf Coast digital services for creators, real estate, tourism & local brands.</p>
-        </div>
-        
-        <div>
-          <h4 class="font-semibold mb-4">Services</h4>
-          <ul class="space-y-2 text-sm text-slate-400">
-            <li><a href="#services" class="hover:text-white">Web & App Development</a></li>
-            <li><a href="#services" class="hover:text-white">Video & Audio Production</a></li>
-            <li><a href="#services" class="hover:text-white">Event Management</a></li>
-            <li><a href="#services" class="hover:text-white">UGC & Content Creation</a></li>
-          </ul>
-        </div>
-        
-        <div>
-          <h4 class="font-semibold mb-4">Contact</h4>
-          <ul class="space-y-2 text-sm text-slate-400">
-            <li><a href="mailto:1coastmedia@gmail.com" class="hover:text-white">1coastmedia@gmail.com</a></li>
-            <li><a href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noreferrer" class="hover:text-white">Schedule a Call</a></li>
-          </ul>
-        </div>
-      </div>
-      
-      <div class="border-t border-slate-800 mt-8 pt-8 text-center text-sm text-slate-400">
-        <p>&copy; 2025 1CoastMedia. All rights reserved.</p>
-      </div>
-    </div>
-  </footer>
-
-  <!-- CHECKOUT MODAL -->
-  <div x-show="checkoutModalOpen" 
-       x-transition:enter="transition ease-out duration-300"
-       x-transition:enter-start="opacity-0"
-       x-transition:enter-end="opacity-100"
-       x-transition:leave="transition ease-in duration-200"
-       x-transition:leave-start="opacity-100"
-       x-transition:leave-end="opacity-0"
-       class="fixed inset-0 z-50 overflow-y-auto"
-       @click.self="closeCheckoutModal()">
-    
-    <div class="flex min-h-full items-center justify-center p-4">
-      <div class="bg-white rounded-2xl shadow-2xl ring-1 ring-slate-200 w-full max-w-4xl max-h-[90vh] overflow-hidden"
-           @click.stop>
-        
-        <!-- Modal Header -->
-        <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
-          <div class="flex items-center justify-between">
-            <h2 class="text-xl font-bold text-slate-900">Your Package</h2>
-            <button @click="closeCheckoutModal()" class="text-slate-400 hover:text-slate-600">
-              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-        
-        <!-- Modal Content -->
-        <div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-          
-          <!-- Cart Items -->
-          <div class="mb-8">
-            <h3 class="font-semibold text-lg mb-4">Selected Services</h3>
-            
-            <!-- Services -->
-            <div x-show="cartServices.length > 0" class="space-y-3 mb-6">
-              <template x-for="serviceKey in cartServices" :key="serviceKey">
-                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                  <div class="flex-1">
-                    <div class="font-medium" x-text="getServiceByKey(serviceKey)?.name"></div>
-                    <div class="text-sm text-slate-600" x-text="getServiceByKey(serviceKey)?.outcome"></div>
-                  </div>
-                  <div class="text-right">
-                    <div class="font-semibold" x-text="fmtUSD(getServiceByKey(serviceKey)?.price[plan])"></div>
-                    <button @click="toggleService(serviceKey)" class="text-xs text-red-600 hover:text-red-800">Remove</button>
-                  </div>
-                </div>
-              </template>
-            </div>
-            
-            <!-- Bundles -->
-            <div x-show="cartBundles.length > 0" class="space-y-3 mb-6">
-              <template x-for="bundleKey in cartBundles" :key="bundleKey">
-                <div class="flex items-center justify-between p-4 bg-emerald-50 rounded-lg">
-                  <div class="flex-1">
-                    <div class="font-medium" x-text="getBundleByKey(bundleKey)?.name"></div>
-                    <div class="text-sm text-slate-600" x-text="getBundleByKey(bundleKey)?.description"></div>
-                  </div>
-                  <div class="text-right">
-                    <div class="font-semibold">
-                      <span x-show="getBundleByKey(bundleKey)?.price.oneTime" x-text="fmtUSD(getBundleByKey(bundleKey)?.price.oneTime)"></span>
-                      <span x-show="getBundleByKey(bundleKey)?.price.monthly" class="text-sm text-slate-600">
-                        <span x-show="getBundleByKey(bundleKey)?.price.oneTime"> + </span>
-                        <span x-text="fmtUSD(getBundleByKey(bundleKey)?.price.monthly) + '/mo'"></span>
-                      </span>
-                    </div>
-                    <button @click="toggleBundle(bundleKey)" class="text-xs text-red-600 hover:text-red-800">Remove</button>
-                  </div>
-                </div>
-              </template>
-            </div>
-            
-            <!-- Add-ons in cart -->
-            <div x-show="cartAddons.length > 0" class="space-y-3 mb-6">
-              <h4 class="font-medium text-slate-900">Add-ons</h4>
-              <template x-for="addonKey in cartAddons" :key="addonKey">
-                <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                  <div class="flex-1">
-                    <div class="font-medium text-sm" x-text="getAddonByKey(addonKey)?.name"></div>
-                    <div class="text-xs text-slate-600" x-text="getAddonByKey(addonKey)?.short"></div>
-                  </div>
-                  <div class="text-right">
-                    <div class="font-semibold text-sm" x-text="fmtUSD(getAddonByKey(addonKey)?.price[plan])"></div>
-                    <button @click="toggleAddon(addonKey)" class="text-xs text-red-600 hover:text-red-800">Remove</button>
-                  </div>
-                </div>
-              </template>
-            </div>
-            
-            <!-- Empty State -->
-            <div x-show="cartServices.length === 0 && cartBundles.length === 0" class="text-center py-8 text-slate-500">
-              <p>No services selected yet.</p>
-              <button @click="closeCheckoutModal()" class="mt-2 text-slate-600 hover:text-slate-800 underline">Browse services</button>
-            </div>
-          </div>
-          
-          <!-- Totals -->
-          <div x-show="cartServices.length > 0 || cartBundles.length > 0" class="border-t border-slate-200 pt-6 mb-8">
-            <div class="space-y-2">
-              <div class="flex justify-between text-lg">
-                <span>One-time Total:</span>
-                <span class="font-semibold" x-text="fmtUSD(getOneTimeTotal())"></span>
+              </ul>
               </div>
-              <div class="flex justify-between text-lg">
-                <span>Monthly Total:</span>
-                <span class="font-semibold" x-text="fmtUSD(getMonthlyTotal())"></span>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Contact Form -->
-          <div x-show="cartServices.length > 0 || cartBundles.length > 0" class="space-y-4">
-            <h3 class="font-semibold text-lg">Contact Information</h3>
-            
-            <div class="grid md:grid-cols-2 gap-4">
-              <div>
-                <label for="checkout-name" class="block text-sm font-medium text-slate-700 mb-1">Name *</label>
-                <input type="text" id="checkout-name" name="name" required 
-                       class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                       autocomplete="name">
               </div>
               
-              <div>
-                <label for="checkout-email" class="block text-sm font-medium text-slate-700 mb-1">Email *</label>
-                <input type="email" id="checkout-email" name="email" required 
-                       class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                       autocomplete="email">
+              <!-- Action Buttons -->
+              <div class="space-y-2">
+              <button @click="toggleService(service.key)" 
+              class="w-full py-2 px-4 rounded-lg font-medium transition-all duration-200"
+              :class="cartServices.includes(service.key) 
+              ? 'bg-slate-900 text-white hover:bg-slate-800' 
+              : 'bg-slate-100 text-slate-900 hover:bg-slate-200'">
+              <span x-show="!cartServices.includes(service.key)">Add to Cart</span>
+              <span x-show="cartServices.includes(service.key)">Remove from Cart</span>
+              </button>
+              </div>
+              </div>
+              </template>
               </div>
               
-              <div>
-                <label for="checkout-phone" class="block text-sm font-medium text-slate-700 mb-1">Phone</label>
-                <input type="tel" id="checkout-phone" name="phone" 
-                       class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                       autocomplete="tel">
+              <!-- Empty State -->
+              <div x-show="Object.values(serviceCategories).every(cat => !cat.services || cat.services.filter(s => s.price[plan] > 0).length === 0)" 
+                   class="text-center py-12">
+                <div class="text-slate-400 text-4xl mb-4">🔧</div>
+                <h3 class="text-lg font-medium text-slate-900 mb-2">No Services Available</h3>
+                <p class="text-slate-600">No services are available for the selected plan. Try switching between One-Time and Monthly.</p>
               </div>
               
-              <div>
-                <label for="checkout-company" class="block text-sm font-medium text-slate-700 mb-1">Company</label>
-                <input type="text" id="checkout-company" name="company" 
-                       class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                       autocomplete="organization">
-              </div>
-            </div>
-            
-            <div>
-              <label for="checkout-notes" class="block text-sm font-medium text-slate-700 mb-1">Project Notes</label>
-              <textarea id="checkout-notes" name="notes" rows="3" 
-                        class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                        placeholder="Tell us about your project, timeline, or any specific requirements..."></textarea>
-            </div>
-            
-            <div class="flex items-start gap-3">
-              <input type="checkbox" id="checkout-terms" name="terms" required 
-                     class="mt-1 h-4 w-4 text-slate-600 focus:ring-slate-500 border-slate-300 rounded">
-              <label for="checkout-terms" class="text-sm text-slate-600">
-                I agree to the terms of service and understand that 1CoastMedia will contact me to discuss project details and finalize the agreement.
-              </label>
-            </div>
-          </div>
-          
-          <!-- Action Buttons -->
-          <div x-show="cartServices.length > 0 || cartBundles.length > 0" class="flex gap-3 mt-8">
-            <button @click="closeCheckoutModal()" 
-                    class="flex-1 btn ring-1 ring-slate-200 bg-white px-6 py-3 hover:bg-slate-50 rounded-xl">
-              Continue Shopping
-            </button>
-            <button @click="submitOrder()" 
-                    class="flex-1 btn btn-primary rounded-xl px-6 py-3">
-              Submit Order
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Success/Error Messages -->
-  <div x-show="showMessage" 
-       x-transition:enter="transition ease-out duration-300"
-       x-transition:enter-start="opacity-0 translate-y-4"
-       x-transition:enter-end="opacity-100 translate-y-0"
-       x-transition:leave="transition ease-in duration-200"
-       x-transition:leave-start="opacity-100 translate-y-0"
-       x-transition:leave-end="opacity-0 translate-y-4"
-       class="fixed top-4 right-4 z-50 max-w-sm">
-    <div class="bg-white rounded-lg shadow-lg ring-1 ring-slate-200 p-4"
-         :class="messageType === 'success' ? 'ring-emerald-200 bg-emerald-50' : 'ring-red-200 bg-red-50'">
-      <div class="flex items-start gap-3">
-        <div class="flex-shrink-0">
-          <svg x-show="messageType === 'success'" class="h-5 w-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-          </svg>
-          <svg x-show="messageType === 'error'" class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-          </svg>
-        </div>
-        <div class="flex-1">
-          <p class="text-sm font-medium" 
-             :class="messageType === 'success' ? 'text-emerald-800' : 'text-red-800'" 
-             x-text="messageText"></p>
-        </div>
-        <button @click="showMessage = false" 
-                class="flex-shrink-0 text-slate-400 hover:text-slate-600">
-          <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ADD-ONS MODAL -->
-  <div x-show="showAddonsModal" 
-       x-transition:enter="transition ease-out duration-300"
-       x-transition:enter-start="opacity-0"
-       x-transition:enter-end="opacity-100"
-       x-transition:leave="transition ease-in duration-200"
-       x-transition:leave-start="opacity-100"
-       x-transition:leave-end="opacity-0"
-       class="fixed inset-0 z-50 bg-slate-900/50 overflow-y-auto p-4 sm:p-6"
-       role="dialog" aria-modal="true">
-    <div class="mx-auto w-full max-w-4xl">
-      <div x-transition:enter="transition ease-out duration-300"
-           x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-           x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-           x-transition:leave="transition ease-in duration-200"
-           x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-           x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-           class="glass rounded-2xl shadow-xl max-h-[90vh] overflow-hidden">
-        
-        <!-- Header -->
-        <div class="sticky top-0 z-10 bg-white/95 backdrop-blur px-6 py-4 border-b border-slate-200">
-          <div class="flex items-center justify-between">
-            <div>
-              <h2 class="text-xl font-bold text-slate-900">Add-Ons</h2>
-              <p class="text-sm text-slate-600 mt-1" x-text="`Enhance your ${getServiceByKey(activeAddonService)?.name || 'service'} package`"></p>
-            </div>
-            <button @click="closeAddonsModal()" 
-                    class="h-10 w-10 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600">
-              <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-              </svg>
-            </button>
-          </div>
-          
-          <!-- Filters -->
-          <div class="flex items-center gap-4 mt-4">
-            <div class="flex items-center gap-2">
-              <label class="text-sm font-medium text-slate-700">Service:</label>
-              <select x-model="activeAddonService" @change="loadAddonsForService()" 
-                      class="px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500">
-                <template x-for="service in getAvailableServices()" :key="service.key">
-                  <option :value="service.key" x-text="service.name"></option>
-                </template>
-              </select>
-            </div>
-            
-            <div class="flex items-center gap-2">
-              <label class="text-sm font-medium text-slate-700">Sort:</label>
-              <select x-model="addonSortBy" 
-                      class="px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500">
-                <option value="popular">Popular First</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="alpha">Alphabetical</option>
-              </select>
-            </div>
-            
-            <div class="flex-1">
-              <input type="text" x-model="addonSearchQuery" 
-                     placeholder="Search add-ons..." 
-                     class="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500">
-            </div>
-          </div>
-        </div>
-        
-        <!-- Content -->
-        <div class="p-6 overflow-y-auto" style="max-height: calc(90vh - 140px);">
-          <!-- Add-ons Grid -->
-          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <template x-for="addon in getFilteredAddons()" :key="addon.key">
-              <div class="relative bg-white rounded-xl ring-1 ring-slate-200 p-4 hover:ring-slate-300 transition-all duration-200"
-                   :class="cartAddons.includes(addon.key) ? 'ring-2 ring-slate-900 bg-slate-50' : ''">
-                
-                <!-- Popular Badge -->
-                <div x-show="addon.popular" 
-                     class="absolute -top-2 -right-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
-                  Popular
-                </div>
-                
-                <!-- Badge -->
-                <div x-show="addon.badge" 
-                     class="inline-block bg-slate-100 text-slate-700 text-xs font-medium px-2 py-1 rounded-full mb-3"
-                     x-text="addon.badge"></div>
-                
-                <!-- Content -->
-                <div class="mb-4">
-                  <h3 class="font-semibold text-slate-900 mb-1" x-text="addon.name"></h3>
-                  <p x-show="addon.short" class="text-sm text-slate-600 mb-2" x-text="addon.short"></p>
-                  <p class="text-sm text-slate-500" x-text="addon.description"></p>
-                </div>
-                
-                <!-- Pricing -->
-                <div class="mb-4">
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <div class="text-lg font-bold text-slate-900" x-text="fmtUSD(addon.price[plan])"></div>
-                      <div class="text-xs text-slate-500" x-text="plan === 'monthly' ? 'per month' : 'one-time'"></div>
-                    </div>
-                    <div x-show="plan === 'monthly' && addon.price.oneTime > 0" class="text-right">
-                      <div class="text-sm text-slate-600" x-text="'+ ' + fmtUSD(addon.price.oneTime)"></div>
-                      <div class="text-xs text-slate-500">setup</div>
-                    </div>
-                  </div>
-                </div>
-                
-                <!-- Action Button -->
-                <button @click="toggleAddon(addon.key)" 
-                        class="w-full py-2 px-4 rounded-lg font-medium transition-all duration-200"
-                        :class="cartAddons.includes(addon.key) 
-                          ? 'bg-slate-900 text-white hover:bg-slate-800' 
-                          : 'bg-slate-100 text-slate-900 hover:bg-slate-200'">
-                  <span x-show="!cartAddons.includes(addon.key)">Add to Cart</span>
-                  <span x-show="cartAddons.includes(addon.key)">✓ Added</span>
+              <!-- CTA -->
+              <div class="text-center mt-12">
+                <button @click="openCheckoutModal()" class="tap btn btn-primary rounded-xl px-8 py-3">
+                  Build Your Custom Package
                 </button>
               </div>
-            </template>
-          </div>
-          
-          <!-- Empty State -->
-          <div x-show="getFilteredAddons().length === 0" class="text-center py-12">
-            <div class="text-slate-400 text-4xl mb-4">🔍</div>
-            <h3 class="text-lg font-medium text-slate-900 mb-2">No add-ons found</h3>
-            <p class="text-slate-600">Try adjusting your search or selecting a different service.</p>
-          </div>
-        </div>
-        
-        <!-- Footer -->
-        <div class="sticky bottom-0 bg-white/95 backdrop-blur border-t border-slate-200 px-6 py-4">
-          <div class="flex items-center justify-between">
-            <div class="text-sm text-slate-600">
-              <span x-text="cartAddons.length"></span> add-on<span x-show="cartAddons.length !== 1">s</span> selected
             </div>
-            <div class="flex gap-3">
-              <button @click="closeAddonsModal()" 
-                      class="px-4 py-2 text-slate-600 hover:text-slate-800 font-medium">
-                Continue Shopping
-              </button>
-              <button @click="closeAddonsModal(); openCheckoutModal()" 
-                      class="btn btn-primary rounded-lg px-6 py-2">
-                View Cart
-              </button>
+          </section>
+
+          <!-- FEATURED SIGNATURE OFFERS -->
+          <section class="py-16 bg-slate-50">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <div class="text-center mb-12">
+                <h2 class="text-3xl font-black tracking-tight">Featured Signature Offers</h2>
+                <p class="mt-4 text-slate-600">Homepage highlights</p>
+              </div>
+              <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl p-6 ring-1 ring-slate-200">
+                  <h3 class="font-bold text-lg mb-2">48-Hour Launch Funnel</h3>
+                  <p class="text-slate-600 mb-4">A tracked lead-gen system live in 2 days.</p>
+                  <div class="text-2xl font-bold text-green-600">$1,950</div>
+                </div>
+                <div class="bg-white rounded-xl p-6 ring-1 ring-slate-200">
+                  <h3 class="font-bold text-lg mb-2">Local Authority Sprint</h3>
+                  <p class="text-slate-600 mb-4">Your business everywhere it counts in 7 days.</p>
+                  <div class="text-2xl font-bold text-green-600">$1,500</div>
+                </div>
+                <div class="bg-white rounded-xl p-6 ring-1 ring-slate-200">
+                  <h3 class="font-bold text-lg mb-2">Site-in-a-Week</h3>
+                  <p class="text-slate-600 mb-4">Six responsive pages, live and optimized in 7 days.</p>
+                  <div class="text-2xl font-bold text-green-600">$3,500</div>
+                </div>
+                <div class="bg-white rounded-xl p-6 ring-1 ring-slate-200">
+                  <h3 class="font-bold text-lg mb-2">Event Surge Kit</h3>
+                  <p class="text-slate-600 mb-4">Flyers, page, promos, and ads — event-ready in a week.</p>
+                  <div class="text-2xl font-bold text-green-600">$1,200</div>
+                </div>
+              </div>
+              <div class="text-center mt-8">
+                <button @click="openCheckoutModal()" class="tap btn btn-primary rounded-xl px-6 py-3">Explore Signature Programs</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- SOCIAL PROOF -->
+          <section class="py-16">
+            <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+              <blockquote class="text-xl italic text-slate-700 mb-4">
+                "We needed a site live before our event — they delivered in 5 days. Bookings doubled."
+              </blockquote>
+              <cite class="text-slate-500">— Local Venue Owner, Biloxi MS</cite>
+            </div>
+          </section>
+
+          <!-- CTA BLOCK -->
+          <section class="py-16">
+            <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+              <h2 class="text-3xl font-black mb-4">Ready to grow your brand?</h2>
+              <p class="text-xl mb-8">Pick a base service, stack add-ons, or build from scratch.</p>
+              <button @click="openCheckoutModal()" class="tap bg-white text-blue-600 font-bold px-8 py-4 rounded-xl hover:bg-slate-50 transition-colors">👉 Build My Package</button>
+            </div>
+          </section>
+
+          <!-- FAQ SECTION -->
+          <section id="faq" class="py-16 bg-slate-50">
+            <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+              <div class="text-center mb-12">
+                <h2 class="text-3xl font-extrabold tracking-tight">Frequently Asked Questions</h2>
+                <p class="mt-2 text-slate-600">Everything you need to know about working with 1CoastMedia</p>
+              </div>
+              
+              <div class="space-y-6">
+                <div class="card p-6">
+                  <h3 class="font-semibold text-lg mb-2">How fast can you deliver?</h3>
+                  <p class="text-slate-600">Most projects are completed within 3-7 days. Rush delivery available for urgent needs.</p>
+                </div>
+                
+                <div class="card p-6">
+                  <h3 class="font-semibold text-lg mb-2">What's included in the pricing?</h3>
+                  <p class="text-slate-600">All pricing is transparent and includes everything listed in the deliverables. No hidden fees or surprise charges.</p>
+                </div>
+                
+                <div class="card p-6">
+                  <h3 class="font-semibold text-lg mb-2">Do you offer revisions?</h3>
+                  <p class="text-slate-600">Yes! We include reasonable revisions to ensure you're completely satisfied with the final deliverable.</p>
+                </div>
+                
+                <div class="card p-6">
+                  <h3 class="font-semibold text-lg mb-2">Can I cancel my monthly service?</h3>
+                  <p class="text-slate-600">Monthly services can be cancelled anytime after the minimum term commitment is met.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- CONTACT SECTION -->
+          <section id="contact" class="py-16">
+            <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+              <h2 class="text-3xl font-extrabold tracking-tight mb-4">Ready to Get Started?</h2>
+              <p class="text-slate-600 mb-8">Let's discuss your project and find the perfect solution for your needs.</p>
+              
+              <div class="flex flex-wrap justify-center gap-4">
+                <a href="mailto:1coastmedia@gmail.com" class="btn btn-primary rounded-xl px-6 py-3">Email Us</a>
+                <a href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noreferrer" class="btn ring-1 ring-slate-200 bg-white px-6 py-3 hover:bg-slate-50 rounded-xl">Schedule Call</a>
+                <button @click="openCheckoutModal()" class="btn bg-emerald-600 text-white hover:bg-emerald-700 rounded-xl px-6 py-3">Build Package</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- FOOTER -->
+          <footer class="bg-slate-900 text-white py-12">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <div class="grid md:grid-cols-3 gap-8">
+                <div>
+                  <div class="flex items-center gap-2 mb-4">
+                    <span class="inline-grid place-items-center h-8 w-8 rounded-lg bg-white/10 overflow-hidden">
+                      <img src="/assets/1coastmedia_logo_A_primary_mark_2048.jpg" alt="1CoastMedia logo" class="h-8 w-8 object-cover" />
+                    </span>
+                    <span class="font-bold">1CoastMedia</span>
+                  </div>
+                  <p class="text-slate-400 text-sm">Gulf Coast digital services for creators, real estate, tourism & local brands.</p>
+                </div>
+                
+                <div>
+                  <h4 class="font-semibold mb-4">Services</h4>
+                  <ul class="space-y-2 text-sm text-slate-400">
+                    <li><a href="#services" class="hover:text-white">Web & App Development</a></li>
+                    <li><a href="#services" class="hover:text-white">Video & Audio Production</a></li>
+                    <li><a href="#services" class="hover:text-white">Event Management</a></li>
+                    <li><a href="#services" class="hover:text-white">UGC & Content Creation</a></li>
+                  </ul>
+                </div>
+                
+                <div>
+                  <h4 class="font-semibold mb-4">Contact</h4>
+                  <ul class="space-y-2 text-sm text-slate-400">
+                    <li><a href="mailto:1coastmedia@gmail.com" class="hover:text-white">1coastmedia@gmail.com</a></li>
+                    <li><a href="https://calendly.com/bdaniels013/30min" target="_blank" rel="noreferrer" class="hover:text-white">Schedule a Call</a></li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div class="border-t border-slate-800 mt-8 pt-8 text-center text-sm text-slate-400">
+                <p>&copy; 2025 1CoastMedia. All rights reserved.</p>
+              </div>
+            </div>
+          </footer>
+
+          <!-- CHECKOUT MODAL -->
+          <div x-show="checkoutModalOpen" 
+               x-transition:enter="transition ease-out duration-300"
+               x-transition:enter-start="opacity-0"
+               x-transition:enter-end="opacity-100"
+               x-transition:leave="transition ease-in duration-200"
+               x-transition:leave-start="opacity-100"
+               x-transition:leave-end="opacity-0"
+               class="fixed inset-0 z-50 overflow-y-auto"
+               @click.self="closeCheckoutModal()">
+            
+            <div class="flex min-h-full items-center justify-center p-4">
+              <div class="bg-white rounded-2xl shadow-2xl ring-1 ring-slate-200 w-full max-w-4xl max-h-[90vh] overflow-hidden"
+                   @click.stop>
+                
+                <!-- Modal Header -->
+                <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
+                  <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-slate-900">Your Package</h2>
+                    <button @click="closeCheckoutModal()" class="text-slate-400 hover:text-slate-600">
+                      <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                
+                <!-- Modal Content -->
+                <div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+                
+                <!-- Cart Items -->
+                <div class="mb-8">
+                  <h3 class="font-semibold text-lg mb-4">Selected Services</h3>
+                  
+                  <!-- Services -->
+                  <div x-show="cartServices.length > 0" class="space-y-3 mb-6">
+                    <template x-for="serviceKey in cartServices" :key="serviceKey">
+                      <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                        <div class="flex-1">
+                          <div class="font-medium" x-text="getServiceByKey(serviceKey)?.name"></div>
+                          <div class="text-sm text-slate-600" x-text="getServiceByKey(serviceKey)?.outcome"></div>
+                        </div>
+                        <div class="text-right">
+                          <div class="font-semibold" x-text="fmtUSD(getServiceByKey(serviceKey)?.price[plan])"></div>
+                          <button @click="toggleService(serviceKey)" class="text-xs text-red-600 hover:text-red-800">Remove</button>
+                        </div>
+                      </div>
+                    </template>
+                  </div>
+                  
+                  <!-- Bundles -->
+                  <div x-show="cartBundles.length > 0" class="space-y-3 mb-6">
+                    <template x-for="bundleKey in cartBundles" :key="bundleKey">
+                      <div class="flex items-center justify-between p-4 bg-emerald-50 rounded-lg">
+                        <div class="flex-1">
+                          <div class="font-medium" x-text="getBundleByKey(bundleKey)?.name"></div>
+                          <div class="text-sm text-slate-600" x-text="getBundleByKey(bundleKey)?.description"></div>
+                        </div>
+                        <div class="text-right">
+                          <div class="font-semibold">
+                            <span x-show="getBundleByKey(bundleKey)?.price.oneTime" x-text="fmtUSD(getBundleByKey(bundleKey)?.price.oneTime)"></span>
+                            <span x-show="getBundleByKey(bundleKey)?.price.monthly" class="text-sm text-slate-600">
+                              <span x-show="getBundleByKey(bundleKey)?.price.oneTime"> + </span>
+                              <span x-text="fmtUSD(getBundleByKey(bundleKey)?.price.monthly) + '/mo'"></span>
+                            </span>
+                          </div>
+                          <button @click="toggleBundle(bundleKey)" class="text-xs text-red-600 hover:text-red-800">Remove</button>
+                        </div>
+                      </div>
+                    </template>
+                  </div>
+                  
+                  <!-- Add-ons in cart -->
+                  <div x-show="cartAddons.length > 0" class="space-y-3 mb-6">
+                    <h4 class="font-medium text-slate-900">Add-ons</h4>
+                    <template x-for="addonKey in cartAddons" :key="addonKey">
+                      <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                        <div class="flex-1">
+                          <div class="font-medium text-sm" x-text="getAddonByKey(addonKey)?.name"></div>
+                          <div class="text-xs text-slate-600" x-text="getAddonByKey(addonKey)?.short"></div>
+                        </div>
+                        <div class="text-right">
+                          <div class="font-semibold text-sm" x-text="fmtUSD(getAddonByKey(addonKey)?.price[plan])"></div>
+                          <button @click="toggleAddon(addonKey)" class="text-xs text-red-600 hover:text-red-800">Remove</button>
+                        </div>
+                      </div>
+                    </template>
+                  </div>
+                  
+                  <!-- Empty State -->
+                  <div x-show="cartServices.length === 0 && cartBundles.length === 0" class="text-center py-8 text-slate-500">
+                    <p>No services selected yet.</p>
+                    <button @click="closeCheckoutModal()" class="mt-2 text-slate-600 hover:text-slate-800 underline">Browse services</button>
+                  </div>
+                </div>
+                
+                <!-- Totals -->
+                <div x-show="cartServices.length > 0 || cartBundles.length > 0" class="border-t border-slate-200 pt-6 mb-8">
+                  <div class="space-y-2">
+                    <div class="flex justify-between text-lg">
+                      <span>One-time Total:</span>
+                      <span class="font-semibold" x-text="fmtUSD(getOneTimeTotal())"></span>
+                    </div>
+                    <div class="flex justify-between text-lg">
+                      <span>Monthly Total:</span>
+                      <span class="font-semibold" x-text="fmtUSD(getMonthlyTotal())"></span>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Contact Form -->
+                <div x-show="cartServices.length > 0 || cartBundles.length > 0" class="space-y-4">
+                  <h3 class="font-semibold text-lg">Contact Information</h3>
+                  
+                  <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label for="checkout-name" class="block text-sm font-medium text-slate-700 mb-1">Name *</label>
+                      <input type="text" id="checkout-name" name="name" required 
+                             class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                             autocomplete="name">
+                    </div>
+                    
+                    <div>
+                      <label for="checkout-email" class="block text-sm font-medium text-slate-700 mb-1">Email *</label>
+                      <input type="email" id="checkout-email" name="email" required 
+                             class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                             autocomplete="email">
+                    </div>
+                    
+                    <div>
+                      <label for="checkout-phone" class="block text-sm font-medium text-slate-700 mb-1">Phone</label>
+                      <input type="tel" id="checkout-phone" name="phone" 
+                             class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                             autocomplete="tel">
+                    </div>
+                    
+                    <div>
+                      <label for="checkout-company" class="block text-sm font-medium text-slate-700 mb-1">Company</label>
+                      <input type="text" id="checkout-company" name="company" 
+                             class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                             autocomplete="organization">
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label for="checkout-notes" class="block text-sm font-medium text-slate-700 mb-1">Project Notes</label>
+                    <textarea id="checkout-notes" name="notes" rows="3" 
+                              class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                              placeholder="Tell us about your project, timeline, or any specific requirements..."></textarea>
+                  </div>
+                  
+                  <div class="flex items-start gap-3">
+                    <input type="checkbox" id="checkout-terms" name="terms" required 
+                           class="mt-1 h-4 w-4 text-slate-600 focus:ring-slate-500 border-slate-300 rounded">
+                    <label for="checkout-terms" class="text-sm text-slate-600">
+                      I agree to the terms of service and understand that 1CoastMedia will contact me to discuss project details and finalize the agreement.
+                    </label>
+                  </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div x-show="cartServices.length > 0 || cartBundles.length > 0" class="flex gap-3 mt-8">
+                  <button @click="closeCheckoutModal()" 
+                          class="flex-1 btn ring-1 ring-slate-200 bg-white px-6 py-3 hover:bg-slate-50 rounded-xl">
+                    Continue Shopping
+                  </button>
+                  <button @click="submitOrder()" 
+                          class="flex-1 btn btn-primary rounded-xl px-6 py-3">
+                    Submit Order
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
+
+          <!-- Success/Error Messages -->
+          <div x-show="showMessage" 
+               x-transition:enter="transition ease-out duration-300"
+               x-transition:enter-start="opacity-0 translate-y-4"
+               x-transition:enter-end="opacity-100 translate-y-0"
+               x-transition:leave="transition ease-in duration-200"
+               x-transition:leave-start="opacity-100 translate-y-0"
+               x-transition:leave-end="opacity-0 translate-y-4"
+               class="fixed top-4 right-4 z-50 max-w-sm">
+            <div class="bg-white rounded-lg shadow-lg ring-1 ring-slate-200 p-4"
+                 :class="messageType === 'success' ? 'ring-emerald-200 bg-emerald-50' : 'ring-red-200 bg-red-50'">
+              <div class="flex items-start gap-3">
+                <div class="flex-shrink-0">
+                  <svg x-show="messageType === 'success'" class="h-5 w-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                  </svg>
+                  <svg x-show="messageType === 'error'" class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                  </svg>
+                </div>
+                <div class="flex-1">
+                  <p class="text-sm font-medium" 
+                     :class="messageType === 'success' ? 'text-emerald-800' : 'text-red-800'" 
+                     x-text="messageText"></p>
+                </div>
+                <button @click="showMessage = false" 
+                        class="flex-shrink-0 text-slate-400 hover:text-slate-600">
+                  <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ADD-ONS MODAL -->
+          <div x-show="showAddonsModal" 
+               x-transition:enter="transition ease-out duration-300"
+               x-transition:enter-start="opacity-0"
+               x-transition:enter-end="opacity-100"
+               x-transition:leave="transition ease-in duration-200"
+               x-transition:leave-start="opacity-100"
+               x-transition:leave-end="opacity-0"
+               class="fixed inset-0 z-50 bg-slate-900/50 overflow-y-auto p-4 sm:p-6"
+               role="dialog" aria-modal="true">
+            <div class="mx-auto w-full max-w-4xl">
+              <div x-transition:enter="transition ease-out duration-300"
+                   x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                   x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                   x-transition:leave="transition ease-in duration-200"
+                   x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                   x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                   class="glass rounded-2xl shadow-xl max-h-[90vh] overflow-hidden">
+                
+                <!-- Header -->
+                <div class="sticky top-0 z-10 bg-white/95 backdrop-blur px-6 py-4 border-b border-slate-200">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <h2 class="text-xl font-bold text-slate-900">Add-Ons</h2>
+                      <p class="text-sm text-slate-600 mt-1" x-text="`Enhance your ${getServiceByKey(activeAddonService)?.name || 'service'} package`"></p>
+                    </div>
+                    <button @click="closeAddonsModal()" 
+                            class="h-10 w-10 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600">
+                      <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  <!-- Filters -->
+                  <div class="flex items-center gap-4 mt-4">
+                    <div class="flex items-center gap-2">
+                      <label class="text-sm font-medium text-slate-700">Service:</label>
+                      <select x-model="activeAddonService" @change="loadAddonsForService()" 
+                              class="px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500">
+                        <template x-for="service in getAvailableServices()" :key="service.key">
+                          <option :value="service.key" x-text="service.name"></option>
+                        </template>
+                      </select>
+                    </div>
+                    
+                    <div class="flex items-center gap-2">
+                      <label class="text-sm font-medium text-slate-700">Sort:</label>
+                      <select x-model="addonSortBy" 
+                              class="px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500">
+                        <option value="popular">Popular First</option>
+                        <option value="price-asc">Price: Low to High</option>
+                        <option value="price-desc">Price: High to Low</option>
+                        <option value="alpha">Alphabetical</option>
+                      </select>
+                    </div>
+                    
+                    <div class="flex-1">
+                      <input type="text" x-model="addonSearchQuery" 
+                             placeholder="Search add-ons..." 
+                             class="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500">
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Content -->
+                <div class="p-6 overflow-y-auto" style="max-height: calc(90vh - 140px);">
+                  <!-- Add-ons Grid -->
+                  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <template x-for="addon in getFilteredAddons()" :key="addon.key">
+                      <div class="relative bg-white rounded-xl ring-1 ring-slate-200 p-4 hover:ring-slate-300 transition-all duration-200"
+                           :class="cartAddons.includes(addon.key) ? 'ring-2 ring-slate-900 bg-slate-50' : ''">
+                        
+                        <!-- Popular Badge -->
+                        <div x-show="addon.popular" 
+                             class="absolute -top-2 -right-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
+                          Popular
+                        </div>
+                        
+                        <!-- Badge -->
+                        <div x-show="addon.badge" 
+                             class="inline-block bg-slate-100 text-slate-700 text-xs font-medium px-2 py-1 rounded-full mb-3"
+                             x-text="addon.badge"></div>
+                        
+                        <!-- Content -->
+                        <div class="mb-4">
+                          <h3 class="font-semibold text-slate-900 mb-1" x-text="addon.name"></h3>
+                          <p x-show="addon.short" class="text-sm text-slate-600 mb-2" x-text="addon.short"></p>
+                          <p class="text-sm text-slate-500" x-text="addon.description"></p>
+                        </div>
+                        
+                        <!-- Pricing -->
+                        <div class="mb-4">
+                          <div class="flex items-center justify-between">
+                            <div>
+                              <div class="text-lg font-bold text-slate-900" x-text="fmtUSD(addon.price[plan])"></div>
+                              <div class="text-xs text-slate-500" x-text="plan === 'monthly' ? 'per month' : 'one-time'"></div>
+                            </div>
+                            <div x-show="plan === 'monthly' && addon.price.oneTime > 0" class="text-right">
+                              <div class="text-sm text-slate-600" x-text="'+ ' + fmtUSD(addon.price.oneTime)"></div>
+                              <div class="text-xs text-slate-500">setup</div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <!-- Action Button -->
+                        <button @click="toggleAddon(addon.key)" 
+                                class="w-full py-2 px-4 rounded-lg font-medium transition-all duration-200"
+                                :class="cartAddons.includes(addon.key) 
+                                  ? 'bg-slate-900 text-white hover:bg-slate-800' 
+                                  : 'bg-slate-100 text-slate-900 hover:bg-slate-200'">
+                          <span x-show="!cartAddons.includes(addon.key)">Add to Cart</span>
+                          <span x-show="cartAddons.includes(addon.key)">✓ Added</span>
+                        </button>
+                      </div>
+                    </template>
+                  </div>
+                  
+                  <!-- Empty State -->
+                  <div x-show="getFilteredAddons().length === 0" class="text-center py-12">
+                    <div class="text-slate-400 text-4xl mb-4">🔍</div>
+                    <h3 class="text-lg font-medium text-slate-900 mb-2">No add-ons found</h3>
+                    <p class="text-slate-600">Try adjusting your search or selecting a different service.</p>
+                  </div>
+                </div>
+                
+                <!-- Footer -->
+                <div class="sticky bottom-0 bg-white/95 backdrop-blur border-t border-slate-200 px-6 py-4">
+                  <div class="flex items-center justify-between">
+                    <div class="text-sm text-slate-600">
+                      <span x-text="cartAddons.length"></span> add-on<span x-show="cartAddons.length !== 1">s</span> selected
+                    </div>
+                    <div class="flex gap-3">
+                      <button @click="closeAddonsModal()" 
+                              class="px-4 py-2 text-slate-600 hover:text-slate-800 font-medium">
+                        Continue Shopping
+                      </button>
+                      <button @click="closeAddonsModal(); openCheckoutModal()" 
+                              class="btn btn-primary rounded-lg px-6 py-2">
+                        View Cart
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
 </body>
 </html>
