@@ -7,7 +7,7 @@ function adminApp() {
     addons: [],
     totalSales: 0,
     // Form models for new entries
-    newService: { category: '', key: '', name: '', oneTime: '', monthly: '' },
+    newService: { category: '', key: '', name: '', outcome: '', deliverables: '', oneTime: '', monthly: '' },
     newAddon: { key: '', name: '', description: '', oneTime: '', monthly: '' },
     // Save all changes flag (not used but could be for UI)
     saving: false,
@@ -34,6 +34,8 @@ function adminApp() {
           this.flatServices.push({
             key: svc.key,
             name: svc.name,
+            outcome: svc.outcome || '',
+            deliverables: (svc.deliverables || []).join(', '),
             priceOneTime: svc.price?.oneTime || 0,
             priceMonthly: svc.price?.monthly || 0,
             category: catKey
@@ -86,7 +88,7 @@ function adminApp() {
      * Add a new service to the catalog
      */
     addService() {
-      const { category, key, name, oneTime, monthly } = this.newService;
+      const { category, key, name, outcome, deliverables, oneTime, monthly } = this.newService;
       if (!category || !key || !name) {
         alert('Please fill out category, key and name');
         return;
@@ -104,18 +106,25 @@ function adminApp() {
       }
       const priceOne = parseFloat(oneTime) || 0;
       const priceMon = parseFloat(monthly) || 0;
+      // Parse deliverables from comma-separated string
+      const deliverableList = (deliverables || '')
+        .split(',')
+        .map(d => d.trim())
+        .filter(Boolean);
       const newSvc = {
         key: key,
         name: name,
-        outcome: '',
-        deliverables: [],
+        outcome: outcome || '',
+        deliverables: deliverableList,
         price: { oneTime: priceOne, monthly: priceMon }
       };
       this.serviceCategories[category].services.push(newSvc);
-      this.flatServices.push({ key, name, priceOneTime: priceOne, priceMonthly: priceMon, category });
+      this.flatServices.push({ key, name, outcome: outcome || '', deliverables: deliverableList.join(', '), priceOneTime: priceOne, priceMonthly: priceMon, category });
       // Reset form fields
       this.newService.key = '';
       this.newService.name = '';
+      this.newService.outcome = '';
+      this.newService.deliverables = '';
       this.newService.oneTime = '';
       this.newService.monthly = '';
       // Persist
@@ -205,8 +214,12 @@ function adminApp() {
         const updatedSvc = {
           key: svc.key,
           name: svc.name,
-          outcome: orig.outcome || '',
-          deliverables: orig.deliverables || [],
+          // Use edited outcome if provided; otherwise fall back to original
+          outcome: svc.outcome !== undefined ? svc.outcome : (orig.outcome || ''),
+          // Parse deliverables from comma-separated string if edited, else use original array
+          deliverables: svc.deliverables !== undefined
+            ? svc.deliverables.split(',').map(d => d.trim()).filter(Boolean)
+            : (orig.deliverables || []),
           sla: orig.sla || '',
           price: {
             oneTime: parseFloat(svc.priceOneTime) || 0,

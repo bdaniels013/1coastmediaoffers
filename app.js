@@ -110,38 +110,62 @@ function app() {
         }
       });
       // Add-ons total
-       this.cartAddons.forEach(key => {
+      this.cartAddons.forEach(key => {
         const addon = this.getAddonByKey(key);
-        if (addon && addon.price && addon.price.oneTime) {
-          total += addon.price.oneTime;
+        if (addon && addon.price) {
+          const price = addon.price.oneTime && addon.price.oneTime > 0
+            ? addon.price.oneTime
+            : (addon.price.monthly || 0);
+          total += price;
         }
       });
       return total;
     },
     // Checkout via Stripe
     async checkout() {
-      // Build cart items with names and prices for Stripe
+      // Build cart items with names and prices for Stripe.
+      // Determine if any monthly items are present to set the session mode accordingly.
       const items = [];
-      // Add base services
+      let hasMonthly = false;
+      // Base services
       this.cartServices.forEach(key => {
         const svc = this.getServiceByKey(key);
-        if (svc && svc.price && svc.price.oneTime) {
-          items.push({ type: 'service', name: svc.name, price: svc.price.oneTime });
+        if (svc && svc.price) {
+          let price = 0;
+          if (svc.price.oneTime && svc.price.oneTime > 0) {
+            price = svc.price.oneTime;
+          } else if (svc.price.monthly && svc.price.monthly > 0) {
+            price = svc.price.monthly;
+            hasMonthly = true;
+          }
+          if (price > 0) {
+            items.push({ type: 'service', name: svc.name, price });
+          }
         }
       });
-      // Add add-ons
+      // Add-ons
       this.cartAddons.forEach(key => {
         const addon = this.getAddonByKey(key);
-        if (addon && addon.price && addon.price.oneTime) {
-          items.push({ type: 'addon', name: addon.name, price: addon.price.oneTime });
+        if (addon && addon.price) {
+          let price = 0;
+          if (addon.price.oneTime && addon.price.oneTime > 0) {
+            price = addon.price.oneTime;
+          } else if (addon.price.monthly && addon.price.monthly > 0) {
+            price = addon.price.monthly;
+            hasMonthly = true;
+          }
+          if (price > 0) {
+            items.push({ type: 'addon', name: addon.name, price });
+          }
         }
       });
       if (items.length === 0) return;
+      const planType = hasMonthly ? 'monthly' : 'one-time';
       try {
         const response = await fetch('/api/checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ plan: 'one-time', cart: items, contact: {} })
+          body: JSON.stringify({ plan: planType, cart: items, contact: {} })
         });
         const data = await response.json();
         if (data && data.url) {

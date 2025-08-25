@@ -60,7 +60,9 @@
             <tr>
               <th class="p-2 text-left">Key</th>
               <th class="p-2 text-left">Name</th>
-              <th class="p-2 text-right">One-time</th>
+              <th class="p-2 text-left">Outcome</th>
+              <th class="p-2 text-left">Deliverables</th>
+              <th class="p-2 text-right">One‑time</th>
               <th class="p-2 text-right">Monthly</th>
               <th class="p-2 text-left">Category</th>
               <th class="p-2 text-right">Actions</th>
@@ -77,6 +79,12 @@
                 </td>
                 <td class="p-2">
                   <input x-model="svc.name" class="bg-transparent border-b border-white/30 focus:outline-none w-full text-sm" />
+                </td>
+                <td class="p-2">
+                  <input x-model="svc.outcome" class="bg-transparent border-b border-white/30 focus:outline-none w-full text-sm" placeholder="Outcome" />
+                </td>
+                <td class="p-2">
+                  <input x-model="svc.deliverables" class="bg-transparent border-b border-white/30 focus:outline-none w-full text-sm" placeholder="Comma-separated" />
                 </td>
                 <td class="p-2 text-right">
                   <input x-model.number="svc.priceOneTime" type="number" step="1" class="bg-transparent border-b border-white/30 focus:outline-none w-full text-sm text-right" />
@@ -96,7 +104,7 @@
                 </td>
               </tr>
             </template>
-            <tr x-show="flatServices.length === 0"><td colspan="6" class="p-2 text-center text-gray-400">No services.</td></tr>
+            <tr x-show="flatServices.length === 0"><td colspan="8" class="p-2 text-center text-gray-400">No services.</td></tr>
           </tbody>
         </table>
         <!-- Save changes button -->
@@ -104,28 +112,42 @@
           <button @click="saveChanges()" class="px-4 py-2 rounded bg-green-600 hover:opacity-90 text-white text-sm">Save All Changes</button>
         </div>
         <!-- Add service form -->
-        <form @submit.prevent="addService" class="mt-4 grid grid-cols-5 gap-2 items-end">
+        <form @submit.prevent="addService" class="mt-4 grid grid-cols-6 gap-2 items-end">
           <div class="col-span-1">
             <label class="block text-xs text-gray-400">Category</label>
-            <input x-model="newService.category" type="text" class="bg-transparent border-b border-white/30 focus:outline-none px-2 py-1 w-full text-sm" />
+            <input x-model="newService.category" list="categoryList" type="text" class="bg-transparent border-b border-white/30 focus:outline-none px-2 py-1 w-full text-sm" placeholder="e.g. signature" />
+            <!-- datalist of existing category keys -->
+            <datalist id="categoryList">
+              <template x-for="(cat, key) in serviceCategories" :key="key">
+                <option :value="key" x-text="formatCategoryTitle(key)"></option>
+              </template>
+            </datalist>
           </div>
           <div class="col-span-1">
             <label class="block text-xs text-gray-400">Key</label>
-            <input x-model="newService.key" type="text" class="bg-transparent border-b border-white/30 focus:outline-none px-2 py-1 w-full text-sm" />
+            <input x-model="newService.key" type="text" class="bg-transparent border-b border-white/30 focus:outline-none px-2 py-1 w-full text-sm" placeholder="unique-key" />
           </div>
-          <div class="col-span-1">
+          <div class="col-span-2">
             <label class="block text-xs text-gray-400">Name</label>
-            <input x-model="newService.name" type="text" class="bg-transparent border-b border-white/30 focus:outline-none px-2 py-1 w-full text-sm" />
+            <input x-model="newService.name" type="text" class="bg-transparent border-b border-white/30 focus:outline-none px-2 py-1 w-full text-sm" placeholder="Service name" />
+          </div>
+          <div class="col-span-2">
+            <label class="block text-xs text-gray-400">Outcome</label>
+            <input x-model="newService.outcome" type="text" class="bg-transparent border-b border-white/30 focus:outline-none px-2 py-1 w-full text-sm" placeholder="e.g. Website live in 7 days" />
+          </div>
+          <div class="col-span-3">
+            <label class="block text-xs text-gray-400">Deliverables (comma‑separated)</label>
+            <input x-model="newService.deliverables" type="text" class="bg-transparent border-b border-white/30 focus:outline-none px-2 py-1 w-full text-sm" placeholder="page, SEO setup, ..." />
           </div>
           <div class="col-span-1">
             <label class="block text-xs text-gray-400">One‑time</label>
-            <input x-model="newService.oneTime" type="number" min="0" class="bg-transparent border-b border-white/30 focus:outline-none px-2 py-1 w-full text-sm" />
+            <input x-model="newService.oneTime" type="number" min="0" class="bg-transparent border-b border-white/30 focus:outline-none px-2 py-1 w-full text-sm" placeholder="$" />
           </div>
           <div class="col-span-1">
             <label class="block text-xs text-gray-400">Monthly</label>
-            <input x-model="newService.monthly" type="number" min="0" class="bg-transparent border-b border-white/30 focus:outline-none px-2 py-1 w-full text-sm" />
+            <input x-model="newService.monthly" type="number" min="0" class="bg-transparent border-b border-white/30 focus:outline-none px-2 py-1 w-full text-sm" placeholder="$" />
           </div>
-          <div class="col-span-5">
+          <div class="col-span-6">
             <button type="submit" class="mt-2 px-3 py-1.5 rounded bg-indigo-600 hover:opacity-90 text-white text-sm">Add Service</button>
           </div>
         </form>
