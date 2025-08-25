@@ -8,7 +8,7 @@ function adminApp() {
     totalSales: 0,
     // Form models for new entries
     newService: { category: '', key: '', name: '', oneTime: '', monthly: '' },
-    newAddon: { key: '', name: '', description: '', oneTime: '' },
+    newAddon: { key: '', name: '', description: '', oneTime: '', monthly: '' },
     // Save all changes flag (not used but could be for UI)
     saving: false,
     init() {
@@ -35,7 +35,8 @@ function adminApp() {
         key: a.key,
         name: a.name,
         description: a.description,
-        priceOneTime: a.price?.oneTime || 0
+        priceOneTime: a.price?.oneTime || 0,
+        priceMonthly: a.price?.monthly || 0
       }));
       // initialise form categories with first category key if available
       const firstCat = Object.keys(this.serviceCategories)[0] || '';
@@ -126,7 +127,7 @@ function adminApp() {
      * Add a new add-on
      */
     addAddon() {
-      const { key, name, description, oneTime } = this.newAddon;
+      const { key, name, description, oneTime, monthly } = this.newAddon;
       if (!key || !name) {
         alert('Please fill out key and name for the add-on');
         return;
@@ -137,22 +138,24 @@ function adminApp() {
         return;
       }
       const priceOne = parseFloat(oneTime) || 0;
+      const priceMon = parseFloat(monthly) || 0;
       const newAddon = {
         key: key,
         name: name,
         description: description || '',
-        price: { oneTime: priceOne, monthly: 0 },
+        price: { oneTime: priceOne, monthly: priceMon },
         applicableServices: ['all']
       };
       // Add to global data structure
       if (!window.serviceData.addons) window.serviceData.addons = [];
       window.serviceData.addons.push(newAddon);
-      this.flatAddons.push({ key, name, description: description || '', priceOneTime: priceOne });
+      this.flatAddons.push({ key, name, description: description || '', priceOneTime: priceOne, priceMonthly: priceMon });
       // Reset form
       this.newAddon.key = '';
       this.newAddon.name = '';
       this.newAddon.description = '';
       this.newAddon.oneTime = '';
+      this.newAddon.monthly = '';
       this.saveData();
     },
     /**
@@ -217,7 +220,7 @@ function adminApp() {
           description: a.description || '',
           price: {
             oneTime: parseFloat(a.priceOneTime) || 0,
-            monthly: 0
+            monthly: parseFloat(a.priceMonthly) || 0
           },
           applicableServices: orig?.applicableServices || ['all']
         };
@@ -227,6 +230,30 @@ function adminApp() {
       this.saveData();
       alert('Changes saved successfully');
     },
+
+    /**
+     * Move a service up or down in the flat list. Updates only the view; call saveChanges() to persist.
+     */
+    moveServiceUp(index) {
+      if (index <= 0) return;
+      const item = this.flatServices.splice(index, 1)[0];
+      this.flatServices.splice(index - 1, 0, item);
+    },
+    moveServiceDown(index) {
+      if (index >= this.flatServices.length - 1) return;
+      const item = this.flatServices.splice(index, 1)[0];
+      this.flatServices.splice(index + 1, 0, item);
+    },
+    moveAddonUp(index) {
+      if (index <= 0) return;
+      const item = this.flatAddons.splice(index, 1)[0];
+      this.flatAddons.splice(index - 1, 0, item);
+    },
+    moveAddonDown(index) {
+      if (index >= this.flatAddons.length - 1) return;
+      const item = this.flatAddons.splice(index, 1)[0];
+      this.flatAddons.splice(index + 1, 0, item);
+    }
     /**
      * Persist current serviceData to localStorage
      */

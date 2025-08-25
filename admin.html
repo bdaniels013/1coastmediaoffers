@@ -67,7 +67,7 @@
             </tr>
           </thead>
           <tbody>
-            <template x-for="svc in flatServices" :key="svc.key">
+            <template x-for="(svc, index) in flatServices" :key="svc.key">
               <tr class="border-b border-white/20">
                 <td class="p-2">
                   <input x-model="svc.key" class="bg-transparent border-b border-white/30 focus:outline-none w-full text-sm" />
@@ -85,7 +85,11 @@
                   <input x-model="svc.category" class="bg-transparent border-b border-white/30 focus:outline-none w-full text-sm" />
                 </td>
                 <td class="p-2 text-right">
-                  <button @click="deleteService(svc.key)" class="text-xs text-red-400 hover:underline">Delete</button>
+                  <div class="flex items-center justify-end space-x-2">
+                    <button @click="moveServiceUp(index)" class="text-xs text-indigo-300 hover:text-indigo-500">▲</button>
+                    <button @click="moveServiceDown(index)" class="text-xs text-indigo-300 hover:text-indigo-500">▼</button>
+                    <button @click="deleteService(svc.key)" class="text-xs text-red-400 hover:underline">Delete</button>
+                  </div>
                 </td>
               </tr>
             </template>
@@ -145,7 +149,7 @@
             </tr>
           </thead>
           <tbody>
-            <template x-for="addon in flatAddons" :key="addon.key">
+            <template x-for="(addon, index) in flatAddons" :key="addon.key">
               <tr class="border-b border-white/20">
                 <td class="p-2">
                   <input x-model="addon.key" class="bg-transparent border-b border-white/30 focus:outline-none w-full text-sm" />
@@ -157,10 +161,17 @@
                   <input x-model="addon.description" class="bg-transparent border-b border-white/30 focus:outline-none w-full text-sm" />
                 </td>
                 <td class="p-2 text-right">
-                  <input x-model.number="addon.priceOneTime" type="number" step="1" class="bg-transparent border-b border-white/30 focus:outline-none w-full text-sm text-right" />
+                  <div class="flex flex-col items-end space-y-1">
+                    <input x-model.number="addon.priceOneTime" type="number" step="1" placeholder="One‑time" class="bg-transparent border-b border-white/30 focus:outline-none w-full text-sm text-right" />
+                    <input x-model.number="addon.priceMonthly" type="number" step="1" placeholder="Monthly" class="bg-transparent border-b border-white/30 focus:outline-none w-full text-sm text-right" />
+                  </div>
                 </td>
                 <td class="p-2 text-right">
-                  <button @click="deleteAddon(addon.key)" class="text-xs text-red-400 hover:underline">Delete</button>
+                  <div class="flex items-center justify-end space-x-2">
+                    <button @click="moveAddonUp(index)" class="text-xs text-indigo-300 hover:text-indigo-500">▲</button>
+                    <button @click="moveAddonDown(index)" class="text-xs text-indigo-300 hover:text-indigo-500">▼</button>
+                    <button @click="deleteAddon(addon.key)" class="text-xs text-red-400 hover:underline">Delete</button>
+                  </div>
                 </td>
               </tr>
             </template>
@@ -172,7 +183,7 @@
           <button @click="saveChanges()" class="px-4 py-2 rounded bg-green-600 hover:opacity-90 text-white text-sm">Save All Changes</button>
         </div>
         <!-- Add add-on form -->
-        <form @submit.prevent="addAddon" class="mt-4 grid grid-cols-4 gap-2 items-end">
+        <form @submit.prevent="addAddon" class="mt-4 grid grid-cols-5 gap-2 items-end">
           <div class="col-span-1">
             <label class="block text-xs text-gray-400">Key</label>
             <input x-model="newAddon.key" type="text" class="bg-transparent border-b border-white/30 focus:outline-none px-2 py-1 w-full text-sm" />
@@ -186,10 +197,14 @@
             <input x-model="newAddon.description" type="text" class="bg-transparent border-b border-white/30 focus:outline-none px-2 py-1 w-full text-sm" />
           </div>
           <div class="col-span-1">
-            <label class="block text-xs text-gray-400">Price</label>
+            <label class="block text-xs text-gray-400">One‑time</label>
             <input x-model="newAddon.oneTime" type="number" min="0" class="bg-transparent border-b border-white/30 focus:outline-none px-2 py-1 w-full text-sm" />
           </div>
-          <div class="col-span-4">
+          <div class="col-span-1">
+            <label class="block text-xs text-gray-400">Monthly</label>
+            <input x-model="newAddon.monthly" type="number" min="0" class="bg-transparent border-b border-white/30 focus:outline-none px-2 py-1 w-full text-sm" />
+          </div>
+          <div class="col-span-5">
             <button type="submit" class="mt-2 px-3 py-1.5 rounded bg-indigo-600 hover:opacity-90 text-white text-sm">Add Add-on</button>
           </div>
         </form>

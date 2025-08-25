@@ -10,6 +10,8 @@ function app() {
     cartServices: [],
     addons: [],
     cartAddons: [],
+    oneTimeAddons: [],
+    monthlyAddons: [],
     // Init loads services from global `serviceData`
     init() {
       // If admin has stored a custom catalog in localStorage, load it
@@ -32,6 +34,19 @@ function app() {
       } else {
         this.addons = [];
       }
+      // Split add-ons into one-time and monthly lists for display
+      this.oneTimeAddons = [];
+      this.monthlyAddons = [];
+      this.addons.forEach(a => {
+        const hasMonthly = a.price && a.price.monthly && a.price.monthly > 0;
+        const hasOneTime = a.price && a.price.oneTime && a.price.oneTime > 0;
+        if (hasMonthly && !hasOneTime) {
+          this.monthlyAddons.push(a);
+        } else {
+          // default to one-time list when both are defined or only one-time exists
+          this.oneTimeAddons.push(a);
+        }
+      });
       // initialize detailsOpen map
       for (const category of Object.values(this.serviceCategories)) {
         for (const svc of category.services) {
