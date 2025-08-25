@@ -36,7 +36,7 @@
     <h2 class="text-4xl sm:text-5xl font-extrabold tracking-tight">Your Gulf Coast Growth Partner — Fast, Clear, Measurable.</h2>
     <p class="text-lg text-gray-300 max-w-3xl mx-auto">We launch websites, campaigns, and content that actually move the needle. One‑time for quick wins. Monthly for momentum. Transparent pricing, fast turnarounds, zero fluff.</p>
     <div class="flex flex-col sm:flex-row justify-center gap-4 mt-6">
-      <button @click="cartOpen = true" class="px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium shadow-lg hover:opacity-90 focus:outline-none">👉 Build Your Package</button>
+      <button @click="scrollToServices(); cartOpen = true" class="px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium shadow-lg hover:opacity-90 focus:outline-none">👉 Build Your Package</button>
       <a href="#services" class="flex items-center justify-center px-6 py-3 rounded-full bg-white/10 border border-white/20 text-indigo-300 hover:bg-white/20">See Services →</a>
     </div>
   </section>
@@ -156,7 +156,7 @@
   <section class="max-w-7xl mx-auto px-4 py-16 text-center space-y-6">
     <h3 class="text-3xl font-bold">Ready to grow your brand?</h3>
     <p class="text-gray-300">Pick a base service, stack add‑ons, or build from scratch.</p>
-    <button @click="cartOpen = true" class="px-8 py-4 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium shadow-lg hover:opacity-90">👉 Build My Package</button>
+    <button @click="scrollToServices(); cartOpen = true" class="px-8 py-4 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium shadow-lg hover:opacity-90">👉 Build My Package</button>
   </section>
 
   <!-- Services Listing -->

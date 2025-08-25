@@ -172,5 +172,16 @@ function app() {
       if (!key) return '';
       return key.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
     }
+
+    ,
+    /**
+     * Smoothly scroll to the services section of the page. Also optionally open the cart if desired.
+     */
+    scrollToServices() {
+      const el = document.getElementById('services');
+      if (el && typeof el.scrollIntoView === 'function') {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
   };
 }

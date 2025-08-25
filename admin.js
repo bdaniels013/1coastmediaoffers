@@ -12,8 +12,21 @@ function adminApp() {
     // Save all changes flag (not used but could be for UI)
     saving: false,
     init() {
-      // Load data from global serviceData
-      this.serviceCategories = window.serviceData?.serviceCategories || {};
+      // Load data from localStorage if available; fall back to global serviceData
+      try {
+        const stored = localStorage.getItem('serviceData');
+        if (stored) {
+          window.serviceData = JSON.parse(stored);
+        }
+      } catch (err) {
+        console.warn('Could not parse serviceData from localStorage', err);
+      }
+      // Ensure window.serviceData exists
+      if (!window.serviceData) {
+        window.serviceData = { serviceCategories: {}, addons: [] };
+      }
+      // Copy categories to internal state
+      this.serviceCategories = window.serviceData.serviceCategories || {};
       // Flatten services into a single list for display
       this.flatServices = [];
       for (const [catKey, cat] of Object.entries(this.serviceCategories)) {
@@ -29,12 +42,12 @@ function adminApp() {
       }
       // Load add-ons
       let addonList = [];
-      if (window.serviceData?.addons) addonList = window.serviceData.addons;
-      else if (window.serviceData?.serviceCategories?.addons) addonList = window.serviceData.serviceCategories.addons;
+      if (window.serviceData.addons && Array.isArray(window.serviceData.addons)) addonList = window.serviceData.addons;
+      else if (window.serviceData.serviceCategories?.addons) addonList = window.serviceData.serviceCategories.addons;
       this.flatAddons = addonList.map(a => ({
         key: a.key,
         name: a.name,
-        description: a.description,
+        description: a.description || '',
         priceOneTime: a.price?.oneTime || 0,
         priceMonthly: a.price?.monthly || 0
       }));
@@ -253,7 +266,29 @@ function adminApp() {
       if (index >= this.flatAddons.length - 1) return;
       const item = this.flatAddons.splice(index, 1)[0];
       this.flatAddons.splice(index + 1, 0, item);
-    }
+    },
+
+    // Drag-and-drop support
+    dragServiceIndex: null,
+    dragAddonIndex: null,
+    handleServiceDragStart(event, index) {
+      this.dragServiceIndex = index;
+    },
+    handleServiceDrop(event, index) {
+      if (this.dragServiceIndex === null || this.dragServiceIndex === index) return;
+      const item = this.flatServices.splice(this.dragServiceIndex, 1)[0];
+      this.flatServices.splice(index, 0, item);
+      this.dragServiceIndex = null;
+    },
+    handleAddonDragStart(event, index) {
+      this.dragAddonIndex = index;
+    },
+    handleAddonDrop(event, index) {
+      if (this.dragAddonIndex === null || this.dragAddonIndex === index) return;
+      const item = this.flatAddons.splice(this.dragAddonIndex, 1)[0];
+      this.flatAddons.splice(index, 0, item);
+      this.dragAddonIndex = null;
+    },
     /**
      * Persist current serviceData to localStorage
      */

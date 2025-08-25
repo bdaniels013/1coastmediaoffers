@@ -68,7 +68,10 @@
           </thead>
           <tbody>
             <template x-for="(svc, index) in flatServices" :key="svc.key">
-              <tr class="border-b border-white/20">
+              <tr class="border-b border-white/20" draggable="true"
+                  @dragstart="handleServiceDragStart($event, index)"
+                  @dragover.prevent
+                  @drop="handleServiceDrop($event, index)">
                 <td class="p-2">
                   <input x-model="svc.key" class="bg-transparent border-b border-white/30 focus:outline-none w-full text-sm" />
                 </td>
@@ -150,7 +153,10 @@
           </thead>
           <tbody>
             <template x-for="(addon, index) in flatAddons" :key="addon.key">
-              <tr class="border-b border-white/20">
+              <tr class="border-b border-white/20" draggable="true"
+                  @dragstart="handleAddonDragStart($event, index)"
+                  @dragover.prevent
+                  @drop="handleAddonDrop($event, index)">
                 <td class="p-2">
                   <input x-model="addon.key" class="bg-transparent border-b border-white/30 focus:outline-none w-full text-sm" />
                 </td>
