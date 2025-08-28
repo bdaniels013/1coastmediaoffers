@@ -46,6 +46,19 @@
       </div>
     </section>
 
+    <!-- GA4 Quick Analytics Widget -->
+    <section class="mt-8 max-w-3xl space-y-4 p-4 rounded shadow-lg border border-white/20 bg-white/10 backdrop-blur-lg">
+      <h2 class="text-lg font-bold">Quick Analytics</h2>
+      <div class="text-sm text-gray-300">Realtime users: <strong id="rtUsers">–</strong></div>
+      <div class="mt-4">
+        <canvas id="gaChart" width="800" height="300"></canvas>
+      </div>
+      <div class="mt-4">
+        <h3 class="text-sm font-semibold mb-2">Top pages (last 7 days)</h3>
+        <ol id="topPages" class="list-decimal ml-5 space-y-1 text-sm text-gray-300"></ol>
+      </div>
+    </section>
+
     <!-- Services management -->
     <section class="rounded shadow-lg border border-white/20 bg-white/10 backdrop-blur-lg p-4" x-data="{ open: true }">
       <div class="flex justify-between items-center mb-4">
@@ -325,6 +338,52 @@
   </main>
 
   <!-- Load data and admin logic -->
+  <!-- Chart.js for analytics widget -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+  (async function() {
+    // If your API is on another origin, replace with its full URL, e.g. https://api.1coastmedia.com
+    const API_BASE = location.origin;
+    // Realtime users
+    try {
+      const rt = await fetch(`${API_BASE}/api/ga/realtime`).then(r => r.json());
+      document.getElementById("rtUsers").textContent = rt.activeUsers ?? "0";
+    } catch {
+      document.getElementById("rtUsers").textContent = "0";
+    }
+    // Summary
+    let data = null;
+    try {
+      data = await fetch(`${API_BASE}/api/ga/summary`).then(r => r.json());
+    } catch {}
+    if (!data) return;
+    // Timeseries chart for 28‑day users
+    const labels = data.timeseries.map(d => d.date);
+    const users = data.timeseries.map(d => d.totalUsers);
+    const ctx = document.getElementById("gaChart").getContext("2d");
+    new Chart(ctx, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [{ label: "Users (28 days)", data: users, tension: 0.3, borderColor: "#818cf8", backgroundColor: "rgba(129,140,248,0.2)" }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#cbd5e1' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+          y: { ticks: { color: '#cbd5e1' }, grid: { color: 'rgba(255,255,255,0.1)' } }
+        }
+      }
+    });
+    // Top pages list
+    const list = document.getElementById("topPages");
+    data.topPages.forEach(p => {
+      const li = document.createElement("li");
+      li.textContent = `${p.path} — ${p.views} views`;
+      list.appendChild(li);
+    });
+  })();
+  </script>
   <script src="./data/services.js"></script>
   <script src="./admin.js"></script>
 </body>
